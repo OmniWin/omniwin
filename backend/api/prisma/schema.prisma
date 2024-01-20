@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model NFT {
+  id_nft         Int       @id @default(autoincrement())
+  id_lot         Int
+  total_tickets  Int
+  bonus_tickets  Int
+  tickets_bought Int
+  ticket_price   BigInt
+  transactions   Int
+  end_timestamp  Int
+  fee            Int
+  closed         Boolean
+  buyout         Boolean
+  asset_claimed  Boolean
+  tokens_claimed Boolean
+  owner          String
+  token          String
+  token_id       String
+  amount         String
+  asset_type     AssetType
+  data           String
+  network        Network
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @default(now()) @updatedAt
+
+  @@unique([id_lot, network], name: "id_lot_network_unique")
+  @@index([token, token_id], name: "token_tokenID")
+}
+
+model NFTMetadata {
+  id_nftMetadata Int               @id @default(autoincrement())
+  id_nft         Int
+  id_lot         Int
+  name           String
+  image          String
+  json           Json
+  image_url      String
+  image_local    String
+  status         NFTMetadataStatus
+  created_at     DateTime          @default(now())
+  updated_at     DateTime          @default(now()) @updatedAt
+
+  @@unique([id_nft], name: "id_nft_unique")
+  @@index([id_nft], name: "id_nft")
+}
+
+enum NFTMetadataStatus {
+  ERROR
+  FAILED
+  SUCCESS
+}
+
+enum AssetType {
+  ERC721
+  ERC1155
+  ERC20
+  ERC777
+  ERC1155ATOMIC
+  ERC721ATOMIC
+  ERC20ATOMIC
+  ERC777ATOMIC
+  ERC721ATOMICV2
+  ERC1155ATOMICV2
+  ERC20ATOMICV2
+  ERC777ATOMICV2
+  ERC721ATOMICV3
+  ERC1155ATOMICV3
+  ERC20ATOMICV3
+  ERC777ATOMICV3
+}
+
+enum Network {
+  ETHEREUM
+  GOERLI
+}

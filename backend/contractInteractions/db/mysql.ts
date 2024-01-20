@@ -1,0 +1,16 @@
+import mysql, { PoolOptions } from 'mysql2/promise'
+
+const access: PoolOptions = {
+    user: 'root',
+    password: '327TFg8qGjnrBi',
+    database: 'omniwin',
+    host: 'localhost',
+    port: 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+};
+
+const conn = mysql.createPool(access);
+
+export default conn;
