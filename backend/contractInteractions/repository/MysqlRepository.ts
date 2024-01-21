@@ -2,49 +2,59 @@ import { RowDataPacket } from 'mysql2';
 import conn from '../db/mysql';
 import { NFT, NFTMetadata } from '../types/nft';
 import { AssetType } from '../types/nft';
+import logger from "../log/winston";
 
 export default class MysqlRepository {
     constructor() {
 
     }
 
-    public async insertNFT(data: NFT, metadata: NFTMetadata | null) {
+    public async insertNFT(data: NFT) {
         try {
 
             const assetType = this.mapIntToAssetType(data.assetType)
 
-            const query = `INSERT INTO NFT (id_lot, total_tickets, bonus_tickets, tickets_bought, ticket_price, transactions, end_timestamp, fee, closed, buyout, asset_claimed, tokens_claimed, owner, token, token_id, amount, asset_type, data, network) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE network = ?`;
-            const [rows,] = await conn.query(query, [data.lotID, data.totalTickets, data.bonusTickets, data.ticketsBought, data.ticketPrice, data.transactions, data.endTimestamp, data.fee, data.closed, data.buyout, data.assetClaimed, data.tokensClaimed, data.owner, data.token, data.tokenID, data.amount, assetType, data.data, "GOERLI", "GOERLI"]);
+
+            const query = `INSERT INTO NFT (id_lot, total_tickets, bonus_tickets, tickets_bought, ticket_price, transactions, end_timestamp, fee, closed, buyout, asset_claimed, tokens_claimed, owner, token, token_id, amount, asset_type, data, network) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_tickets = VALUES(total_tickets), bonus_tickets = VALUES(bonus_tickets), tickets_bought = VALUES(tickets_bought), ticket_price = VALUES(ticket_price), transactions = VALUES(transactions), end_timestamp = VALUES(end_timestamp), fee = VALUES(fee), closed = VALUES(closed), buyout = VALUES(buyout), asset_claimed = VALUES(asset_claimed), tokens_claimed = VALUES(tokens_claimed), owner = VALUES(owner), token = VALUES(token), token_id = VALUES(token_id), amount = VALUES(amount), asset_type = VALUES(asset_type), data = VALUES(data), network = VALUES(network), id_nft = LAST_INSERT_ID(id_nft);`;
+
+            const [rows,] = await conn.query(query, [
+                data.lotID, data.totalTickets, data.bonusTickets, data.ticketsBought, data.ticketPrice, data.transactions, data.endTimestamp, data.fee, data.closed, data.buyout, data.assetClaimed, data.tokensClaimed, data.owner, data.token, data.tokenID, data.amount, assetType, data.data, "GOERLI",
+            ]);
+
 
             const nftID = (rows as RowDataPacket).insertId;
-
-            await this.insertMetadata(nftID, data.lotID, metadata);
-
-            return rows;
+            return nftID;
         }
         catch (error) {
-            console.log("error insertNFT: ", error);
-            process.exit(1);
+            console.log(error);
+            logger.error(`Error insertNFT ${data} ${error}`);
+            throw new Error("Error insertNFT");
         }
     }
 
 
     public async insertMetadata(nftID: number, lotID: number, metadata: NFTMetadata | null) {
         try {
-
             if (!metadata) {
-                const metadataQuery = `INSERT INTO NFTMetadata (id_nft,id_lot, name, image, json, image_url, image_local, status) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE status = ?`;
-                await conn.query(metadataQuery, [nftID, lotID, "", "", "", "", "", "FAILED", "FAILED"]);
+                const metadataQuery = `INSERT INTO NFTMetadata (id_nft, id_lot, name, image, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
+
+                await conn.query(metadataQuery, [nftID, lotID, "", "", "", null, "", "", "FAILED", "FAILED"]);
 
                 return;
             }
 
-            const metadataQuery = `INSERT INTO NFTMetadata (id_nft, id_lot, name, image, json, image_url, image_local, status) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE status = ?`;
-            await conn.query(metadataQuery, [nftID, lotID, metadata?.name || "", metadata?.image || "", JSON.stringify(metadata), "", "", "SUCCESS", "SUCCESS"]);
+            const metadataQuery = `INSERT INTO NFTMetadata (id_nft, id_lot, name, image, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_lot = ?, name = ?, image = ?, description = ?, json = ?, image_url = ?, image_local = ?, status = ?`;
+
+            await conn.query(metadataQuery, [nftID, lotID, metadata?.name || "", metadata?.image || "", metadata?.description || "", JSON.stringify(metadata) || "", "", "", "SUCCESS", lotID, metadata?.name || "", metadata?.image || "", metadata?.description || "", JSON.stringify(metadata) || "", "", "", "SUCCESS"]);
+
         } catch (error) {
-            const metadataQuery = `INSERT INTO NFTMetadata (id_nft, id_lot, name, image, json, image_url, image_local, status) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE status = ?`;
-            await conn.query(metadataQuery, [nftID, lotID, "", "", JSON.stringify({}), "", "", "ERROR", "ERROR"]);
+            console.log(error);
+            const metadataQuery = `INSERT INTO NFTMetadata (id_nft, id_lot, name, image, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
+            await conn.query(metadataQuery, [nftID, lotID, "", "", "", null, "", "", "ERROR", "ERROR"]);
+            logger.error(`Error insertMetadata ${nftID} ${lotID} ${metadata} ${error}`);
+            throw new Error("Error insertMetadata");
         }
+
     }
 
     private mapIntToAssetType(value: number): string {
@@ -55,14 +65,110 @@ export default class MysqlRepository {
                 return "ERC1155";
             case AssetType.ERC20:
                 return "ERC20";
+            case AssetType.NativeToken:
+                return "NATIVE";
             // Handle other cases as needed
             default:
-                throw new Error("Invalid AssetType value");
+                logger.error(`Invalid mapIntToAssetType AssetType value ${value}`);
+                throw new Error(`Invalid mapIntToAssetType AssetType value ${value}`);
         }
     }
 
 
-}
+    public async createLot(data: {
+        lotID: string,
+        token: string,
+        tokenID: string,
+        amount: string,
+        assetType: number,
+        data: string,
+        owner: string,
+        signer: string,
+        totalTickets: string,
+        ticketPrice: string,
+        endTimestamp: string,
+    }) {
+        try {
+            const assetType = this.mapIntToAssetType(data.assetType)
 
+            const query = `INSERT INTO NFT (id_lot, token, token_id, amount, asset_type, data, owner, signer, total_tickets, ticket_price, end_timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), token_id = VALUES(token_id), amount = VALUES(amount), asset_type = VALUES(asset_type), data = VALUES(data), owner = VALUES(owner), signer = VALUES(signer), total_tickets = VALUES(total_tickets), ticket_price = VALUES(ticket_price), end_timestamp = VALUES(end_timestamp);`;
+
+            const [rows,] = await conn.query(query, [
+                data.lotID, data.token, data.tokenID, data.amount, assetType, data.data, data.owner, data.signer, data.totalTickets, data.ticketPrice, data.endTimestamp,
+            ]);
+
+            return rows;
+        } catch (error) {
+            logger.error(`Error createLot ${data} ${error}`);
+            console.log(`${data} ${error}`);
+            throw new Error(`Error createLot ${data} ${error}`);
+        }
+    }
+
+    public async buyTickets(data: {
+        lotID: number,
+        recipient: string,
+        totalTickets: number,
+        amount: number,
+        tokensSpent: number,
+        bonus: number,
+        uniqueID: string,
+    }) {
+        try {
+            const query = `INSERT INTO Tickets (id_lot, uniqueID, recipient, totalTickets, amount, tokensSpent, bonus) VALUES (?,?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE recipient = VALUES(recipient), totalTickets = VALUES(totalTickets), amount = VALUES(amount), tokensSpent = VALUES(tokensSpent), bonus = VALUES(bonus), updated_at = CURRENT_TIMESTAMP()
+            ;`;
+
+            const [rows,] = await conn.query(query, [
+                data.lotID, data.uniqueID, data.recipient, data.totalTickets, data.amount, data.tokensSpent, data.bonus,
+            ]);
+
+            return rows;
+        } catch (error) {
+            logger.error(`Error buyTickets ${data} ${error}`);
+            throw new Error("Error buyTickets");
+        }
+    }
+
+    public async incrementTotalTickets(lotID: number) {
+        try {
+            const query = `UPDATE NFT SET total_tickets = total_tickets + 1 WHERE id_lot = ?`;
+
+            const [rows,] = await conn.query(query, [
+                lotID,
+            ]);
+
+            return rows;
+        } catch (error) {
+            logger.error(`Error incrementTotalTickets ${lotID} ${error}`);
+            throw new Error("Error incrementTotalTickets");
+        }
+    }
+
+    public async getTicketsByLotID(lotID: number) {
+        try {
+            const query = `SELECT id_ticket, id_lot, recipient, totalTickets, amount, tokensSpent, bonus, created_at,updated_at,uniqueID FROM Tickets WHERE id_lot = ?;`;
+
+            const [rows,] = await conn.query(query, [
+                lotID,
+            ]);
+
+            return rows as {
+                id_ticket: number,
+                id_lot: number,
+                recipient: string,
+                totalTickets: number,
+                amount: number,
+                tokensSpent: number,
+                bonus: number,
+                created_at: Date,
+                updated_at: Date,
+                uniqueID: string,
+            }[];
+        } catch (error) {
+            logger.error(`Error getTicketsByLotID ${lotID} ${error}`);
+            throw new Error("Error getTicketsByLotID");
+        }
+    }
+}
 
 export const mysqlInstance = new MysqlRepository();

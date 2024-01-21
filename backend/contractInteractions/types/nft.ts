@@ -23,6 +23,7 @@ export type NFTMetadata = {
     id_nft: number;
     name: string;
     image: string;
+    description: string;
     json: any;
     image_url: string;
     image_local: string;
@@ -30,7 +31,8 @@ export type NFTMetadata = {
 }
 
 export enum AssetType {
-    ERC20 = 2,
+    NativeToken = 3,
     ERC721 = 0,
-    ERC1155 = 1
+    ERC1155 = 1,
+    ERC20 = 2,
 }

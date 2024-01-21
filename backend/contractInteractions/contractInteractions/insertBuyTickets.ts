@@ -1,0 +1,60 @@
+import { ethers } from 'ethers';
+import { MainABI } from '../types/MainABI';
+import { mysqlInstance } from '../repository/MysqlRepository';
+import { goerliProvider } from '../providers/goerli';
+
+
+export async function insertBuyTickets(numberOfBlocks: number, contract: MainABI, all = false) {
+    const latestBlock = await goerliProvider.getBlockNumber(); // Get the latest block number
+    const blockSize = 1000; // Define the size of each block range for queries
+    let fromBlock = latestBlock - numberOfBlocks;
+
+    if (all) {
+        fromBlock = 10043386; // 10043386 is the block where the contract was deployed on goerli
+    }
+
+    console.log(`Fetching events for block range ${fromBlock} to ${latestBlock}`);
+
+    for (let block = fromBlock; block < latestBlock; block += blockSize) {
+        const endBlock = Math.min(block + blockSize - 1, latestBlock);
+
+        try {
+            const eventFilter = contract.filters.BuyTickets();
+            const events = await contract.queryFilter(eventFilter, block, endBlock);
+
+            for (let i = 0; i < events.length; i++) {
+                const event = events[i];
+                const { ID, recipient, lowerBound, ticketAmount, tokensSpent, bonusTickets } = event.args;
+                const uniqueID = ethers.keccak256(ethers.toUtf8Bytes(
+                    `${event.transactionHash}${event.index}`
+                ));
+
+                const dataToInsert = {
+                    lotID: Number(ID),
+                    recipient,
+                    totalTickets: Number(lowerBound),
+                    amount: Number(ticketAmount),
+                    tokensSpent: Number(tokensSpent),
+                    bonus: Number(bonusTickets),
+                    uniqueID: uniqueID,
+                } as {
+                    lotID: number,
+                    recipient: string,
+                    totalTickets: number,
+                    amount: number,
+                    tokensSpent: number,
+                    bonus: number,
+                    uniqueID: string,
+                }
+
+                await mysqlInstance.buyTickets(dataToInsert);
+            }
+            const progress = ((block + blockSize - fromBlock) / (latestBlock - fromBlock)) * 100;
+            console.log(`Progress: ${Math.min(progress, 100).toFixed(2)}%`); // Ensure progress does not exceed 100%
+
+
+        } catch (error) {
+            console.error(`Error fetching events for block range ${block} to ${endBlock}:`, error);
+        }
+    }
+}

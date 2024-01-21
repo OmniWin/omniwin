@@ -10,21 +10,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model NFT {
+model Nft {
   id_nft         Int       @id @default(autoincrement())
   id_lot         Int
-  total_tickets  Int
-  bonus_tickets  Int
-  tickets_bought Int
+  total_tickets  Int       @default(0)
+  bonus_tickets  Int       @default(0)
+  tickets_bought Int       @default(0)
   ticket_price   BigInt
-  transactions   Int
+  transactions   Int       @default(0)
   end_timestamp  Int
-  fee            Int
-  closed         Boolean
-  buyout         Boolean
-  asset_claimed  Boolean
-  tokens_claimed Boolean
+  fee            Int       @default(600)
+  closed         Boolean   @default(false)
+  buyout         Boolean   @default(false)
+  asset_claimed  Boolean   @default(false)
+  tokens_claimed Boolean   @default(false)
   owner          String
+  signer         String?
   token          String
   token_id       String
   amount         String
@@ -38,21 +39,38 @@ model NFT {
   @@index([token, token_id], name: "token_tokenID")
 }
 
-model NFTMetadata {
+model NftMetadata {
   id_nftMetadata Int               @id @default(autoincrement())
   id_nft         Int
   id_lot         Int
-  name           String
-  image          String
-  json           Json
-  image_url      String
-  image_local    String
+  name           String?
+  image          String?
+  description    String?           @db.VarChar(2000)
+  json           Json?
+  image_url      String?
+  image_local    String?
   status         NFTMetadataStatus
   created_at     DateTime          @default(now())
   updated_at     DateTime          @default(now()) @updatedAt
 
   @@unique([id_nft], name: "id_nft_unique")
   @@index([id_nft], name: "id_nft")
+}
+
+model Tickets {
+  id_ticket    Int      @id @default(autoincrement())
+  id_lot       Int
+  uniqueID     String
+  recipient    String
+  totalTickets Int
+  amount       BigInt
+  tokensSpent  BigInt
+  bonus        Int
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+
+  @@unique([uniqueID], name: "id_lot_id_user_unique")
+  @@index([recipient], name: "recipient")
 }
 
 enum NFTMetadataStatus {
