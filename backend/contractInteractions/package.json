@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "watch": "ts-node index.ts"
+    "watch": "ts-node index.ts",
+    "listen": "ts-node eventListener.ts"
   },
   "author": "",
   "license": "ISC",
@@ -14,7 +15,9 @@
     "ethers": "^6.10.0",
     "ipfs-http-client": "^60.0.1",
     "mysql2": "^3.7.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "util": "^0.12.5",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "@typechain/ethers-v6": "^0.5.1",
