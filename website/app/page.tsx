@@ -3,6 +3,7 @@
 import { Trending } from "./components/Home/Trending";
 import { FeaturedList } from "./components/Home/FeaturedList";
 import { PaidContests } from "./components/Home/PaidContests";
+import { RaffleList } from "./components/Home/RaffleList";
 
 export default function IndexPage() {
     // return <Counter />;
@@ -17,6 +18,9 @@ export default function IndexPage() {
             </section>
             <section>
                 <PaidContests />
+            </section>
+            <section>
+                <RaffleList />
             </section>
         </div>
       </>

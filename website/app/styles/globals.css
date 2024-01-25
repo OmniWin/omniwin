@@ -41,6 +41,31 @@ body {
 
 html {
   /* @apply bg-gradient-to-b from-smoke-900 to-smoke-950; */
-  @apply bg-smoke-950;
+  /* @apply bg-smoke-950; */
+  @apply bg-zinc-950;
   min-height: 100%;
+}
+
+
+body {
+  --sb-track-color: theme('colors.zinc.700');
+  --sb-thumb-color: theme('colors.zinc.800');
+  --sb-size: 10px;
+
+  scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
+}
+
+::-webkit-scrollbar {
+  width: var(--sb-size)
+}
+
+::-webkit-scrollbar-track {
+  background: var(--sb-track-color);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb-color);
+  border-radius: 10px;
+
 }

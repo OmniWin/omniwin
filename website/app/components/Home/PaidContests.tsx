@@ -205,7 +205,7 @@ export const PaidContests = () => {
                     These contests are promoted by the creators. <br /> Win them by playing.
                 </p>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6 gap-6 mt-12">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-6 gap-6 mt-12">
                 {trending.map((item) => (
                     <>
                         <a href="#" className="flex items-center rounded-lg relative xl:min-h-96 group">
