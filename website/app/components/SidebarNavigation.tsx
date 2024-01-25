@@ -8,38 +8,40 @@ import { classNames } from "../utils/index";
 
 import { Fragment, useEffect, useState } from "react";
 import { Dialog, Disclosure, Transition } from "@headlessui/react";
-import { CalendarIcon, ChartPieIcon, Cog6ToothIcon, DocumentDuplicateIcon, FolderIcon, HomeIcon, UsersIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { CalendarIcon, ChartPieIcon, Cog6ToothIcon, DocumentDuplicateIcon, FolderIcon, HomeIcon, UsersIcon, XMarkIcon, BookOpenIcon } from "@heroicons/react/24/outline";
 import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
 
 import { useSelector, useDispatch, sidebarSlice } from "@/lib/redux";
 import { selectSidebarOpenState, selectSidebarToggleState } from "@/lib/redux/slices/sidebarSlice/selectors";
 
+import Link from "next/link";
+
 const navigation = [
-    { name: "Dashboard", href: "#", icon: HomeIcon, current: true },
-    {
-        name: "Teams",
-        icon: UsersIcon,
-        current: false,
-        children: [
-            { name: "Engineering", href: "#", current: false },
-            { name: "Human Resources", href: "#", current: false },
-            { name: "Customer Success", href: "#", current: false },
-        ],
-    },
-    {
-        name: "Projects",
-        icon: FolderIcon,
-        current: false,
-        children: [
-            { name: "GraphQL API", href: "#", current: false },
-            { name: "iOS App", href: "#", current: false },
-            { name: "Android App", href: "#", current: false },
-            { name: "New Customer Portal", href: "#", current: false },
-        ],
-    },
-    { name: "Calendar", href: "#", icon: CalendarIcon, current: false },
-    { name: "Documents", href: "#", icon: DocumentDuplicateIcon, current: false },
-    { name: "Reports", href: "#", icon: ChartPieIcon, current: false },
+    { name: "Home", href: "#", icon: HomeIcon, current: true },
+    // {
+    //     name: "Teams",
+    //     icon: UsersIcon,
+    //     current: false,
+    //     children: [
+    //         { name: "Engineering", href: "#", current: false },
+    //         { name: "Human Resources", href: "#", current: false },
+    //         { name: "Customer Success", href: "#", current: false },
+    //     ],
+    // },
+    // {
+    //     name: "Projects",
+    //     icon: FolderIcon,
+    //     current: false,
+    //     children: [
+    //         { name: "GraphQL API", href: "#", current: false },
+    //         { name: "iOS App", href: "#", current: false },
+    //         { name: "Android App", href: "#", current: false },
+    //         { name: "New Customer Portal", href: "#", current: false },
+    //     ],
+    // },
+    { name: "Explore", href: "raffles", icon: BookOpenIcon, current: false },
+    // { name: "Documents", href: "#", icon: DocumentDuplicateIcon, current: false },
+    // { name: "Reports", href: "#", icon: ChartPieIcon, current: false },
 ];
 const teams = [
     { id: 1, name: "Heroicons", href: "#", initial: "H", current: false },
@@ -109,7 +111,7 @@ export const SidebarNavigation = () => {
                                                     {navigation.map((item) => (
                                                         <li key={item.name}>
                                                             {!item.children ? (
-                                                                <a
+                                                                <Link
                                                                     href={item.href}
                                                                     className={classNames(
                                                                         item.current ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-900",
@@ -118,7 +120,7 @@ export const SidebarNavigation = () => {
                                                                 >
                                                                     <item.icon className="h-6 w-6 shrink-0 text-zinc-400" aria-hidden="true" />
                                                                     {item.name}
-                                                                </a>
+                                                                </Link>
                                                             ) : (
                                                                 <Disclosure as="div">
                                                                     {({ open }) => (
@@ -141,7 +143,7 @@ export const SidebarNavigation = () => {
                                                                                     <li key={subItem.name}>
                                                                                         {/* 44px */}
                                                                                         <Disclosure.Button
-                                                                                            as="a"
+                                                                                            as={Link}
                                                                                             href={subItem.href}
                                                                                             className={classNames(
                                                                                                 subItem.current ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-900",

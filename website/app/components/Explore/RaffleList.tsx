@@ -1,4 +1,8 @@
-const trending = [
+import Filters from "./Filters";
+import RaffleMetaWin from "../Raffle/RaffleMetaWin";
+import CardSettings from "../Raffle/CardSettings";
+
+const raffleList = [
     {
         id: 9750,
         title: "BoredApeYachtClub",
@@ -192,28 +196,19 @@ const trending = [
         endingIn: "1 day",
     },
 ];
-// import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
-// import { TicketIcon, ClockIcon } from "@heroicons/react/24/outline";
 
-import RaffleEse from "../Raffle/RaffleEse";
-
-export const PaidContests = () => {
+export default function RaffleList() {
     return (
         <>
-            {/* <div className="mt-5 grid min-h-[18rem] gap-x-[40px] gap-y-0 rounded-lg border border-smoke-800 px-6 py-6 grid-auto-fit-[18.5rem] lg:px-4 lg:py-4 2xl:px-[26px] 2xl:py-6"> */}
-            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-3xl">
-                <h2 className="text-base font-semibold leading-8 text-sky-400">Paid contest</h2>
-                <p className="mt-2 text-2xl font-bold tracking-tight text-white xl:text-4xl">
-                    These contests are promoted by the creators. <br /> Win them by playing.
-                </p>
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-6 gap-6 mt-12">
-                {trending.map((item) => (
+            <Filters />
+            <CardSettings showStyle={true} showDisplay={true} />
+            <div className="flex flex-wrap sm:grid sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 sm:gap-x-3 gap-y-4 lg:gap-y-3 mt-5 xl:mt-5">
+                {raffleList.map((item) => (
                     <>
-                        <RaffleEse {...item} />
+                        <RaffleMetaWin {...item} />
                     </>
                 ))}
             </div>
         </>
     );
-};
+}
