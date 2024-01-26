@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `NFT` ADD COLUMN `signer` VARCHAR(191) NULL;
