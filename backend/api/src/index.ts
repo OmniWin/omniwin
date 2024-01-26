@@ -4,6 +4,8 @@ import dbPlugin from './db/dbConnector'
 import { HttpError } from './errors/httpError';
 import Ajv from 'ajv'
 import dotenv from 'dotenv'
+import cors from '@fastify/cors'
+
 dotenv.config()
 
 const ajv = new Ajv({
@@ -17,6 +19,12 @@ const ajv = new Ajv({
 const fastify = Fastify({
     logger: true
 })
+
+const corsOptions = {
+    origin: '*',
+    methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
+};
+fastify.register(cors, corsOptions)
 
 fastify.register(dbPlugin)
 fastify.register(userRoutes, { prefix: '/v1' })

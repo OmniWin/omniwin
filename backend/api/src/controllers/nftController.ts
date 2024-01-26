@@ -4,19 +4,29 @@ import { NftService } from '../services/nftService';
 import { HttpError } from '../errors/httpError';
 import { FastifyInstance } from 'fastify';
 import { AssetType, NetworkType } from '@prisma/client';
+import { SortBy } from "../types/sortBy";
 export class NftController {
-
+    /**
+     * 
+     const sortOptions = [
+        { id: "tickets_remaining",name: "% Tickets Remaining", href: "#", current: true },
+        { id: "newest",name: "Newest", href: "#", current: true },
+        { id: "oldest",name: "Oldest", href: "#", current: false },
+        { id: "time_remaining",name: "Time remaining", href: "#", current: false },
+    ];
+     */
     public static async fetchNFTs(req: FastifyRequest, res: FastifyReply) {
         try {
             const nftService = new NftService(req.server as FastifyInstance);
 
-            const { pagination, types, networks } = req.body as {
+            const { pagination, types, networks, sortBy } = req.body as {
                 pagination: {
                     pageSize: string,
                     offset: string
                 },
                 types: AssetType[],
-                networks: NetworkType[]
+                networks: NetworkType[],
+                sortBy: SortBy
             };
 
             console.log("filters", req.body);
@@ -28,6 +38,7 @@ export class NftController {
             const filters = {
                 types,
                 networks,
+                sortBy
             }
 
 
@@ -46,7 +57,7 @@ export class NftController {
 
             const USDC_decimals = 6;
             const convertedItems = items.map(item => ({
-                full_price: Number(item.ticket_price) / USDC_decimals * item.total_tickets,
+                full_price: (Number(item.ticket_price) / USDC_decimals) * item.total_tickets,
                 ticket_price: Number(item.ticket_price) / USDC_decimals,
                 tickets_bought: item.tickets_bought,
                 tickets_total: item.total_tickets,

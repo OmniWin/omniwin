@@ -6,13 +6,13 @@ export class NftRepository {
         this.fastify = fastify;
     }
 
-    async fetchNFTs(whereCondition: any, limit: number) {
+    async fetchNFTs(whereCondition: any, limit: number, orderBy: any) {
         const { prisma } = this.fastify;
 
         const nfts = await prisma.nft.findMany({
             where: whereCondition,
             take: limit + 1, // Fetch one extra item to determine if there's a next page
-            orderBy: { id_nft: 'asc' },
+            orderBy: orderBy,
             include: {
                 metadata: true,
             }
