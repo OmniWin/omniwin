@@ -192,8 +192,8 @@ const trending = [
         endingIn: "1 day",
     },
 ];
-import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
-import { TicketIcon, ClockIcon } from "@heroicons/react/24/outline";
+
+import RaffleMetaWin from "../Raffle/RaffleMetaWin";
 
 export const Trending = () => {
     return (
@@ -209,147 +209,8 @@ export const Trending = () => {
             <div className="flex flex-wrap sm:grid sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 sm:gap-x-3 gap-y-4 lg:gap-y-3 mt-8 xl:mt-12">
                 {trending.map((item) => (
                     <>
-                        {/* <a href="#" className="flex items-center rounded-lg relative xl:min-h-60 group"> */}
-                        <a href="#" className="d-block w-[calc(33%-.45rem)] sm:w-full mx-1 sm:mx-0 flex flex-col items-center rounded-lg relative group hover:bg-smoke-800 transition-color duration-400">
-                            {/* <div className="absolute left-0 bottom-[78px] z-10 w-full bg-smoke-900/20 group-hover:bg-smoke-900/90 transition-colors duration-700 rounded-t-xl rounded-b-lg overflow-hidden"> */}
-                            <div className="relative">
-                                <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                                <img className="object-cover rounded-t-lg h-full w-full xl:min-h-64" alt="img" src={item.image} />
-
-                                <div className="absolute left-1 top-1 lg:left-2 lg:top-2 z-10">
-                                    <div className="inline-flex items-center py-1.5 px-2.5 rounded-3xl bg-smoke-900/20 group-hover:bg-smoke-900/90 transition-colors duration-400 gap-1">
-                                        <p className="text-[11px] leading-3 lg:text-sm text-white font-bold truncate select-text max-w-20">10 </p>
-                                        <img
-                                            className="tw-ml-2 inline-block h-4 lg:h-5 w-4 lg:w-5 tw-object-fill"
-                                            loading="lazy"
-                                            alt="USDC"
-                                            src="https://assets.coingecko.com/coins/images/6319/standard/usdc.png?1696506694"
-                                        ></img>
-                                    </div>
-                                </div>
-
-                                <div className="absolute right-1 top-1 lg:right-2 lg:top-2 z-10">
-                                    {/* Add to collection / Like */}
-                                    <button className="group/like relative z-[10] fill-blood-500 transition-colors duration-400 hover:fill-blood-700 bg-smoke-950/20 group-hover:bg-smoke-950/90 p-1 px-1.5 sm:px-2 lg:py-1 lg:px-1.5 rounded-full">
-                                        <HeartIcon className="inline-block h-4 lg:h-5 w-4 lg:w-5 fill-inherit stroke-inherit group-hover/like:animate-pulse" />
-                                    </button>
-                                </div>
-
-                                {/* <div className="absolute left-1 lg:left-2 bottom-2 lg:bottom-7 text-[11px] leading-3 px-1 lg:px-2 py-0.5 lg:py-1 inline-flex items-center gap-x-1 bg-smoke-900/90 rounded-3xl">
-                                        <TicketIcon className="inline-block h-3 w-3 xl:h-5 xl:w-5 text-jade-400" />
-                                        <div className="flex items-center space-x-1">
-                                            <p className="text-jade-400 whitespace-nowrap">{item.raisedTickets}</p>
-                                            <p className="text-white">/</p>
-                                            <p className="text-white">{item.tickets}</p>
-                                        </div>
-                                </div> */}
-
-                                {/* <div className="absolute right-1 lg:right-3 bottom-7 text-[11px] inline-flex items-center gap-2 px-2 py-1 rounded-3xl bg-lemon-400 text-smoke-900 font-bold"> */}
-                                <div className="absolute right-1 lg:right-2 bottom-2 lg:bottom-7 text-[11px] leading-3 px-1 lg:px-2 py-0.5 lg:py-1 rounded-3xl bg-lemon-400 text-smoke-900 font-bold">
-                                    {/* <ClockIcon className="inline-block h-5 w-5" /> */}
-                                    {item.endingIn}
-                                </div>
-
-                                {/* <div className="absolute left-3 bottom-3 text-[11px] inline-flex items-center gap-2 px-2 py-1 rounded-3xl bg-smoke-950/20 group-hover:bg-smoke-950/90 p-2 rounded-3xl font-bold">
-                                    <div className="flex items-center space-x-1">
-                                        <p className="text-jade-400 whitespace-nowrap">{item.raisedTickets}</p>
-                                        <p className="text-white">/</p>
-                                        <p className="text-white">{item.tickets}</p>
-                                    </div>
-                                </div> */}
-                            </div>
-                            <div className="w-full text-center py-2 bg-smoke-950 -mt-1 lg:-mt-5 relative z-10">
-                                <div className="overflow-hidden bg-white/20 h-1 lg:h-2 -mt-2 mb-2">
-                                    <div className="h-full bg-gradient-to-b from-jade-400 to-jade-500 w-6"></div>
-                                </div>
-                                <p className="text-[11px] leading-3 lg:leading-none lg:text-xs font-bold text-smoke-300 flex items-center justify-center gap-1">
-                                    <CheckBadgeIcon className="inline-block h-4 lg:h-5 w-4 lg:w-5 text-[#1475e1] z-10 relative" />
-                                    <span className="truncate max-w-[90%]">{item.title}</span>
-                                </p>
-                                <p className="lg:text-xl font-bold text-white truncate select-text">${item.price}</p>
-                            </div>
-                            <div className="w-full text-center py-1.5 bg-jade-400 rounded-b-lg leading-4">
-                                <p className="text-xs lg:text-base font-bold text-smoke-900 truncate select-text">Enter now</p>
-                                {/* <p className="text-xs font-normal text-smoke-900">10 USDC</p> */}
-                            </div>
-                        </a>
+                        <RaffleMetaWin {...item} />
                     </>
-                ))}
-            </div>
-
-            <div className="sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 sm:gap-x-3 gap-y-4 lg:gap-y-3 mt-8 xl:mt-12">
-                {trending.map((item) => (
-                    // <div className="max-w-xs w-full lg:max-w-full lg:flex group">
-                    <div className="max-w-xs w-full lg:max-w-full group">
-                        <div className="h-48 lg:h-auto flex-none bg-cover text-center overflow-hidden relative" title="Woman holding a mug">
-                            <img src={item.image} alt="" className="object-cover object-center h-full w-full xl:min-h-64 rounded-t lg:rounded-l-xl" />
-                            <div className="absolute ri8ght-3 top-3">
-                                <button className="group/like relative z-[10] fill-blood-500 transition-colors duration-400 hover:fill-blood-700 bg-smoke-900/20 group-hover:bg-smoke-900/90 p-2 rounded-full">
-                                    <div className="border-box items-center flex gap-[4px]">
-                                        <HeartIcon className="inline-block h-5 w-5 fill-inherit stroke-inherit group-hover/like:animate-pulse" />
-                                    </div>
-                                </button>
-                            </div>
-                            <div className="absolute bottom-3 w-full px-3 -ml-[2px]">
-                                <div className="px-2 py-1 pb-2 gap-x-1 rounded-md bg-smoke-900/90">
-                                    <div className="flex items-center justify-between text-xs mb-1 font-bold">
-                                        <div className="flex items-center justify-between gap-x-2 w-full">
-                                            {/* <TicketIcon className="inline-block h-5 w-5 text-jade-400" /> */}
-                                            <span className="text-smoke-300">Ticket sold</span>
-                                            <div className="flex items-center space-x-1">
-                                                <p className="text-jade-400 whitespace-nowrap">{item.raisedTickets}</p>
-                                                <p className="text-white">/</p>
-                                                <p className="text-white">{item.tickets}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="overflow-hidden rounded-xl bg-white/20 h-1 w-full">
-                                        <div className="h-full rounded-xl bg-gradient-to-b from-jade-400 to-jade-500 w-6"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {/* <div className="relative border-r border-b border-l border-smoke-800 lg:border-l-0 lg:border-t lg:border-smoke-800 group-hover:border-smoke-600 bg-smoke-900 rounded-b lg:rounded-b-none lg:rounded-r-xl p-4 flex flex-col justify-between leading-normal w-full lg:-ml-1"> */}
-                        <div className="relative border-r border-b border-l border-smoke-800 lg:border-smoke-800 group-hover:border-smoke-600 bg-smoke-900 rounded-b p-4 flex flex-col justify-between leading-normal w-full -mt-2 group-hover:bg-gradient-to-t group-hover:from-smoke-900 group-hover:to-smoke-800/50">
-                            <div className="flex justify-between">
-                                <p className="text-sm text-smoke-600 flex items-center space-x-1">
-                                    <div className="relative">
-                                        <CheckBadgeIcon className="inline-block h-5 w-5 text-[#1475e1] z-10 relative" />
-                                        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 inset-0 rounded-full bg-white h-3 w-3"></div>
-                                    </div>
-                                    <p className="text-smoke-300 font-bold truncate select-text max-w-36">{item.title}</p>
-                                    <p className="text-smoke-300 font-bold truncate select-text max-w-14">#{item.id}</p>
-                                </p>
-                                <div className="text-xs inline-flex items-center gap-2 px-2 py-1 rounded-3xl bg-lemon-400/90 group-hover:bg-lemon-400 text-smoke-900 font-bold">
-                                    <span>{item.endingIn}</span>
-                                </div>
-                            </div>
-                            <div className="text-white font-bold text-xl flex items-center my-2">
-                                <div className="flex flex-col">
-                                    <p className="text-xs font-bold text-smoke-300 mb-1">Market value / Full price</p>
-                                    <p className="text-2xl font-bold text-white truncate select-text">${item.price}</p>
-                                </div>
-                                {/* <div className="flex flex-col max-w-[30%] min-w-[30%]">
-                                    <p className="text-xs font-bold text-smoke-300">Ticket price</p>
-                                    <p className="text-xl font-bold text-white truncate select-text">$100</p>
-                                </div> */}
-                            </div>
-                            <div className="flex justify-between gap-6">
-                                <p className="text-xs font-bold text-smoke-300 self-center">100 USDC lowest ticket</p>
-                                <div className="min-w-[6rem]">
-                                    {/* <button className="text-sm font-bold text-smoke-900 bg-gradient-to-b from-sky-400 to-sky-500 hover:to-sky-600 rounded-md px-3 py-1.5 w-full leading-5"> */}
-                                    {/* <button className="text-sm font-bold text-smoke-900 bg-gradient-to-b bg-[#23f7dd] hover:bg-[#08d3ba] rounded-md px-3 py-1.5 w-full leading-5"> */}
-                                    <button className="text-sm font-bold text-white bg-[#1475e1] hover:bg-[#1475e1] rounded-md px-3 py-1.5 w-full leading-5">
-                                        Enter Now
-                                        {/* Enter
-                                                <br />
-                                                Now */}
-                                        {/* Play */}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 ))}
             </div>
         </>

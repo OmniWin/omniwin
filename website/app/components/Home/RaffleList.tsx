@@ -194,24 +194,21 @@ const trending = [
 ];
 // import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
 // import { TicketIcon, ClockIcon } from "@heroicons/react/24/outline";
+import RaffleDefault from "../Raffle/RaffleDefault";
 
-import RaffleEse from "../Raffle/RaffleEse";
-
-export const PaidContests = () => {
+export const RaffleList = () => {
     return (
         <>
             {/* <div className="mt-5 grid min-h-[18rem] gap-x-[40px] gap-y-0 rounded-lg border border-smoke-800 px-6 py-6 grid-auto-fit-[18.5rem] lg:px-4 lg:py-4 2xl:px-[26px] 2xl:py-6"> */}
-            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-3xl">
-                <h2 className="text-base font-semibold leading-8 text-sky-400">Paid contest</h2>
-                <p className="mt-2 text-2xl font-bold tracking-tight text-white xl:text-4xl">
-                    These contests are promoted by the creators. <br /> Win them by playing.
-                </p>
+            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl">
+                <h2 className="text-base font-semibold leading-8 text-sky-400">The most popular NFTs</h2>
+                <p className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">Trending</p>
+                <p className="mt-6 text-lg leading-8 text-gray-300">Target Values are determined and set by the raffle creator.</p>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-6 gap-6 mt-12">
-                {trending.map((item) => (
-                    <>
-                        <RaffleEse {...item} />
-                    </>
+
+            <div className="sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 3xl: sm:gap-x-4 gap-y-4 lg:gap-y-6 mt-8 xl:mt-12">
+                {trending.map((item, i) => (
+                    <RaffleDefault key={i} {...item} />
                 ))}
             </div>
         </>
