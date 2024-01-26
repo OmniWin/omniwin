@@ -1,8 +1,8 @@
-"use client";
+// "use client";
 
 /* Core */
-// import Link from "next/link";
-// import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { classNames } from "../utils/index";
 
@@ -13,8 +13,6 @@ import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
 
 import { useSelector, useDispatch, sidebarSlice } from "@/lib/redux";
 import { selectSidebarOpenState, selectSidebarToggleState } from "@/lib/redux/slices/sidebarSlice/selectors";
-
-import Link from "next/link";
 
 const navigation = [
     { name: "Home", href: "#", icon: HomeIcon, current: true },
@@ -28,28 +26,18 @@ const navigation = [
     //         { name: "Customer Success", href: "#", current: false },
     //     ],
     // },
-    // {
-    //     name: "Projects",
-    //     icon: FolderIcon,
-    //     current: false,
-    //     children: [
-    //         { name: "GraphQL API", href: "#", current: false },
-    //         { name: "iOS App", href: "#", current: false },
-    //         { name: "Android App", href: "#", current: false },
-    //         { name: "New Customer Portal", href: "#", current: false },
-    //     ],
-    // },
     { name: "Explore", href: "raffles", icon: BookOpenIcon, current: false },
-    // { name: "Documents", href: "#", icon: DocumentDuplicateIcon, current: false },
-    // { name: "Reports", href: "#", icon: ChartPieIcon, current: false },
-];
-const teams = [
-    { id: 1, name: "Heroicons", href: "#", initial: "H", current: false },
-    { id: 2, name: "Tailwind Labs", href: "#", initial: "T", current: false },
-    { id: 3, name: "Workcation", href: "#", initial: "W", current: false },
 ];
 
+
 export const SidebarNavigation = () => {
+    const path = usePathname();
+    console.log(path)
+    const [navigation, setNavigation] = useState([
+        { name: "Home", href: "/", icon: HomeIcon, current: true, children: null },
+        { name: "Explore", href: "/raffles", icon: BookOpenIcon, current: false, children: null },
+    ] as { name: string; href: string; icon: any; current: boolean; children: null | {name: string, href: string, current: boolean}[] }[]);
+
     // const pathname = usePathname();
     const dispatch = useDispatch();
     const sidebarOpenState = useSelector(selectSidebarOpenState);
@@ -64,6 +52,20 @@ export const SidebarNavigation = () => {
 
         console.log("sidebarToggleState", sidebarToggleState.toggleSidebar);
     }, [dispatch]);
+
+    useEffect(() => {
+        if (path === "/") {
+            setNavigation([
+                { name: "Home", href: "/", icon: HomeIcon, current: true, children: null },
+                { name: "Explore", href: "/raffles", icon: BookOpenIcon, current: false, children: null },
+            ]);
+        } else if (path === "/raffles") {
+            setNavigation([
+                { name: "Home", href: "/", icon: HomeIcon, current: false, children: null },
+                { name: "Explore", href: "/raffles", icon: BookOpenIcon, current: true, children: null },
+            ]);
+        }
+    }, [path]);
 
     return (
         <>
@@ -139,21 +141,22 @@ export const SidebarNavigation = () => {
                                                                                 />
                                                                             </Disclosure.Button>
                                                                             <Disclosure.Panel as="ul" className="mt-1 px-2">
-                                                                                {item.children.map((subItem) => (
-                                                                                    <li key={subItem.name}>
-                                                                                        {/* 44px */}
-                                                                                        <Disclosure.Button
-                                                                                            as={Link}
-                                                                                            href={subItem.href}
-                                                                                            className={classNames(
-                                                                                                subItem.current ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-900",
-                                                                                                "block rounded-md py-2 pr-2 pl-9 text-sm leading-6"
-                                                                                            )}
-                                                                                        >
-                                                                                            {subItem.name}
-                                                                                        </Disclosure.Button>
-                                                                                    </li>
-                                                                                ))}
+                                                                                {item.children &&
+                                                                                    item.children.map((subItem) => (
+                                                                                        <li key={subItem.name}>
+                                                                                            {/* 44px */}
+                                                                                            <Disclosure.Button
+                                                                                                as={Link}
+                                                                                                href={subItem.href}
+                                                                                                className={classNames(
+                                                                                                    subItem.current ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-900",
+                                                                                                    "block rounded-md py-2 pr-2 pl-9 text-sm leading-6"
+                                                                                                )}
+                                                                                            >
+                                                                                                {subItem.name}
+                                                                                            </Disclosure.Button>
+                                                                                        </li>
+                                                                                    ))}
                                                                             </Disclosure.Panel>
                                                                         </>
                                                                     )}
@@ -234,7 +237,7 @@ export const SidebarNavigation = () => {
                                                                 )}
                                                             </Disclosure.Button>
                                                             <Disclosure.Panel as="ul" className="mt-1 px-2">
-                                                                {item.children.map((subItem) => (
+                                                                {item.children && item.children.map((subItem) => (
                                                                     <li key={subItem.name}>
                                                                         {/* 44px */}
                                                                         <Disclosure.Button

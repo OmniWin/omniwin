@@ -6,38 +6,38 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import { classNames } from "@/app/utils";
 
 const sortOptions = [
-  { name: 'Most Popular', href: '#', current: true },
-  { name: 'Best Rating', href: '#', current: false },
-  { name: 'Newest', href: '#', current: false },
-]
+    { id: "tickets_remaining",name: "% Tickets Remaining", href: "#", current: true },
+    { id: "newest",name: "Newest", href: "#", current: true },
+    { id: "oldest",name: "Oldest", href: "#", current: false },
+    { id: "time_remaining",name: "Time remaining", href: "#", current: false },
+];
 const filters = [
   {
-    id: 'category',
-    name: 'Category',
+    id: 'chain',
+    name: 'Chain',
     options: [
-      { value: 'new-arrivals', label: 'All New Arrivals', checked: false },
-      { value: 'tees', label: 'Tees', checked: false },
-      { value: 'objects', label: 'Objects', checked: true },
+      { value: 'eth', label: 'Ethereum', checked: false },
+      { value: 'polygon', label: 'Polygon', checked: false },
+      { value: 'bsc', label: 'BSC', checked: true },
     ],
   },
-  {
-    id: 'color',
-    name: 'Color',
-    options: [
-      { value: 'white', label: 'White', checked: false },
-      { value: 'beige', label: 'Beige', checked: false },
-      { value: 'blue', label: 'Blue', checked: false },
-    ],
-  },
-  {
-    id: 'sizes',
-    name: 'Sizes',
-    options: [
-      { value: 's', label: 'S', checked: false },
-      { value: 'm', label: 'M', checked: false },
-      { value: 'l', label: 'L', checked: false },
-    ],
-  },
+//   {
+//     id: 'color',
+//     name: 'Color',
+//     options: [
+//       { value: 'white', label: 'White', checked: false },
+//       { value: 'beige', label: 'Beige', checked: false },
+//       { value: 'blue', label: 'Blue', checked: false },
+//     ],
+//   },
+//   {
+//     id: 'verified',
+//     name: 'Verified',
+//     options: [
+//       { value: 'yes', label: 'No', checked: false },
+//       { value: 'no', label: 'Yes', checked: false },
+//     ],
+//   },
 ]
 const activeFilters = [{ value: 'objects', label: 'Objects' }]
 
