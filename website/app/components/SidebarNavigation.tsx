@@ -208,11 +208,12 @@ export const SidebarNavigation = () => {
                                                     className={classNames(
                                                         item.current ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-900",
                                                         "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-all duration-300",
-                                                        sidebarToggleState.toggleSidebar ? "justify-center" : ""
+                                                        sidebarToggleState.toggleSidebar ? "pl-3" : ""
                                                     )}
                                                 >
                                                     <item.icon className="h-6 w-6 shrink-0 text-zinc-400" aria-hidden="true" />
-                                                    {sidebarToggleState.toggleSidebar ? "" : item.name}
+                                                    {/* {sidebarToggleState.toggleSidebar ? "" : item.name} */}
+                                                    <span className={classNames(sidebarToggleState.toggleSidebar && 'hidden', 'transition-all duration-300')}>{item.name}</span>
                                                 </a>
                                             ) : (
                                                 <Disclosure as="div">
@@ -221,12 +222,13 @@ export const SidebarNavigation = () => {
                                                             <Disclosure.Button
                                                                 className={classNames(
                                                                     item.current ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-900",
-                                                                    sidebarToggleState.toggleSidebar ? "justify-center" : "",
+                                                                    sidebarToggleState.toggleSidebar ? "pl-3" : "",
                                                                     "flex items-center w-full text-left rounded-md p-2 gap-x-3 text-sm leading-6 font-semibold"
                                                                 )}
                                                             >
                                                                 <item.icon className="h-6 w-6 shrink-0 text-zinc-400" aria-hidden="true" />
-                                                                {sidebarToggleState.toggleSidebar ? "" : item.name}
+                                                                {/* {sidebarToggleState.toggleSidebar ? "" : item.name} */}
+                                                                <span className={classNames(sidebarToggleState.toggleSidebar && 'hidden', 'transition-all duration-300')}>{item.name}</span>
                                                                 {sidebarToggleState.toggleSidebar ? (
                                                                     ""
                                                                 ) : (
@@ -263,11 +265,12 @@ export const SidebarNavigation = () => {
                                     href="#"
                                     className={classNames(
                                         "group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-zinc-400 hover:bg-zinc-900 hover:text-white",
-                                        sidebarToggleState.toggleSidebar ? "justify-center" : ""
+                                        sidebarToggleState.toggleSidebar ? "pl-3" : ""
                                     )}
                                 >
                                     <Cog6ToothIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
-                                    {sidebarToggleState.toggleSidebar ? "" : "Settings"}
+                                    {/* {sidebarToggleState.toggleSidebar ? "" : "Settings"} */}
+                                    <span className={classNames(sidebarToggleState.toggleSidebar && 'hidden', 'transition-all duration-300')}>{"Settings"}</span>
                                 </a>
                             </li>
                         </ul>
