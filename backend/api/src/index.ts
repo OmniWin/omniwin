@@ -27,7 +27,8 @@ fastify.setValidatorCompiler(({ schema, method, url, httpPart }) => {
 
 const start = async () => {
     try {
-        fastify.listen({ port: 6969, host: '0.0.0.0' }, function (err, address) {
+        const port = parseInt(process.env.PORT || "8978")
+        fastify.listen({ port: port, host: '0.0.0.0' }, function (err, address) {
             if (err) {
                 fastify.log.error(err)
                 process.exit(1)
