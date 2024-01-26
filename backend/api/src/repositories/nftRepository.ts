@@ -38,7 +38,7 @@ export class NftRepository {
         const { prisma } = this.fastify;
 
         // Construct the base query with parameter placeholders
-        let rawQuery = `SELECT id_nft, id_lot, total_tickets, bonus_tickets, tickets_bought, ticket_price, transactions, end_timestamp, fee, closed, buyout, asset_claimed, tokens_claimed, owner, signer, token, token_id, amount, asset_type, data, network, created_at, updated_at, NftMetadata.name, NftMetadata.image FROM Nft
+        let rawQuery = `SELECT Nft.id_nft, Nft.id_lot, Nft.total_tickets, Nft.bonus_tickets, Nft.tickets_bought, Nft.ticket_price, Nft.transactions, Nft.end_timestamp, Nft.fee, Nft.closed, Nft.buyout, Nft.asset_claimed, Nft.tokens_claimed, Nft.owner, Nft.signer, Nft.token, Nft.token_id, Nft.amount, Nft.asset_type, Nft.data, Nft.network, Nft.created_at, Nft.updated_at, NftMetadata.name, NftMetadata.image FROM Nft
         LEFT JOIN NftMetadata ON Nft.id_nft = NftMetadata.id_nft
         `;
 
