@@ -48,8 +48,8 @@ export class NftService {
         switch (sortBy) {
             case SortBy.TicketsRemaining:
                 return { custom: 'total_tickets - tickets_bought' };
-            // case SortBy.PriceHighToLow:
-            // return { ticket_price: 'desc' };
+            case SortBy.PriceHighToLow:
+                return { custom: '(item.ticket_price / 6) * item.total_tickets' };
             case SortBy.Newest:
                 return { created_at: 'desc' };
             case SortBy.Oldest:
