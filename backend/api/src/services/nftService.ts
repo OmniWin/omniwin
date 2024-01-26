@@ -1,5 +1,7 @@
 import { NftRepository } from '../repositories/nftRepository';
 import { FastifyInstance } from 'fastify';
+//import assetType enum
+import { AssetType, NetworkType } from '@prisma/client';
 
 export class NftService {
     private nftRepository: NftRepository;
@@ -7,8 +9,23 @@ export class NftService {
         this.nftRepository = new NftRepository(this.fastify);
     }
 
-    async fetchNFTs(limit: number, cursor?: string) {
-        const whereCondition = cursor ? { id_nft: { gt: cursor } } : {};
+    async fetchNFTs(limit: number, cursor: number, filters: { types?: AssetType[], networks?: NetworkType[] }) {
+        let whereCondition = cursor ? { id_nft: { gt: cursor } } : {} as any;
+
+        if (filters?.types) {
+            whereCondition.asset_type = {
+                in: filters.types
+            };
+        }
+
+        if (filters?.networks) {
+            whereCondition.network = {
+                in: filters.networks
+            };
+        }
+
+        console.log("whereCondition", whereCondition);
+
         const items = await this.nftRepository.fetchNFTs(whereCondition, limit);
 
         let nextCursor: string | null = null;

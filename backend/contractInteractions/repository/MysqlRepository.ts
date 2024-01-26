@@ -15,7 +15,7 @@ export default class MysqlRepository {
             const assetType = this.mapIntToAssetType(data.assetType)
 
 
-            const query = `INSERT INTO NFT (id_lot, total_tickets, bonus_tickets, tickets_bought, ticket_price, transactions, end_timestamp, fee, closed, buyout, asset_claimed, tokens_claimed, owner, token, token_id, amount, asset_type, data, network) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_tickets = VALUES(total_tickets), bonus_tickets = VALUES(bonus_tickets), tickets_bought = VALUES(tickets_bought), ticket_price = VALUES(ticket_price), transactions = VALUES(transactions), end_timestamp = VALUES(end_timestamp), fee = VALUES(fee), closed = VALUES(closed), buyout = VALUES(buyout), asset_claimed = VALUES(asset_claimed), tokens_claimed = VALUES(tokens_claimed), owner = VALUES(owner), token = VALUES(token), token_id = VALUES(token_id), amount = VALUES(amount), asset_type = VALUES(asset_type), data = VALUES(data), network = VALUES(network), id_nft = LAST_INSERT_ID(id_nft);`;
+            const query = `INSERT INTO Nft (id_lot, total_tickets, bonus_tickets, tickets_bought, ticket_price, transactions, end_timestamp, fee, closed, buyout, asset_claimed, tokens_claimed, owner, token, token_id, amount, asset_type, data, network) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_tickets = VALUES(total_tickets), bonus_tickets = VALUES(bonus_tickets), tickets_bought = VALUES(tickets_bought), ticket_price = VALUES(ticket_price), transactions = VALUES(transactions), end_timestamp = VALUES(end_timestamp), fee = VALUES(fee), closed = VALUES(closed), buyout = VALUES(buyout), asset_claimed = VALUES(asset_claimed), tokens_claimed = VALUES(tokens_claimed), owner = VALUES(owner), token = VALUES(token), token_id = VALUES(token_id), amount = VALUES(amount), asset_type = VALUES(asset_type), data = VALUES(data), network = VALUES(network), id_nft = LAST_INSERT_ID(id_nft);`;
 
             const [rows,] = await conn.query(query, [
                 data.lotID, data.totalTickets, data.bonusTickets, data.ticketsBought, data.ticketPrice, data.transactions, data.endTimestamp, data.fee, data.closed, data.buyout, data.assetClaimed, data.tokensClaimed, data.owner, data.token, data.tokenID, data.amount, assetType, data.data, "GOERLI",
@@ -36,20 +36,20 @@ export default class MysqlRepository {
     public async insertMetadata(nftID: number, lotID: number, metadata: NFTMetadata | null) {
         try {
             if (!metadata) {
-                const metadataQuery = `INSERT INTO NFTMetadata (id_nft, id_lot, name, image, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
+                const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, image, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
 
                 await conn.query(metadataQuery, [nftID, lotID, "", "", "", null, "", "", "FAILED", "FAILED"]);
 
                 return;
             }
 
-            const metadataQuery = `INSERT INTO NFTMetadata (id_nft, id_lot, name, image, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_lot = ?, name = ?, image = ?, description = ?, json = ?, image_url = ?, image_local = ?, status = ?`;
+            const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, image, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_lot = ?, name = ?, image = ?, description = ?, json = ?, image_url = ?, image_local = ?, status = ?`;
 
             await conn.query(metadataQuery, [nftID, lotID, metadata?.name || "", metadata?.image || "", metadata?.description || "", JSON.stringify(metadata) || "", "", "", "SUCCESS", lotID, metadata?.name || "", metadata?.image || "", metadata?.description || "", JSON.stringify(metadata) || "", "", "", "SUCCESS"]);
 
         } catch (error) {
             console.log(error);
-            const metadataQuery = `INSERT INTO NFTMetadata (id_nft, id_lot, name, image, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
+            const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, image, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
             await conn.query(metadataQuery, [nftID, lotID, "", "", "", null, "", "", "ERROR", "ERROR"]);
             logger.error(`Error insertMetadata ${nftID} ${lotID} ${metadata} ${error}`);
             throw new Error("Error insertMetadata");
@@ -91,7 +91,7 @@ export default class MysqlRepository {
         try {
             const assetType = this.mapIntToAssetType(data.assetType)
 
-            const query = `INSERT INTO NFT (id_lot, token, token_id, amount, asset_type, data, owner, signer, total_tickets, ticket_price, end_timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), token_id = VALUES(token_id), amount = VALUES(amount), asset_type = VALUES(asset_type), data = VALUES(data), owner = VALUES(owner), signer = VALUES(signer), total_tickets = VALUES(total_tickets), ticket_price = VALUES(ticket_price), end_timestamp = VALUES(end_timestamp);`;
+            const query = `INSERT INTO Nft (id_lot, token, token_id, amount, asset_type, data, owner, signer, total_tickets, ticket_price, end_timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), token_id = VALUES(token_id), amount = VALUES(amount), asset_type = VALUES(asset_type), data = VALUES(data), owner = VALUES(owner), signer = VALUES(signer), total_tickets = VALUES(total_tickets), ticket_price = VALUES(ticket_price), end_timestamp = VALUES(end_timestamp);`;
 
             const [rows,] = await conn.query(query, [
                 data.lotID, data.token, data.tokenID, data.amount, assetType, data.data, data.owner, data.signer, data.totalTickets, data.ticketPrice, data.endTimestamp,
@@ -115,7 +115,7 @@ export default class MysqlRepository {
         uniqueID: string,
     }) {
         try {
-            const query = `INSERT INTO Tickets (id_lot, uniqueID, recipient, totalTickets, amount, tokensSpent, bonus) VALUES (?,?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE recipient = VALUES(recipient), totalTickets = VALUES(totalTickets), amount = VALUES(amount), tokensSpent = VALUES(tokensSpent), bonus = VALUES(bonus), updated_at = CURRENT_TIMESTAMP()
+            const query = `INSERT INTO Tickets (id_lot, unique_id, recipient, total_tickets, amount, tokens_spent, bonus) VALUES (?,?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE recipient = VALUES(recipient), total_tickets = VALUES(total_tickets), amount = VALUES(amount), tokens_spent = VALUES(tokens_spent), bonus = VALUES(bonus), updated_at = CURRENT_TIMESTAMP()
             ;`;
 
             const [rows,] = await conn.query(query, [
@@ -131,7 +131,7 @@ export default class MysqlRepository {
 
     public async incrementTotalTickets(lotID: number) {
         try {
-            const query = `UPDATE NFT SET total_tickets = total_tickets + 1 WHERE id_lot = ?`;
+            const query = `UPDATE Nft SET total_tickets = total_tickets + 1 WHERE id_lot = ?`;
 
             const [rows,] = await conn.query(query, [
                 lotID,
@@ -146,7 +146,7 @@ export default class MysqlRepository {
 
     public async getTicketsByLotID(lotID: number) {
         try {
-            const query = `SELECT id_ticket, id_lot, recipient, totalTickets, amount, tokensSpent, bonus, created_at,updated_at,uniqueID FROM Tickets WHERE id_lot = ?;`;
+            const query = `SELECT id_ticket, id_lot, recipient, total_tickets, amount, tokens_spent, bonus, created_at,updated_at,unique_id FROM Tickets WHERE id_lot = ?;`;
 
             const [rows,] = await conn.query(query, [
                 lotID,

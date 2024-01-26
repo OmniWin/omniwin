@@ -13,6 +13,10 @@ export const nftPagination = {
             types: {
                 type: "array",
                 items: { type: "string" }
+            },
+            networks: {
+                type: "array",
+                items: { type: "string" }
             }
         },
         required: ["pagination", "types"] // Adjust according to your requirements

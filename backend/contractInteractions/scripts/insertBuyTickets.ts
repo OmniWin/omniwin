@@ -1,10 +1,10 @@
 import { ethers } from 'ethers';
-import { MainABI } from '../types/MainABI';
 import { mysqlInstance } from '../repository/MysqlRepository';
 import { goerliProvider } from '../providers/goerli';
+import config from "../contracts/contractConfig";
 
 
-export async function insertBuyTickets(numberOfBlocks: number, contract: MainABI, all = false) {
+export async function insertBuyTickets(numberOfBlocks: number, all = false) {
     const latestBlock = await goerliProvider.getBlockNumber(); // Get the latest block number
     const blockSize = 1000; // Define the size of each block range for queries
     let fromBlock = latestBlock - numberOfBlocks;
@@ -19,8 +19,8 @@ export async function insertBuyTickets(numberOfBlocks: number, contract: MainABI
         const endBlock = Math.min(block + blockSize - 1, latestBlock);
 
         try {
-            const eventFilter = contract.filters.BuyTickets();
-            const events = await contract.queryFilter(eventFilter, block, endBlock);
+            const eventFilter = config.contract.filters.BuyTickets();
+            const events = await config.contract.queryFilter(eventFilter, block, endBlock);
 
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];

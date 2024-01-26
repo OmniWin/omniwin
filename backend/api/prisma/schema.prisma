@@ -11,19 +11,19 @@ datasource db {
 }
 
 model Nft {
-  id_nft         Int       @id @default(autoincrement())
+  id_nft         Int         @id @default(autoincrement())
   id_lot         Int
-  total_tickets  Int       @default(0)
-  bonus_tickets  Int       @default(0)
-  tickets_bought Int       @default(0)
+  total_tickets  Int         @default(0)
+  bonus_tickets  Int         @default(0)
+  tickets_bought Int         @default(0)
   ticket_price   BigInt
-  transactions   Int       @default(0)
+  transactions   Int         @default(0)
   end_timestamp  Int
-  fee            Int       @default(600)
-  closed         Boolean   @default(false)
-  buyout         Boolean   @default(false)
-  asset_claimed  Boolean   @default(false)
-  tokens_claimed Boolean   @default(false)
+  fee            Int         @default(600)
+  closed         Boolean     @default(false)
+  buyout         Boolean     @default(false)
+  asset_claimed  Boolean     @default(false)
+  tokens_claimed Boolean     @default(false)
   owner          String
   signer         String?
   token          String
@@ -31,9 +31,11 @@ model Nft {
   amount         String
   asset_type     AssetType
   data           String
-  network        Network
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @default(now()) @updatedAt
+  network        NetworkType
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @default(now()) @updatedAt
+
+  metadata NftMetadata?
 
   @@unique([id_lot, network], name: "id_lot_network_unique")
   @@index([token, token_id], name: "token_tokenID")
@@ -41,7 +43,7 @@ model Nft {
 
 model NftMetadata {
   id_nftMetadata Int               @id @default(autoincrement())
-  id_nft         Int
+  id_nft         Int               @unique
   id_lot         Int
   name           String?
   image          String?
@@ -53,23 +55,24 @@ model NftMetadata {
   created_at     DateTime          @default(now())
   updated_at     DateTime          @default(now()) @updatedAt
 
-  @@unique([id_nft], name: "id_nft_unique")
+  nft Nft @relation(fields: [id_nft], references: [id_nft])
+
   @@index([id_nft], name: "id_nft")
 }
 
 model Tickets {
-  id_ticket    Int      @id @default(autoincrement())
-  id_lot       Int
-  uniqueID     String
-  recipient    String
-  totalTickets Int
-  amount       BigInt
-  tokensSpent  BigInt
-  bonus        Int
-  created_at   DateTime @default(now())
-  updated_at   DateTime @default(now()) @updatedAt
+  id_ticket     Int      @id @default(autoincrement())
+  id_lot        Int
+  unique_id     String
+  recipient     String
+  total_tickets Int
+  amount        BigInt
+  tokens_spent  BigInt
+  bonus         Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now()) @updatedAt
 
-  @@unique([uniqueID], name: "id_lot_id_user_unique")
+  @@unique([unique_id], name: "id_lot_id_user_unique")
   @@index([recipient], name: "recipient")
 }
 
@@ -98,7 +101,7 @@ enum AssetType {
   ERC777ATOMICV3
 }
 
-enum Network {
+enum NetworkType {
   ETHEREUM
   GOERLI
 }

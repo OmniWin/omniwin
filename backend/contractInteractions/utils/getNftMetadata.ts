@@ -7,36 +7,44 @@ import { goerliProvider } from '../providers/goerli';
 export async function getNFTData(nftContractAddress: string, tokenId: string, assetType: AssetType) {
     const nftContract = assetType === AssetType.ERC721 ? new ethers.Contract(nftContractAddress, NFT_721_ABI, goerliProvider) : new ethers.Contract(nftContractAddress, NFT_1155_ABI, goerliProvider);
 
-    let response;
+    let response = {};
+    let tokenURI;
     try {
-        let tokenURI;
-
         switch (assetType) {
             case AssetType.ERC721:
                 tokenURI = await nftContract.tokenURI(tokenId);
-                response = await fetchNFTData(tokenURI)
+                response = await fetchNFTData(tokenURI) as any;
                 break;
             case AssetType.ERC1155:
                 tokenURI = await nftContract.uri(tokenId);
                 const formattedTokenId = tokenId.padStart(64, '0');
                 const tokenWithId = tokenURI.replace("{id}", formattedTokenId);
-                response = await fetchNFTData(tokenURI.includes("{id}") ? tokenWithId : tokenURI);
+                response = await fetchNFTData(tokenURI.includes("{id}") ? tokenWithId : tokenURI) as any;
                 break;
             default:
                 console.log("Unknown asset type");
                 throw new Error("Unknown asset type");
         }
 
-        if (!response) return null;
+        if (!response) return {
+            name: "",
+            image: "",
+            description: "",
+            tokenURI: tokenURI,
+        };
 
+        (response as any).tokenURI = tokenURI;
         const metadata = response as any;
 
         return metadata;
-        // Here you can access metadata properties like metadata.name, metadata.image, etc.
     } catch (error) {
-        throw new Error("Error fetching NFT data");
         console.error("Error fetching NFT data:", error);
-        return null;
+        return {
+            name: "",
+            image: "",
+            description: "",
+            tokenURI: "",
+        };
     }
 }
 

@@ -7,7 +7,7 @@ import { mysqlInstance } from './repository/MysqlRepository';
 // import util from "util";
 import { getLotByID } from "./contractInteractions/contractMain";
 import { goerliProvider } from "./providers/goerli";
-import { insertBuyTickets } from "./contractInteractions/insertBuyTickets";
+import { insertBuyTickets } from "./scripts/insertBuyTickets";
 import { blocksByTime, getNFTData, cleanHashLots } from "./utils";
 import { EventQueue } from "./queue/EventQueue";
 

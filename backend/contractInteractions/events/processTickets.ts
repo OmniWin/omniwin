@@ -1,7 +1,7 @@
 import { EventQueue } from "../queue/EventQueue";
 import { ethers } from "ethers";
 import { blocksByTime, getNFTData, cleanHashLots } from "../utils";
-import { insertBuyTickets } from "../contractInteractions/insertBuyTickets";
+import { insertBuyTickets } from "../scripts/insertBuyTickets";
 import { getLotByID } from "../contractInteractions/contractMain";
 import config from "../contracts/contractConfig";
 import { mysqlInstance } from '../repository/MysqlRepository';
