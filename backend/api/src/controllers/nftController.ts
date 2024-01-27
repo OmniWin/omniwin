@@ -57,8 +57,8 @@ export class NftController {
 
             const USDC_decimals = 6;
             const convertedItems = items.map(item => ({
-                full_price: (Number(item.ticket_price) / USDC_decimals) * item.total_tickets,
-                ticket_price: Number(item.ticket_price) / USDC_decimals,
+                full_price: (Number(item.ticket_price) / Math.pow(10, USDC_decimals)) * item.total_tickets,
+                ticket_price: Number(item.ticket_price) / Math.pow(10, USDC_decimals),
                 tickets_bought: item.tickets_bought,
                 tickets_total: item.total_tickets,
                 time_left: item.end_timestamp,

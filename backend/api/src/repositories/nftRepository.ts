@@ -47,6 +47,7 @@ export class NftRepository {
 
         // Building the WHERE clause with parameters
         let whereClauses = [];
+        let orderByClause = "";
 
         if (whereCondition.asset_type?.in) {
             whereClauses.push(`asset_type IN (${whereCondition.asset_type.in.map(() => '?').join(', ')})`);
@@ -58,42 +59,47 @@ export class NftRepository {
             queryParams.push(...whereCondition.network.in);
         }
 
-        if (whereClauses.length > 0) {
-            rawQuery += ` WHERE ${whereClauses.join(' AND ')}`;
-        }
+
 
         if (orderBy.custom === 'PriceHighToLow') {
             // Adding ORDER BY and LIMIT with placeholders
-            rawQuery += ` ORDER BY (ticket_price / 6) * total_tickets DESC LIMIT ?`;
+            orderByClause += ` ORDER BY (ticket_price / 6) * total_tickets DESC LIMIT ?`;
         }
 
         if (orderBy.custom === 'PriceLowToHigh') {
             // Adding ORDER BY and LIMIT with placeholders
-            rawQuery += ` ORDER BY (ticket_price / 6) * total_tickets ASC LIMIT ?`;
+            orderByClause += ` ORDER BY (ticket_price / 6) * total_tickets ASC LIMIT ?`;
         }
 
         if (orderBy.custom === 'TicketsRemaining') {
             // Adding ORDER BY and LIMIT with placeholders
-            rawQuery += ` ORDER BY (total_tickets - tickets_bought) DESC LIMIT ?`;
+            orderByClause += `= ORDER BY (total_tickets - tickets_bought) DESC LIMIT ?`;
         }
 
         if (orderBy.custom === 'Newest') {
             // Adding ORDER BY and LIMIT with placeholders
-            rawQuery += ` ORDER BY created_at DESC LIMIT ?`;
+            orderByClause += ` ORDER BY created_at DESC LIMIT ?`;
         }
 
         if (orderBy.custom === 'Oldest') {
             // Adding ORDER BY and LIMIT with placeholders
-            rawQuery += ` ORDER BY created_at ASC LIMIT ?`;
+            orderByClause += ` ORDER BY created_at ASC LIMIT ?`;
         }
 
         if (orderBy.custom === 'TimeRemaining') {
+            whereClauses.push(`end_timestamp != 0`);
             // Adding ORDER BY and LIMIT with placeholders
-            rawQuery += ` ORDER BY end_timestamp ASC LIMIT ?`;
+            orderByClause += ` ORDER BY end_timestamp ASC LIMIT ?`;
+        }
+
+        if (whereClauses.length > 0) {
+            rawQuery += ` WHERE ${whereClauses.join(' AND ')}`;
         }
 
 
         queryParams.push(limit + 1);
+
+        rawQuery += orderByClause;
 
 
         console.log("rawQuery", rawQuery);
