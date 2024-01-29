@@ -8,7 +8,7 @@ import { getLots } from "./scripts";
 //https://goerli.etherscan.io/address/0xa03167de1a56160e4647d77d81e9139af55b63d4#readContract
 // const mainContractAddress = "0xa03167de1a56160e4647d77d81e9139af55b63d4";
 async function main() {
-    getLots(209); // 0 - start from the beginning
+    getLots(17861); // 0 - start from the beginning
     // insertBuyTickets(0, true); //get all    
 }
 

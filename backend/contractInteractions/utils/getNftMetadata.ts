@@ -80,7 +80,8 @@ export async function getNFTData(nftContractAddress: string, tokenId: string, as
 }
 
 async function downloadImage(url: string, tokenId: string) {
-    const __dirname = path.resolve(path.dirname(''));
+    // const __dirname = path.resolve(path.dirname(''));
+    const __dirname = '/home/spike/omniwin/website/public/';
 
     if (url.startsWith("ipfs:")) {
         const baseUrl = "https://ipfs.io/ipfs/";
@@ -89,7 +90,7 @@ async function downloadImage(url: string, tokenId: string) {
 
 
         const imageName = `${tokenId}_${config.network}`;
-        let outputFilePath = path.join(__dirname, "images", `${imageName} `);
+        let outputFilePath = path.join(__dirname, "nft", `${imageName} `);
 
         try {
             const response = await fetch(uri);
@@ -124,7 +125,7 @@ async function downloadImage(url: string, tokenId: string) {
         console.log("arweaveHash", uri);
 
         const imageName = `${tokenId}_${config.network}`;
-        const outputFilePath = path.join(__dirname, "images", `${imageName} `);
+        const outputFilePath = path.join(__dirname, "nft", `${imageName} `);
 
         try {
             const response = await fetch(uri);
@@ -153,7 +154,7 @@ async function downloadImage(url: string, tokenId: string) {
         console.log("uri", uri);
 
         const imageName = `${tokenId}_${config.network}`;
-        const outputFilePath = path.join(__dirname, "images", `${imageName} `);
+        const outputFilePath = path.join(__dirname, "nft", `${imageName} `);
 
         try {
             const response = await fetch(uri);
@@ -192,7 +193,7 @@ async function downloadImage(url: string, tokenId: string) {
         const buffer = Buffer.from(base64String, 'base64');
 
         const imageName = `${tokenId}_${config.network}`;
-        const outputFilePath = path.join(__dirname, "images", `${imageName} `);
+        const outputFilePath = path.join(__dirname, "nft", `${imageName} `);
 
         fs.writeFileSync(outputFilePath.trim() + "." + fileExtension, buffer);
 
