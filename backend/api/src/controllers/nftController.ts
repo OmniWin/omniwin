@@ -4,7 +4,7 @@ import { NftService } from '../services/nftService';
 import { HttpError } from '../errors/httpError';
 import { FastifyInstance } from 'fastify';
 import { AssetType, NetworkType } from '@prisma/client';
-import { SortBy } from "../types/sortBy";
+import { SortBy, FetchNFTsResultType } from "../types";
 export class NftController {
     /**
      * 
@@ -57,13 +57,13 @@ export class NftController {
 
             const USDC_decimals = 6;
             const convertedItems = items.map(item => ({
-                full_price: (Number(item.ticket_price) / USDC_decimals) * item.total_tickets,
-                ticket_price: Number(item.ticket_price) / USDC_decimals,
+                full_price: (Number(item.ticket_price) / Math.pow(10, USDC_decimals)) * item.total_tickets,
+                ticket_price: Number(item.ticket_price) / Math.pow(10, USDC_decimals),
                 tickets_bought: item.tickets_bought,
                 tickets_total: item.total_tickets,
                 time_left: item.end_timestamp,
-                nft_name: item.metadata?.name,
-                nft_image: item.metadata?.image,
+                nft_name: item.name,
+                nft_image: item.image,
                 nft_owner: item.owner,
                 // favorites: item.favorites,
                 asset_type: item.asset_type,
@@ -79,7 +79,7 @@ export class NftController {
                 data: {
                     items: convertedItems,
                     nextCursor: nextCursor
-                },
+                } as FetchNFTsResultType,
                 message: "User created successfully",
             });
 

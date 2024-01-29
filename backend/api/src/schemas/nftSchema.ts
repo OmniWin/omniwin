@@ -17,6 +17,9 @@ export const nftPagination = {
             networks: {
                 type: "array",
                 items: { type: "string" }
+            },
+            sortBy: {
+                type: "string"
             }
         },
         required: ["pagination", "types"] // Adjust according to your requirements

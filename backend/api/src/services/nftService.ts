@@ -3,6 +3,7 @@ import { FastifyInstance } from 'fastify';
 //import assetType enum
 import { AssetType, NetworkType } from '@prisma/client';
 import { SortBy } from "../types/sortBy";
+
 export class NftService {
     private nftRepository: NftRepository;
     constructor(private fastify: FastifyInstance) {
@@ -45,19 +46,22 @@ export class NftService {
     }
 
     mapSortBy(sortBy: SortBy | undefined) {
+        console.log("sortBy", sortBy);
         switch (sortBy) {
             case SortBy.TicketsRemaining:
-                return { custom: 'total_tickets - tickets_bought' };
+                return { custom: 'TicketsRemaining' };
             case SortBy.PriceHighToLow:
-                return { custom: '(item.ticket_price / 6) * item.total_tickets' };
+                return { custom: 'PriceHighToLow' };
+            case SortBy.PriceLowToHigh:
+                return { custom: 'PriceLowToHigh' };
             case SortBy.Newest:
-                return { created_at: 'desc' };
+                return { custom: 'Newest' };
             case SortBy.Oldest:
-                return { created_at: 'asc' };
+                return { custom: 'Oldest' };
             case SortBy.TimeRemaining:
-                return { end_timestamp: 'desc' }; // Modify as per your field name
+                return { custom: 'TimeRemaining' }; // Modify as per your field name
             default:
-                return { created_at: 'desc' };
+                return { custom: 'Newest' };
         }
     }
 }
