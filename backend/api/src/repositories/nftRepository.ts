@@ -87,7 +87,7 @@ export class NftRepository {
         }
 
         if (orderBy.custom === 'TimeRemaining') {
-            whereClauses.push(`end_timestamp != 0`);
+            whereClauses.push(`end_timestamp != 0 AND closed != 0`);
             // Adding ORDER BY and LIMIT with placeholders
             orderByClause += ` ORDER BY end_timestamp ASC LIMIT ?`;
         }

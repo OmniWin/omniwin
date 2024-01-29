@@ -15,7 +15,6 @@ export async function getLots(start: number) {
         try {
             console.log("Lot: ", i);
             const dataToInsert = await getLotByID(config.contract, i);
-
             const nftMetadata = await getNFTData(dataToInsert.token, dataToInsert.tokenID, dataToInsert.assetType);
 
             const nftID = await mysqlInstance.insertNFT(dataToInsert);
