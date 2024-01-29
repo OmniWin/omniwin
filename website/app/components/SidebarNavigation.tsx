@@ -225,7 +225,7 @@ export const SidebarNavigation = () => {
                                     {navigation.map((item) => (
                                         <li key={item.name}>
                                             {!item.children ? (
-                                                <a
+                                                <Link
                                                     href={item.href}
                                                     className={classNames(
                                                         item.current ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-900",
@@ -236,7 +236,7 @@ export const SidebarNavigation = () => {
                                                     <item.icon className="h-6 w-6 shrink-0 text-zinc-400" aria-hidden="true" />
                                                     {/* {sidebarToggleState.toggleSidebar ? "" : item.name} */}
                                                     <span className={classNames(sidebarToggleState.toggleSidebar && "hidden group-hover:inline-block", "transition-all duration-300")}>{item.name}</span>
-                                                </a>
+                                                </Link>
                                             ) : (
                                                 <Disclosure as="div">
                                                     {({ open }) => (

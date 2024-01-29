@@ -5,6 +5,7 @@ import { Providers } from "@/lib/providers";
 // import { SidebarNavigation } from "./components/SidebarNavigation";
 // import { TopNavigation } from "./components/TopNavigation";
 import MainLayout from "./components/MainLayout";
+import { ThemeContextProvider } from "./contexts/ThemeContextProvider";
 
 /* Core */
 // import { useSelector } from "@/lib/redux";
@@ -22,13 +23,16 @@ export default function RootLayout(props: React.PropsWithChildren) {
 
     return (
         <Providers>
-            <html lang="en">
-                <body className={inter.className}>
-                    <MainLayout>
-                        {props.children}
-                    </MainLayout>
-                </body>
-            </html>
+            <ThemeContextProvider>
+                <html lang="en" className="dark">
+                    <body className={inter.className}>
+                        <MainLayout>
+                            {props.children}
+                        </MainLayout>
+                    </body>
+                </html>
+            </ThemeContextProvider>
         </Providers>
     );
 }
+

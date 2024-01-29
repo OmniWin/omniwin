@@ -210,53 +210,61 @@ const raffleList = [
     },
 ];
 
+type ActiveFilterType = {
+    type: string[];
+    network: string[];
+};
+
 export default function RaffleList() {
     // const [raffleList, setRaffleList] = useState([] as FetchNFTsResultType);
     const [nextCursor, setNextCursor] = useState(0);
-
     const userSettingsState = useSelector(selectUserSettingsState);
+    const [activeFilters, setActiveFilters] = useState<ActiveFilterType[]>([]);
 
-    // const fetchRaffleList = () => {
-    //     fetch("https://api-omniwin.web3trust.app/v1/nfts", {
-    //         method: "POST",
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //             // Authorization: "Bearer " + localStorage.getItem("token"),
-    //         },
-    //         body: JSON.stringify({
-    //             pagination: {
-    //                 pageSize: 10,
-    //                 offset: nextCursor,
-    //             },
-    //             types: ["ERC721", "ERC1155"],
-    //             networks: ["GOERLI"],
-    //         }),
-    //     })
-    //         .then((response) => response.json())
-    //         .then((data) => {
-    //             console.log(data);
-    //             setRaffleList(data.data.items);
-    //             setNextCursor(data.data.nextCursor);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error:", error);
-    //         });
-    // };
+    const [activeSort, setActiveSort] = useState("time_remaining" as string);
 
-    // useEffect(() => {
-    //     fetchRaffleList();
-    // }, []);
+    const fetchRaffleList = () => {
+        fetch("https://api-omniwin.web3trust.app/v1/nfts", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                // Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+            body: JSON.stringify({
+                pagination: {
+                    pageSize: 10,
+                    offset: nextCursor,
+                },
+                types: ["ERC721", "ERC1155"],
+                networks: ["GOERLI"],
+                sortBy: 'time_remaining'
+            }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                // setRaffleList(data.data.items);
+                // setNextCursor(data.data.nextCursor);
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
+    };
+
+    useEffect(() => {
+        fetchRaffleList();
+    }, []);
 
     return (
         <>
-            <Filters />
+            <Filters activeFilters={activeFilters} setActiveFilters={setActiveFilters} setActiveSort={setActiveSort} />
             <CardSettings showStyle={true} showDisplay={true} />
             <div
                 className={classNames(
                     "flex flex-wrap sm:grid sm:gap-x-3 gap-y-4 lg:gap-y-3 mt-5 xl:mt-5",
                     // userSettingsState.userSettings.style === 1 && "sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6",
                     userSettingsState.userSettings.style === 1 && "sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-8",
-                    userSettingsState.userSettings.style === 2 && "sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-5",
+                    userSettingsState.userSettings.style === 2 && "sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-5 4xl:grid-cols-6",
                     userSettingsState.userSettings.style === 3 && "grid gap-3 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 4xl:grid-cols-6"
                 )}
             >
