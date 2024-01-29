@@ -75,10 +75,12 @@ export default function RaffleDefault(raffle: Raffle) {
                                     <p className="text-xl font-bold text-white truncate select-text">$100</p>
                                 </div> */}
                 </div>
-                <div className="flex justify-between gap-6">
+                <div className="sm:flex justify-between gap-2 sm:gap-6">
                     {/* <p className="text-xs font-bold text-smoke-300 self-center">100 USDC lowest entry</p> */}
-                    <p className="text-[11px] xl:text-xs font-bold text-smoke-300 self-center inline-flex items-center">
-                        <span>$100 entry price</span>
+                    <p className="text-[11px] xl:text-xs font-bold text-smoke-300 self-center hidden sm:inline-flex items-center">
+                        <span>
+                            $100 <span className="2xl:hidden">per</span> entry <span className="hidden 2xl:inline">price</span>
+                        </span>
                     </p>
                     <div className="min-w-[6rem]">
                         {/* <button className="text-sm font-bold text-smoke-900 bg-gradient-to-b from-sky-400 to-sky-500 hover:to-sky-600 rounded-md px-3 py-1.5 w-full leading-5"> */}

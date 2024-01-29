@@ -2,24 +2,36 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface UserSettingsState {
-  userSettings: Object;
+  userSettings: {
+    style: number; // 1 = mw, 2 = es, 3 = def
+    display: string;
+  };
 }
 
 const initialState: UserSettingsState = {
-  userSettings: {},
+  userSettings: {
+    style: 1,
+    display: 'grid',
+  },
 };
 
 export const userSettingsSlice = createSlice({
   name: 'userSettings',
   initialState,
   reducers: {
-    setUserSettingsState: (state, action: PayloadAction<boolean>) => {
-      state.userSettings = action.payload;
-      localStorage.setItem('userSettings', JSON.stringify(action.payload));
+    setCardStyle: (state, action: PayloadAction<number>) => {
+      state.userSettings.style = action.payload;
+      localStorage.setItem('userSettings', JSON.stringify(state.userSettings));
+    },
+    setCardDisplay: (state, action: PayloadAction<string>) => {
+      state.userSettings.display = action.payload;
+      localStorage.setItem('userSettings', JSON.stringify(state.userSettings));
     },
   },
 });
 
-export const { setUserSettingsState } = userSettingsSlice.actions;
+export const {
+  setCardStyle, setCardDisplay
+} = userSettingsSlice.actions;
 
 export default userSettingsSlice.reducer;

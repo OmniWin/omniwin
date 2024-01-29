@@ -32,11 +32,10 @@ const navigation = [
 
 export const SidebarNavigation = () => {
     const path = usePathname();
-    console.log(path)
     const [navigation, setNavigation] = useState([
         { name: "Home", href: "/", icon: HomeIcon, current: true, children: null },
         { name: "Explore", href: "/raffles", icon: BookOpenIcon, current: false, children: null },
-    ] as { name: string; href: string; icon: any; current: boolean; children: null | {name: string, href: string, current: boolean}[] }[]);
+    ] as { name: string; href: string; icon: any; current: boolean; children: null | { name: string; href: string; current: boolean }[] }[]);
 
     // const pathname = usePathname();
     const dispatch = useDispatch();
@@ -49,8 +48,6 @@ export const SidebarNavigation = () => {
 
         const storedIsSidebarToggle = JSON.parse(localStorage.getItem("isSidebarToggle") || "false");
         dispatch(sidebarSlice.actions.setSidebarToggleState(storedIsSidebarToggle));
-
-        console.log("sidebarToggleState", sidebarToggleState.toggleSidebar);
     }, [dispatch]);
 
     useEffect(() => {
@@ -66,6 +63,28 @@ export const SidebarNavigation = () => {
             ]);
         }
     }, [path]);
+
+    // If user clicks inside the sidebar switch the toggle state to !toggleSidebar
+    // useEffect(() => {
+    //     const sidebar = document.querySelector(".sidebar");
+    //     if (sidebar) {
+    //         const handleClick = (event: Event) => {
+    //             event.preventDefault();
+    //             event.stopPropagation();
+    //             // If is not a link
+    //             if ((event.target as Element) && !(event.target as Element).closest("a")) {
+    //                 dispatch(sidebarSlice.actions.setSidebarToggleState(!sidebarToggleState.toggleSidebar));
+    //             }
+    //         };
+
+    //         sidebar.addEventListener("click", handleClick);
+
+    //         return () => {
+    //             sidebar.removeEventListener("click", handleClick);
+    //         };
+    //     }
+    // }, [sidebarToggleState.toggleSidebar]); // Empty dependency array
+
 
     return (
         <>
@@ -195,11 +214,11 @@ export const SidebarNavigation = () => {
                         {sidebarToggleState.toggleSidebar ? <ChevronRightIcon className="h-6 w-6 text-zinc-400" aria-hidden="true" /> : <ChevronLeftIcon className="h-6 w-6 text-zinc-400" aria-hidden="true" />}
                     </button>
                 </div>
-                <div className={`flex grow flex-col overflow-y-auto bg-zinc-950 pb-4 relative transition-all duration-300 ${sidebarOpenState.toggleSidebar ? "px-4" : "pl-6 pr-4"}`}>
+                <div className={`group flex grow flex-col overflow-y-auto bg-zinc-950 pb-4 relative transition-all duration-300 ${sidebarOpenState.toggleSidebar ? "px-4 hover:w-72 " : "pl-6 pr-4 lg:w-72"}`}>
                     <div className="flex h-16 shrink-0 items-center">
-                        <img className="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" />
+                        <img className="h-8  w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" />
                     </div>
-                    <nav className="flex flex-1 flex-col">
+                    <nav className="flex flex-1 flex-col sidebar">
                         <ul role="list" className="flex flex-1 flex-col gap-y-7">
                             <li>
                                 <ul role="list" className="-mx-2 space-y-1">
@@ -216,7 +235,7 @@ export const SidebarNavigation = () => {
                                                 >
                                                     <item.icon className="h-6 w-6 shrink-0 text-zinc-400" aria-hidden="true" />
                                                     {/* {sidebarToggleState.toggleSidebar ? "" : item.name} */}
-                                                    <span className={classNames(sidebarToggleState.toggleSidebar && 'hidden', 'transition-all duration-300')}>{item.name}</span>
+                                                    <span className={classNames(sidebarToggleState.toggleSidebar && "hidden group-hover:inline-block", "transition-all duration-300")}>{item.name}</span>
                                                 </a>
                                             ) : (
                                                 <Disclosure as="div">
@@ -231,7 +250,7 @@ export const SidebarNavigation = () => {
                                                             >
                                                                 <item.icon className="h-6 w-6 shrink-0 text-zinc-400" aria-hidden="true" />
                                                                 {/* {sidebarToggleState.toggleSidebar ? "" : item.name} */}
-                                                                <span className={classNames(sidebarToggleState.toggleSidebar && 'hidden', 'transition-all duration-300')}>{item.name}</span>
+                                                                <span className={classNames(sidebarToggleState.toggleSidebar && "hidden group-hover:inline-block", "transition-all duration-300")}>{item.name}</span>
                                                                 {sidebarToggleState.toggleSidebar ? (
                                                                     ""
                                                                 ) : (
@@ -239,21 +258,22 @@ export const SidebarNavigation = () => {
                                                                 )}
                                                             </Disclosure.Button>
                                                             <Disclosure.Panel as="ul" className="mt-1 px-2">
-                                                                {item.children && item.children.map((subItem) => (
-                                                                    <li key={subItem.name}>
-                                                                        {/* 44px */}
-                                                                        <Disclosure.Button
-                                                                            as="a"
-                                                                            href={subItem.href}
-                                                                            className={classNames(
-                                                                                subItem.current ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-900",
-                                                                                "block rounded-md py-2 pr-2 pl-9 text-sm leading-6"
-                                                                            )}
-                                                                        >
-                                                                            {subItem.name}
-                                                                        </Disclosure.Button>
-                                                                    </li>
-                                                                ))}
+                                                                {item.children &&
+                                                                    item.children.map((subItem) => (
+                                                                        <li key={subItem.name}>
+                                                                            {/* 44px */}
+                                                                            <Disclosure.Button
+                                                                                as="a"
+                                                                                href={subItem.href}
+                                                                                className={classNames(
+                                                                                    subItem.current ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-900",
+                                                                                    "block rounded-md py-2 pr-2 pl-9 text-sm leading-6"
+                                                                                )}
+                                                                            >
+                                                                                {subItem.name}
+                                                                            </Disclosure.Button>
+                                                                        </li>
+                                                                    ))}
                                                             </Disclosure.Panel>
                                                         </>
                                                     )}
@@ -273,7 +293,7 @@ export const SidebarNavigation = () => {
                                 >
                                     <Cog6ToothIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
                                     {/* {sidebarToggleState.toggleSidebar ? "" : "Settings"} */}
-                                    <span className={classNames(sidebarToggleState.toggleSidebar && 'hidden', 'transition-all duration-300')}>{"Settings"}</span>
+                                    <span className={classNames(sidebarToggleState.toggleSidebar && "hidden group-hover:inline-block", "transition-all duration-300")}>{"Settings"}</span>
                                 </a>
                             </li>
                         </ul>

@@ -125,22 +125,22 @@ export default function Filters() {
               </Dialog>
           </Transition.Root>
 
+          {/* <div className="py-16 mx-auto max-w-7xl"> */}
           <div className="py-16">
               <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Explore Raffles</h1>
-              <p className="mt-4 max-w-xl text-sm text-zinc-400">
-                  Dive into a world of unique chances and hidden gems. Find your next big win or the perfect addition to your collection — start
-                  exploring today!
-              </p>
+              <p className="mt-4 max-w-xl text-sm text-zinc-400">Dive into a world of unique chances and hidden gems. Find your next big win or the perfect addition to your collection — start exploring today!</p>
           </div>
 
           {/* Filters */}
-          <section aria-labelledby="filter-heading">
+          {/* <section aria-labelledby="filter-heading" className="mx-auto max-w-7xl"> */}
+          <section aria-labelledby="filter-heading" className="">
               <h2 id="filter-heading" className="sr-only">
                   Filters
               </h2>
 
               <div className="pb-4">
-                  <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+                  {/* <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"> */}
+                  <div className="mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8">
                       <Menu as="div" className="relative inline-block text-left">
                           <div>
                               <Menu.Button className="group inline-flex justify-center text-sm font-medium text-zinc-200 hover:text-zinc-100">
@@ -228,7 +228,8 @@ export default function Filters() {
 
               {/* Active filters */}
               <div className="bg-zinc-800 rounded-xl">
-                  <div className="mx-auto max-w-7xl px-4 py-3 sm:flex sm:items-center sm:px-6 lg:px-8">
+                  {/* <div className="mx-auto max-w-7xl px-4 py-3 sm:flex sm:items-center sm:px-6 lg:px-8"> */}
+                  <div className="mx-auto px-4 py-3 sm:flex sm:items-center sm:px-6 lg:px-8">
                       <h3 className="text-sm font-medium text-zinc-500">
                           Filters
                           <span className="sr-only">, active</span>

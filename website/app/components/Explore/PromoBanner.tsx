@@ -1,8 +1,10 @@
 export default function PromoBanner() {
   return (
       <div className="overflow-hidden pt-32 sm:pt-14 my-10 rounded-xl">
+          {/* <div className="overflow-hidden pt-32 sm:pt-14 my-10 rounded-xl mx-auto max-w-7xl"> */}
           <div className="bg-zinc-800 rounded-xl">
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              {/* <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"> */}
+              <div className="mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="relative pb-16 pt-48 sm:pb-24">
                       <div>
                           <h2 id="sale-heading" className="text-4xl font-bold tracking-tight text-zinc-100 xs:text-lg sm:text-xl xl:text-4xl">

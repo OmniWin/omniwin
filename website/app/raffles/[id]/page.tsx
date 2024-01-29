@@ -57,7 +57,8 @@ export default function RafflePage({
         title: "BoredApeYachtClub",
         price: "1000",
         currency: "USDC",
-        image: "https://metadata.degods.com/g/1570-dead.png",
+        // image: "https://metadata.degods.com/g/1570-dead.png",
+        image: "https://ipfs.raribleuserdata.com/ipfs/QmUbgubLVZdyZF1ocsJisX7weQARQ2fgxDiTHJYcG6UViq",
         chain: "Goerli Network",
         chainIcon: "/icons.svg#ethereumChain",
         tickets: 50,
@@ -124,7 +125,9 @@ export default function RafflePage({
                     {/* <div className="grid items-center lg:grid-cols-8 mt-8"> */}
                     <div className="p-4 flex items-center justify-center gap-3 col-span-1 xl:border-r border-zinc-800 h-full">
                         {/* <div className="p-4 flex items-center gap-3 lg:col-span-1 h-full"> */}
-                        <img className="w-10 h-w-10 rounded-full" src="https://pbs.twimg.com/profile_images/885868801232961537/b1F6H4KC_400x400.jpg" alt="Avatar of Jonathan Reinink" />
+                        <div className="relative">
+                            <img className="w-10 h-w-10 rounded-full" src="https://pbs.twimg.com/profile_images/885868801232961537/b1F6H4KC_400x400.jpg" alt="Avatar of Jonathan Reinink" />
+                        </div>
                         <div>
                             <div className="text-zinc-400 text-sm">Owner</div>
                             {/* <div className="text-lg font-bold leading-7 text-zinc-100 sm:truncate sm:text-xl sm:tracking-tight">0x6d..d34</div> */}
@@ -166,8 +169,12 @@ export default function RafflePage({
 
                 <div className="grid gap-10 xl:grid-cols-2 mt-10">
                     <div className="">
-                        <div className="relative">
-                            <img className="object-cover rounded-xl h-full w-full xl:max-h-144" alt="img" src={contest.image} />
+                        <div className={`relative`}>
+                            <div
+                                style={{ backgroundImage: `url(${contest.image})` }}
+                                className="absolute rounded-xl w-full h-full mx-auto after:content-[''] after:w-full after:h-full after:block after:absolute after:-bottom-[15px] after:z-[-1] after:blur-[20px] after:bg-inherit"
+                            ></div>
+                            <img className="relative z-1 object-cover rounded-xl h-full w-full xl:max-h-144" alt="img" src={contest.image} />
                             <button className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900/40">
                                 <ArrowsPointingOutIcon className="h-5 w-5 text-zinc-50" />
                             </button>

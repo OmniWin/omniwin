@@ -13,6 +13,7 @@ const config: Config = {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        inherit: 'inherit',
       },
       colors: {
         jade: {
@@ -106,6 +107,13 @@ const config: Config = {
         128: '32rem',
         144: '36rem',
         ...defaultTheme.maxHeight,
+      },
+      maxWidth: {
+        '8xl': '90rem',
+        '9xl': '100rem',
+        '10xl': '110rem',
+        '11xl': '120rem',
+        ...defaultTheme.maxWidth,
       },
     },
   },

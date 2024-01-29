@@ -69,7 +69,7 @@ export default function RaffleMetaWin(raffle: Raffle) {
                 </p>
                 <p className="lg:text-xl font-bold text-white truncate select-text">${raffle.price}</p>
             </div>
-            <div className="w-full text-center py-1.5 bg-jade-400 rounded-b-lg leading-4">
+            <div className="w-full text-center py-1.5 bg-jade-400 rounded-b-lg leading-4 hover:bg-jade-500">
                 <p className="text-xs lg:text-base font-bold text-smoke-900 truncate select-text">Enter now</p>
                 {/* <p className="text-xs font-normal text-smoke-900">10 USDC</p> */}
             </div>

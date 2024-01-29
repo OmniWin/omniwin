@@ -1,6 +1,19 @@
+import { useEffect, useState } from "react";
+
+// Components
 import Filters from "./Filters";
 import RaffleMetaWin from "../Raffle/RaffleMetaWin";
+import RaffleEse from "../Raffle/RaffleEse";
+import RaffleDefault from "../Raffle/RaffleDefault";
 import CardSettings from "../Raffle/CardSettings";
+
+// Redux Hooks
+import { useSelector } from "@/lib/redux";
+import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
+import { classNames } from "@/app/utils";
+
+// Types
+import {FetchNFTsResultType} from "../../../../backend/api/src/types/fetchNfts";
 
 const raffleList = [
     {
@@ -198,14 +211,60 @@ const raffleList = [
 ];
 
 export default function RaffleList() {
+    // const [raffleList, setRaffleList] = useState([] as FetchNFTsResultType);
+    const [nextCursor, setNextCursor] = useState(0);
+
+    const userSettingsState = useSelector(selectUserSettingsState);
+
+    // const fetchRaffleList = () => {
+    //     fetch("https://api-omniwin.web3trust.app/v1/nfts", {
+    //         method: "POST",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //             // Authorization: "Bearer " + localStorage.getItem("token"),
+    //         },
+    //         body: JSON.stringify({
+    //             pagination: {
+    //                 pageSize: 10,
+    //                 offset: nextCursor,
+    //             },
+    //             types: ["ERC721", "ERC1155"],
+    //             networks: ["GOERLI"],
+    //         }),
+    //     })
+    //         .then((response) => response.json())
+    //         .then((data) => {
+    //             console.log(data);
+    //             setRaffleList(data.data.items);
+    //             setNextCursor(data.data.nextCursor);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error:", error);
+    //         });
+    // };
+
+    // useEffect(() => {
+    //     fetchRaffleList();
+    // }, []);
+
     return (
         <>
             <Filters />
             <CardSettings showStyle={true} showDisplay={true} />
-            <div className="flex flex-wrap sm:grid sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 sm:gap-x-3 gap-y-4 lg:gap-y-3 mt-5 xl:mt-5">
+            <div
+                className={classNames(
+                    "flex flex-wrap sm:grid sm:gap-x-3 gap-y-4 lg:gap-y-3 mt-5 xl:mt-5",
+                    // userSettingsState.userSettings.style === 1 && "sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6",
+                    userSettingsState.userSettings.style === 1 && "sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-8",
+                    userSettingsState.userSettings.style === 2 && "sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-5",
+                    userSettingsState.userSettings.style === 3 && "grid gap-3 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 4xl:grid-cols-6"
+                )}
+            >
                 {raffleList.map((item) => (
                     <>
-                        <RaffleMetaWin {...item} />
+                        {userSettingsState.userSettings.style === 1 && <RaffleMetaWin {...item} />}
+                        {userSettingsState.userSettings.style === 2 && <RaffleEse {...item} />}
+                        {userSettingsState.userSettings.style === 3 && <RaffleDefault {...item} />}
                     </>
                 ))}
             </div>
