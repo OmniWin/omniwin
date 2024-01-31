@@ -22,11 +22,12 @@ export type NFT = {
 export type NFTMetadata = {
     id_nft: number;
     name: string;
+    collectionName: string;
     image: string;
     description: string;
     json: any;
     image_url: string;
-    image_local: string;
+    image_local?: string;
     [key: string]: any;
 }
 

@@ -46,7 +46,7 @@ model NftMetadata {
   id_nft         Int               @unique
   id_lot         Int
   name           String?
-  image          String?
+  collectionName String?
   description    String?           @db.VarChar(2000)
   json           Json?
   image_url      String?

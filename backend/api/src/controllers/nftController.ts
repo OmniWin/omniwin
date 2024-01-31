@@ -63,13 +63,15 @@ export class NftController {
                 tickets_total: item.total_tickets,
                 time_left: item.end_timestamp,
                 nft_name: item.name,
-                nft_image: item.image,
+                nft_image: item.image_local,
                 nft_owner: item.owner,
                 // favorites: item.favorites,
                 asset_type: item.asset_type,
                 nft_id: item.id_lot,
                 token_id: item.token_id,
                 network: item.network,
+                collectionName: item.collectionName,
+                isVerified: false,
             }));
 
             req.server.log.info(`Nfts fetched successfully, page: ${cursor}, limit: ${limit}`);

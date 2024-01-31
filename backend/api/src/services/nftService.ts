@@ -46,7 +46,6 @@ export class NftService {
     }
 
     mapSortBy(sortBy: SortBy | undefined) {
-        console.log("sortBy", sortBy);
         switch (sortBy) {
             case SortBy.TicketsRemaining:
                 return { custom: 'TicketsRemaining' };
