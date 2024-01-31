@@ -1,40 +1,55 @@
-import { Fragment, useState } from 'react'
-import { Dialog, Disclosure, Menu, Popover, Transition } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
+import { Fragment, useState } from "react";
+import { Dialog, Disclosure, Menu, Popover, Transition } from "@headlessui/react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { FilterComponentProps, SortOption, FilterOption } from "@/app/types";
 
 import { classNames } from "@/app/utils";
 
-
-export default function Filters({ activeFilters, setActiveFilters, setActiveSort }: { activeFilters:any, setActiveFilters: any; setActiveSort: any }) {
+export default function Filters({ filters, setFilters, sortOptions, setSortOptions }: FilterComponentProps) {
     const [open, setOpen] = useState(false);
 
-    const [sortOptions, setSortOptions] = useState([
-        { id: "tickets_remaining", name: "% Tickets Remaining", href: "#", current: true },
-        { id: "newest", name: "Newest", href: "#", current: true },
-        { id: "oldest", name: "Oldest", href: "#", current: false },
-        { id: "time_remaining", name: "Time remaining", href: "#", current: false },
-    ]);
-    const [filters, setFilters] = useState([
-        {
-            id: "chain",
-            name: "Chain",
-            options: [
-                { value: "eth", label: "Ethereum", checked: false },
-                { value: "polygon", label: "Polygon", checked: false },
-                { value: "bsc", label: "BSC", checked: true },
-            ],
-        },
-        {
-            id: "types",
-            name: "Types",
-            options: [
-                { value: ["ERC721", "ERC1155"], label: "NFTs", checked: false },
-                { value: "ERC20", label: "Tokens", checked: false },
-            ],
-        },
-    ]);
-    const activeFilters = [{ value: "objects", label: "Objects" }];
+    const handleSortOptionClick = (selectedOption: SortOption): void => {
+        setSortOptions(
+            sortOptions.map((option) => ({
+                ...option,
+                current: option.id === selectedOption.id,
+            }))
+        );
+    };
+
+    const handleFilterChange = (sectionId: string, optionValue: string, checked: boolean) => {
+        // Update your filters state based on these values
+        setFilters(
+            filters.map((section) => ({
+                ...section,
+                options: section.options.map((option) => ({
+                    ...option,
+                    checked: option.value === optionValue ? checked : option.checked,
+                })),
+            }))
+        );
+    };
+
+    const removeFilter = (filter: FilterOption) => {
+        setFilters(
+            filters.map((section) => ({
+                ...section,
+                options: section.options.map((option) => ({
+                    ...option,
+                    checked: option.value === filter.value ? false : option.checked,
+                })),
+            }))
+        );
+    };
+
+    const countActiveFilters = (options: FilterOption[]) => {
+        return options.reduce((count, option) => count + (option.checked ? 1 : 0), 0);
+    };
+
+    const activeFilters = filters.reduce((selected, section) => {
+        return selected.concat(section.options.filter((option) => option.checked));
+    }, [] as FilterOption[]);
 
     return (
         <>
@@ -135,7 +150,7 @@ export default function Filters({ activeFilters, setActiveFilters, setActiveSort
                         <Menu as="div" className="relative inline-block text-left">
                             <div>
                                 <Menu.Button className="group inline-flex justify-center text-sm font-medium text-zinc-200 hover:text-zinc-100">
-                                    Sort
+                                    Sort by {sortOptions.find((option) => option.current)?.name}
                                     <ChevronDownIcon className="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-zinc-200 group-hover:text-zinc-500" aria-hidden="true" />
                                 </Menu.Button>
                             </div>
@@ -149,18 +164,18 @@ export default function Filters({ activeFilters, setActiveFilters, setActiveSort
                                 leaveFrom="transform opacity-100 scale-100"
                                 leaveTo="transform opacity-0 scale-95"
                             >
-                                <Menu.Items className="absolute left-0 z-10 mt-2 w-44 origin-top-left rounded-md bg-zinc-800 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                <Menu.Items className="absolute left-0 z-20 mt-2 w-44 origin-top-left rounded-md bg-zinc-800 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
                                     <div className="py-1">
                                         {sortOptions.map((option) => (
                                             <Menu.Item key={option.name}>
                                                 {({ active }) => (
-                                                    <a
-                                                        onClick={() => setActiveSort(option.id)}
-                                                        href={option.href}
+                                                    <button
+                                                        onClick={() => handleSortOptionClick(option)}
                                                         className={classNames(option.current ? "font-medium text-zinc-100" : "text-zinc-500", active ? "bg-zinc-800" : "", "block px-4 py-2 text-sm")}
+                                                        type="button"
                                                     >
                                                         {option.name}
-                                                    </a>
+                                                    </button>
                                                 )}
                                             </Menu.Item>
                                         ))}
@@ -177,45 +192,50 @@ export default function Filters({ activeFilters, setActiveFilters, setActiveSort
                         <div className="block">
                             <div className="flow-root">
                                 <Popover.Group className="-mx-4 flex items-center divide-x divide-zinc-700/80">
-                                    {filters.map((section, sectionIdx) => (
-                                        <Popover key={section.name} className="relative inline-block px-4 text-left">
-                                            <Popover.Button className="group inline-flex justify-center text-sm font-medium text-zinc-200 hover:text-zinc-100">
-                                                <span>{section.name}</span>
-                                                {sectionIdx === 0 ? <span className="ml-1.5 rounded bg-zinc-800 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-zinc-200">1</span> : null}
-                                                <ChevronDownIcon className="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-zinc-200 group-hover:text-zinc-500" aria-hidden="true" />
-                                            </Popover.Button>
+                                    {filters.map((section, sectionIdx) => {
+                                        const activeFilterCount = countActiveFilters(section.options);
 
-                                            <Transition
-                                                as={Fragment}
-                                                enter="transition ease-out duration-100"
-                                                enterFrom="transform opacity-0 scale-95"
-                                                enterTo="transform opacity-100 scale-100"
-                                                leave="transition ease-in duration-75"
-                                                leaveFrom="transform opacity-100 scale-100"
-                                                leaveTo="transform opacity-0 scale-95"
-                                            >
-                                                <Popover.Panel className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-zinc-800 p-4 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                                    <form className="space-y-4">
-                                                        {section.options.map((option, optionIdx) => (
-                                                            <div className="flex items-center">
-                                                                <input
-                                                                    id={`filter-${section.id}-${optionIdx}`}
-                                                                    name={`${section.id}[]`}
-                                                                    defaultValue={option.value}
-                                                                    type="checkbox"
-                                                                    defaultChecked={option.checked}
-                                                                    className="h-4 w-4 rounded border-zinc-700/80 text-jade-600 focus:ring-jade-500"
-                                                                />
-                                                                <label htmlFor={`filter-${section.id}-${optionIdx}`} className="ml-3 whitespace-nowrap pr-6 text-sm font-medium text-zinc-100">
-                                                                    {option.label}
-                                                                </label>
-                                                            </div>
-                                                        ))}
-                                                    </form>
-                                                </Popover.Panel>
-                                            </Transition>
-                                        </Popover>
-                                    ))}
+                                        return (
+                                            <Popover key={section.name} className="relative inline-block px-4 text-left">
+                                                <Popover.Button className="group inline-flex justify-center text-sm font-medium text-zinc-200 hover:text-zinc-100">
+                                                    <span>{section.name}</span>
+                                                    {activeFilterCount ? <span className="ml-1.5 rounded bg-zinc-800 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-zinc-200">{activeFilterCount}</span> : ""}
+                                                    <ChevronDownIcon className="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-zinc-200 group-hover:text-zinc-500" aria-hidden="true" />
+                                                </Popover.Button>
+
+                                                <Transition
+                                                    as={Fragment}
+                                                    enter="transition ease-out duration-100"
+                                                    enterFrom="transform opacity-0 scale-95"
+                                                    enterTo="transform opacity-100 scale-100"
+                                                    leave="transition ease-in duration-75"
+                                                    leaveFrom="transform opacity-100 scale-100"
+                                                    leaveTo="transform opacity-0 scale-95"
+                                                >
+                                                    <Popover.Panel className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-zinc-800 p-4 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                                        <form className="space-y-4">
+                                                            {section.options.map((option, optionIdx) => (
+                                                                <div className="flex items-center">
+                                                                    <input
+                                                                        id={`filter-${section.id}-${optionIdx}`}
+                                                                        name={`${section.id}[]`}
+                                                                        defaultValue={option.value}
+                                                                        type="checkbox"
+                                                                        defaultChecked={option.checked}
+                                                                        onChange={(e) => handleFilterChange(section.id, option.value, e.target.checked)}
+                                                                        className="h-4 w-4 rounded border-zinc-700/80 text-jade-600 focus:ring-jade-500"
+                                                                    />
+                                                                    <label htmlFor={`filter-${section.id}-${optionIdx}`} className="ml-3 whitespace-nowrap pr-6 text-sm font-medium text-zinc-100">
+                                                                        {option.label}
+                                                                    </label>
+                                                                </div>
+                                                            ))}
+                                                        </form>
+                                                    </Popover.Panel>
+                                                </Transition>
+                                            </Popover>
+                                        );
+                                    })}
                                 </Popover.Group>
                             </div>
                         </div>
@@ -224,10 +244,9 @@ export default function Filters({ activeFilters, setActiveFilters, setActiveSort
 
                 {/* Active filters */}
                 <div className="bg-zinc-800 rounded-xl">
-                    {/* <div className="mx-auto max-w-7xl px-4 py-3 sm:flex sm:items-center sm:px-6 lg:px-8"> */}
                     <div className="mx-auto px-4 py-3 sm:flex sm:items-center sm:px-6 lg:px-8">
                         <h3 className="text-sm font-medium text-zinc-500">
-                            Filters
+                            Active Filters
                             <span className="sr-only">, active</span>
                         </h3>
 
@@ -235,10 +254,14 @@ export default function Filters({ activeFilters, setActiveFilters, setActiveSort
 
                         <div className="mt-2 sm:ml-4 sm:mt-0">
                             <div className="-m-1 flex flex-wrap items-center">
-                                {activeFilters.map((activeFilter) => (
+                                {activeFilters.map((activeFilter: FilterOption) => (
                                     <span key={activeFilter.value} className="m-1 inline-flex items-center rounded-full border border-zinc-700/80 bg-zinc-800 py-1.5 pl-3 pr-2 text-sm font-medium text-zinc-100">
                                         <span>{activeFilter.label}</span>
-                                        <button type="button" className="ml-1 inline-flex h-4 w-4 flex-shrink-0 rounded-full p-1 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-500">
+                                        <button
+                                            onClick={() => removeFilter(activeFilter)}
+                                            type="button"
+                                            className="ml-1 inline-flex h-4 w-4 flex-shrink-0 rounded-full p-1 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-500"
+                                        >
                                             <span className="sr-only">Remove filter for {activeFilter.label}</span>
                                             <svg className="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
                                                 <path strokeLinecap="round" strokeWidth="1.5" d="M1 1l6 6m0-6L1 7" />
@@ -247,6 +270,13 @@ export default function Filters({ activeFilters, setActiveFilters, setActiveSort
                                     </span>
                                 ))}
                             </div>
+                            {!activeFilters.length ? (
+                                <div className="mt-3 flex items-center text-sm font-medium text-zinc-500">
+                                    <span>There are no active filters</span>
+                                </div>
+                            ) : (
+                                ""
+                            )}
                         </div>
                     </div>
                 </div>

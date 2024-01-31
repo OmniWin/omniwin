@@ -14,6 +14,7 @@ import { classNames } from "@/app/utils";
 
 // Types
 import {FetchNFTsResultType} from "../../../../backend/api/src/types/fetchNfts";
+import { Filter, SortOption, FetchRequestBody } from "@/app/types";
 
 const raffleList = [
     {
@@ -210,35 +211,71 @@ const raffleList = [
     },
 ];
 
-type ActiveFilterType = {
-    type: string[];
-    network: string[];
-};
-
 export default function RaffleList() {
     // const [raffleList, setRaffleList] = useState([] as FetchNFTsResultType);
     const [nextCursor, setNextCursor] = useState(0);
     const userSettingsState = useSelector(selectUserSettingsState);
-    const [activeFilters, setActiveFilters] = useState<ActiveFilterType[]>([]);
 
-    const [activeSort, setActiveSort] = useState("time_remaining" as string);
+    const [sortOptions, setSortOptions] = useState<SortOption[]>([
+        { id: "tickets_remaining", name: "% Tickets Remaining", href: "#", current: true },
+        { id: "newest", name: "Newest", href: "#", current: false },
+        { id: "oldest", name: "Oldest", href: "#", current: false },
+        { id: "time_remaining", name: "Time remaining", href: "#", current: false },
+    ]);
+    const [filters, setFilters] = useState<Filter[]>([
+        {
+            id: "chain",
+            name: "Chain",
+            options: [
+                { value: "eth", label: "Ethereum", checked: false },
+                { value: "polygon", label: "Polygon", checked: false },
+                { value: "bsc", label: "BSC", checked: true },
+            ],
+        },
+        {
+            id: "types",
+            name: "Types",
+            options: [
+                { value: "nfts", label: "NFTs", checked: false },
+                { value: "ERC20", label: "Tokens", checked: false },
+            ],
+        },
+    ]);
 
-    const fetchRaffleList = () => {
+    const fetchRaffleList = (): void => {
+        const nftsTypes = ["ERC721", "ERC1155"];
+
+        // Extract types from filters
+        const typesFilter = filters.find((filter) => filter.id === "types");
+        let types = typesFilter ? typesFilter.options.filter((option) => option.checked).map((option) => option.value) : [];
+        if (types.includes("nfts")) {
+            types = types.filter((type) => type !== "nfts").concat(nftsTypes);
+        }
+
+        // Extract networks from filters
+        const networkFilter = filters.find((filter) => filter.id === "chain");
+        const networks = networkFilter ? networkFilter.options.filter((option) => option.checked).map((option) => option.value) : [];
+
+        // Determine sort option
+        const selectedSortOption = sortOptions.find((option) => option.current)?.id || "time_remaining";
+
+        const requestBody: FetchRequestBody = {
+            pagination: {
+                pageSize: 10,
+                offset: nextCursor,
+            },
+            types: types,
+            networks: networks,
+            sortBy: selectedSortOption,
+        };
+
         fetch("https://api-omniwin.web3trust.app/v1/nfts", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 // Authorization: "Bearer " + localStorage.getItem("token"),
             },
-            body: JSON.stringify({
-                pagination: {
-                    pageSize: 10,
-                    offset: nextCursor,
-                },
-                types: ["ERC721", "ERC1155"],
-                networks: ["GOERLI"],
-                sortBy: 'time_remaining'
-            }),
+            body: JSON.stringify(requestBody),
         })
             .then((response) => response.json())
             .then((data) => {
@@ -251,13 +288,15 @@ export default function RaffleList() {
             });
     };
 
+
+
     useEffect(() => {
         fetchRaffleList();
-    }, []);
+    }, [sortOptions, filters]);
 
     return (
         <>
-            <Filters activeFilters={activeFilters} setActiveFilters={setActiveFilters} setActiveSort={setActiveSort} />
+            <Filters filters={filters} setFilters={setFilters} sortOptions={sortOptions} setSortOptions={setSortOptions} />
             <CardSettings showStyle={true} showDisplay={true} />
             <div
                 className={classNames(
