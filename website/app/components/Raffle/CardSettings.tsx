@@ -21,7 +21,7 @@ export default function CardSettings ({showStyle, showDisplay}: {showStyle?: boo
                             <button
                                 onClick={() => dispatch(userSettingsSlice.actions.setCardStyle(1))}
                                 type="button"
-                                className={classNames("py-2 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none", userSettingsState.userSettings.style === 1 && "bg-zinc-700")}
+                                className={classNames("py-2 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none focus:ring-0", userSettingsState.userSettings.style === 1 && "bg-zinc-700")}
                             >
                                 <svg
                                     className={`h-4 w-4 ${userSettingsState.userSettings.style === 1 ? "fill-zinc-100 stroke-zinc-100" : "fill-zinc-500 stroke-zinc-500"}`}
@@ -38,7 +38,7 @@ export default function CardSettings ({showStyle, showDisplay}: {showStyle?: boo
                             <button
                                 onClick={() => dispatch(userSettingsSlice.actions.setCardStyle(2))}
                                 type="button"
-                                className={classNames("py-2 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none", userSettingsState.userSettings.style === 2 && "bg-zinc-700")}
+                                className={classNames("py-2 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none focus:ring-0", userSettingsState.userSettings.style === 2 && "bg-zinc-700")}
                             >
                                 <svg
                                     className={`h-4 w-4 ${userSettingsState.userSettings.style === 2 ? "fill-zinc-100 stroke-zinc-100" : "fill-zinc-500 stroke-zinc-500"}`}
@@ -53,7 +53,7 @@ export default function CardSettings ({showStyle, showDisplay}: {showStyle?: boo
                             <button
                                 onClick={() => dispatch(userSettingsSlice.actions.setCardStyle(3))}
                                 type="button"
-                                className={classNames("py-2 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none", userSettingsState.userSettings.style === 3 && "bg-zinc-700")}
+                                className={classNames("py-2 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none focus:ring-0", userSettingsState.userSettings.style === 3 && "bg-zinc-700")}
                             >
                                 <svg
                                     className={`h-4 w-4 ${userSettingsState.userSettings.style === 3 ? "fill-zinc-100 stroke-zinc-100" : "fill-zinc-500 stroke-zinc-500"}`}
@@ -79,7 +79,7 @@ export default function CardSettings ({showStyle, showDisplay}: {showStyle?: boo
                             <button
                                 onClick={() => dispatch(userSettingsSlice.actions.setCardDisplay("carousel"))}
                                 type="button"
-                                className={classNames("py-1.5 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none", userSettingsState.userSettings.display === "carousel" && "bg-zinc-700")}
+                                className={classNames("py-1.5 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none focus:ring-0", userSettingsState.userSettings.display === "carousel" && "bg-zinc-700")}
                             >
                                 <svg
                                     className={`${userSettingsState.userSettings.display === "carousel" ? "fill-zinc-100 stroke-zinc-100" : "fill-zinc-500 stroke-zinc-500"}`}
@@ -94,7 +94,7 @@ export default function CardSettings ({showStyle, showDisplay}: {showStyle?: boo
                             <button
                                 onClick={() => dispatch(userSettingsSlice.actions.setCardDisplay("grid"))}
                                 type="button"
-                                className={classNames("py-1.5 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none", userSettingsState.userSettings.display === "grid" && "bg-zinc-700")}
+                                className={classNames("py-1.5 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none focus:ring-0", userSettingsState.userSettings.display === "grid" && "bg-zinc-700")}
                             >
                                 <svg
                                     className={`${userSettingsState.userSettings.display === "grid" ? "fill-zinc-100 stroke-zinc-100" : "fill-zinc-500 stroke-zinc-500"}`}
