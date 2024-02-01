@@ -318,7 +318,12 @@ export default function RaffleList() {
 
     return (
         <>
-            <div className="sticky -top-[50px] bg-zinc-900 z-[30] sm:mx-0">
+            <div className="pt-16 pb-8">
+                <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Explore Raffles</h1>
+                <p className="mt-4 max-w-xl text-sm text-zinc-400">Dive into a world of unique chances and hidden gems. Find your next big win or the perfect addition to your collection — start exploring today!</p>
+            </div>
+            {/* <div className="sticky -top-[80px] bg-zinc-900 z-[30] sm:mx-0"> */}
+            <div className="sticky -top-[50px] bg-zinc-900 z-[30] sm:mx-0 pt-8 pb-4">
                 <Filters filters={filters} setFilters={setFilters} sortOptions={sortOptions} setSortOptions={setSortOptions} />
                 <CardSettings showStyle={true} showDisplay={false} />
             </div>
@@ -341,7 +346,7 @@ export default function RaffleList() {
                     </>
                 ))}
             </div>
-            {isLoading && 
+            {isLoading && (
                 <div role="status" className="py-10 text-center">
                     <svg aria-hidden="true" className="inline w-10 h-10 text-gray-200 animate-spin dark:text-gray-600 fill-jade-500" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -355,7 +360,7 @@ export default function RaffleList() {
                     </svg>
                     <span className="sr-only">Loading...</span>
                 </div>
-            }
+            )}
         </>
     );
 }

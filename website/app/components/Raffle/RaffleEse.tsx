@@ -1,3 +1,6 @@
+import Link from 'next/link'
+
+
 import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
 import { TicketIcon, ClockIcon } from "@heroicons/react/24/outline";
 
@@ -10,8 +13,8 @@ export default function RaffleEse(raffle: Raffle) {
     const timeLeft = formatCountdown(new Date(), new Date(raffle.time_left * 1000));
 
     return (
-        <a href="#" className="flex items-center rounded-lg relative xl:min-h-96 group">
-            <img className="object-cover inset-0 rounded-lg h-full w-full" alt="img" src={raffle.nft_image} />
+        <Link href={'/raffles/'+raffle.nft_id} className="flex items-center rounded-lg relative xl:min-h-96 group">
+            <img className="object-cover inset-0 rounded-lg h-full w-full min-h-[inherit]" alt="img" src={'https://web3trust.app/nft/'+ raffle.nft_image} />
             <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/60 to-transparent    opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
             {/* <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/60 to-transparent group-hover:opacity-100 transition-opacity duration-700"></div> */}
             <div className="absolute left-0 top-0 z-10 w-full max-w-full flex justify-between px-3">
@@ -96,6 +99,6 @@ export default function RaffleEse(raffle: Raffle) {
                     </div>
                 </div>
             </div>
-        </a>
+        </Link>
     );
 }

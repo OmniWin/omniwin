@@ -132,10 +132,10 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
             </Transition.Root>
 
             {/* <div className="py-16 mx-auto max-w-7xl"> */}
-            <div className="py-16">
+            {/* <div className="py-16">
                 <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Explore Raffles</h1>
                 <p className="mt-4 max-w-xl text-sm text-zinc-400">Dive into a world of unique chances and hidden gems. Find your next big win or the perfect addition to your collection — start exploring today!</p>
-            </div>
+            </div> */}
 
             {/* Filters */}
             {/* <section aria-labelledby="filter-heading" className="mx-auto max-w-7xl"> */}
@@ -150,7 +150,7 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                         <Menu as="div" className="relative inline-block text-left">
                             <div>
                                 <Menu.Button className="group inline-flex justify-center text-sm font-medium text-zinc-200 hover:text-zinc-100">
-                                    Sort by <span className="hidden sm:inline">{sortOptions.find((option) => option.current)?.name}</span>
+                                    Sort by <span className="hidden sm:inline ml-1">{sortOptions.find((option) => option.current)?.name}</span>
                                     <ChevronDownIcon className="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-zinc-200 group-hover:text-zinc-500" aria-hidden="true" />
                                 </Menu.Button>
                             </div>
