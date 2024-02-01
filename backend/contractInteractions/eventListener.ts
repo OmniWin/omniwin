@@ -20,7 +20,7 @@ const eventQueue = new EventQueue<any>();
 
 async function listenForEvents() {
 
-  await insertBuyTickets(0, contract, true); //insert all tickets from the beginning of the contract
+  await insertBuyTickets(0, true); //insert all tickets from the beginning of the contract
 
   let hashLots = {} as {
     [key: number]: {
@@ -82,7 +82,7 @@ async function listenForEvents() {
   //We first get all the tickets from the chain and insert them in our db
   const timeFromBlock = 60 * 10; //10 minutes
   const numberOfBlocks = blocksByTime(network, timeFromBlock)
-  eventQueue.enqueue("", () => insertBuyTickets(numberOfBlocks, contract));
+  eventQueue.enqueue("", () => insertBuyTickets(numberOfBlocks));
 
   setInterval(() => {
     cleanHashLots(hashLots);

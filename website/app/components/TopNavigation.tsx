@@ -18,6 +18,7 @@ import { Search } from "./Search";
 import { useDispatch, sidebarSlice } from "@/lib/redux";
 
 import { useState } from "react";
+import { useWeb3Modal } from '@web3modal/wagmi/react'
 
 const userNavigation = [
     { name: "Your profile", href: "#" },
@@ -26,7 +27,7 @@ const userNavigation = [
 
 export const TopNavigation = () => {
     // const pathname = usePathname();
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
 
     return (
@@ -65,6 +66,7 @@ export const TopNavigation = () => {
                             </svg>
                             Quick search...<span className="ml-auto pl-3 flex-none text-xs font-semibold">Ctrl K</span>
                         </button>
+                        <w3m-button />
                     </form>
                     <div className="flex items-center gap-x-4 lg:gap-x-6">
                         <button onClick={() => setOpen(true)} type="button" className="-m-2.5 p-2.5 text-zinc-400 hover:text-zinc-500 block lg:hidden">

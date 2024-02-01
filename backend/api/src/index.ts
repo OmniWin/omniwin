@@ -1,10 +1,18 @@
 import Fastify from 'fastify'
 import userRoutes from './routes/nft'
+import authRoutes from './routes/auth'
 import dbPlugin from './db/dbConnector'
 import { HttpError } from './errors/httpError';
 import Ajv from 'ajv'
 import dotenv from 'dotenv'
 import cors from '@fastify/cors'
+import type { FastifyCookieOptions } from '@fastify/cookie'
+import cookie from '@fastify/cookie'
+import fastifyJwt from '@fastify/jwt';
+
+
+
+
 
 dotenv.config()
 
@@ -21,13 +29,23 @@ const fastify = Fastify({
 })
 
 const corsOptions = {
-    origin: '*',
+    origin: 'localhost:4356',
     methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
 };
+
+fastify.register(fastifyJwt, {
+    secret: 'supersecret'
+})
+
 fastify.register(cors, corsOptions)
 
 fastify.register(dbPlugin)
 fastify.register(userRoutes, { prefix: '/v1' })
+fastify.register(authRoutes, { prefix: '/v1' })
+fastify.register(cookie, {
+    secret: "my-dadasdadasd", // for cookies signature
+    parseOptions: {}     // options for parsing cookies
+} as FastifyCookieOptions)
 
 fastify.setValidatorCompiler(({ schema, method, url, httpPart }) => {
     return ajv.compile(schema)

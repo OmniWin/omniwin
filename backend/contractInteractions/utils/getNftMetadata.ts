@@ -51,6 +51,9 @@ export async function getNFTData(nftContractAddress: string, tokenId: string, as
 
                 response.collectionName = collectionName_1155;
                 break;
+
+            case AssetType.ERC20:
+                 
             default:
                 console.log("Unknown asset type");
                 throw new Error("Unknown asset type");

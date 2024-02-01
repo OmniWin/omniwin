@@ -76,6 +76,18 @@ model Tickets {
   @@index([recipient], name: "recipient")
 }
 
+model User {
+  id_user    String   @id @default(uuid())
+  address    String   @unique
+  chainId    Int
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  email    String?   @unique
+  username String?   @unique
+  issuedAt DateTime?
+}
+
 enum NFTMetadataStatus {
   ERROR
   FAILED

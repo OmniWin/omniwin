@@ -13,9 +13,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fastify/cookie": "^9.3.1",
     "@fastify/cors": "^9.0.0",
     "@fastify/jwt": "^7.2.4",
     "@prisma/client": "^5.7.1",
+    "@spruceid/ssx-server": "^2.0.0",
     "bcryptjs": "^2.4.3",
     "fastify": "^4.25.2",
     "fastify-plugin": "^4.5.1",

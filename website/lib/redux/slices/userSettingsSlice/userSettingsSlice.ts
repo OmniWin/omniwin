@@ -5,6 +5,7 @@ interface UserSettingsState {
   userSettings: {
     style: number; // 1 = mw, 2 = es, 3 = def
     display: string;
+    jwt: string;
   };
 }
 
@@ -12,8 +13,11 @@ const initialState: UserSettingsState = {
   userSettings: {
     style: 1,
     display: 'grid',
+    jwt: ''
   },
 };
+
+
 
 export const userSettingsSlice = createSlice({
   name: 'userSettings',
@@ -27,11 +31,15 @@ export const userSettingsSlice = createSlice({
       state.userSettings.display = action.payload;
       localStorage.setItem('userSettings', JSON.stringify(state.userSettings));
     },
+    setJwt: (state, action: PayloadAction<string>) => {
+      state.userSettings.jwt = action.payload;
+      localStorage.setItem('userSettings', JSON.stringify(state.userSettings));
+    }
   },
 });
 
 export const {
-  setCardStyle, setCardDisplay
+  setCardStyle, setCardDisplay, setJwt
 } = userSettingsSlice.actions;
 
 export default userSettingsSlice.reducer;
