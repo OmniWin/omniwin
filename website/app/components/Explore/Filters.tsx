@@ -88,7 +88,7 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                                 </div>
 
                                 {/* Filters */}
-                                <form className="mt-4">
+                                <div className="mt-4">
                                     {filters.map((section) => (
                                         <Disclosure as="div" key={section.name} className="border-t border-zinc-700/80 px-4 py-6">
                                             {({ open }) => (
@@ -124,7 +124,7 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                                             )}
                                         </Disclosure>
                                     ))}
-                                </form>
+                                </div>
                             </Dialog.Panel>
                         </Transition.Child>
                     </div>
@@ -150,7 +150,7 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                         <Menu as="div" className="relative inline-block text-left">
                             <div>
                                 <Menu.Button className="group inline-flex justify-center text-sm font-medium text-zinc-200 hover:text-zinc-100">
-                                    Sort by {sortOptions.find((option) => option.current)?.name}
+                                    Sort by <span className="hidden sm:inline">{sortOptions.find((option) => option.current)?.name}</span>
                                     <ChevronDownIcon className="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-zinc-200 group-hover:text-zinc-500" aria-hidden="true" />
                                 </Menu.Button>
                             </div>
@@ -213,7 +213,7 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                                                     leaveTo="transform opacity-0 scale-95"
                                                 >
                                                     <Popover.Panel className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-zinc-800 p-4 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                                        <form className="space-y-4">
+                                                        <div className="space-y-4">
                                                             {section.options.map((option, optionIdx) => (
                                                                 <div className="flex items-center">
                                                                     <input
@@ -230,7 +230,7 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                                                                     </label>
                                                                 </div>
                                                             ))}
-                                                        </form>
+                                                        </div>
                                                     </Popover.Panel>
                                                 </Transition>
                                             </Popover>

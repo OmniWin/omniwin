@@ -32,3 +32,20 @@ export type FetchRequestBody = {
     networks: string[];
     sortBy: string;
 };
+
+export type Raffle = {
+    full_price: number;
+    ticket_price: number;
+    tickets_bought: number;
+    tickets_total: number;
+    time_left: number;
+    nft_name: string;
+    nft_image: string;
+    nft_owner: string;
+    asset_type: string;
+    nft_id: number;
+    token_id: string;
+    network: string;
+    collectionName: string;
+    isVerified: boolean;
+};
