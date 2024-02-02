@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 // import { HeartIcon, TicketIcon, CheckBadgeIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
@@ -7,11 +6,6 @@ import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFall
 
 import { Raffle } from "@/app/types";
 import { classNames, formatCountdown, shortenAddress, formatMoney } from "@/app/utils";
-
-interface RaffleMetaWinProps {
-    raffle: Raffle; // Assuming `Raffle` is an interface representing your data structure
-    className?: string; // Optional className for styling
-}
 
 export default function RaffleMetaWin(raffle: Raffle) {
     const progress = (raffle.tickets_bought / raffle.tickets_total) * 100;
