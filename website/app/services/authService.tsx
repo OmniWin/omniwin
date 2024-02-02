@@ -1,16 +1,15 @@
 import type { SIWEVerifyMessageArgs } from '@web3modal/core'
-import { useSelector, useDispatch, userSettingsSlice } from "@/lib/redux";
-import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
+const domain = "http://localhost:4356"
 
 export const getNonce = async () => {
     try {
-        const response = await fetch('http://localhost:4356/v1/auth/nonce');
+        const response = await fetch(`${domain}/v1/auth/nonce`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        console.log('response', response)
+
         const data = await response.text();
-        console.log('data', data)
+        console.log('nonce', data)
         return data; // assuming data contains the nonce
     } catch (error) {
         console.error('Error fetching nonce:', error);
@@ -20,8 +19,8 @@ export const getNonce = async () => {
 
 export const getSession = async () => {
     try {
-        const response = await fetch('http://localhost:4356/v1/auth/session', {
-            credentials: 'include',
+        const response = await fetch(`${domain}/v1/auth/session`, {
+            credentials: "include",
         });
 
         if (!response.ok) throw new Error('Session fetch failed');
@@ -35,11 +34,8 @@ export const getSession = async () => {
 }
 
 export const validateMessage = async ({ message, signature }: SIWEVerifyMessageArgs) => {
-    const userSettingsState = useSelector(selectUserSettingsState);
-    const dispatch = useDispatch();
-
     try {
-        const response = await fetch('http://localhost:4356/v1/auth/verify', {
+        const response = await fetch(`${domain}/v1/auth/verify`, {
             method: 'POST',
             body: JSON.stringify({ message, signature }),
             headers: {
@@ -51,12 +47,9 @@ export const validateMessage = async ({ message, signature }: SIWEVerifyMessageA
             throw new Error('Network response was not ok');
         }
 
-        const data = await response.json();
+        const isValid = await response.json();
 
-        const jwt = data.token;
-        dispatch(userSettingsSlice.actions.setJwt(jwt))
-
-        return data; // assuming data contains the session
+        return isValid;
     } catch (error) {
         console.error('Error validating message:', error);
         throw error; // Rethrow the error if you want to handle it outside
@@ -65,9 +58,9 @@ export const validateMessage = async ({ message, signature }: SIWEVerifyMessageA
 
 export const signOut = async () => {
     try {
-        const response = await fetch('http://localhost:4356/v1/auth/signout', {
+        const response = await fetch(`${domain}/v1/auth/signout`, {
             method: 'POST',
-            body: JSON.stringify({}),
+            credentials: "include",
             headers: {
                 'Content-Type': 'application/json'
             }

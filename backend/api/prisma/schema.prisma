@@ -12,7 +12,7 @@ datasource db {
 
 model Nft {
   id_nft         Int         @id @default(autoincrement())
-  id_lot         Int
+  id_lot         Int         @unique
   total_tickets  Int         @default(0)
   bonus_tickets  Int         @default(0)
   tickets_bought Int         @default(0)
@@ -36,8 +36,9 @@ model Nft {
   updated_at     DateTime    @default(now()) @updatedAt
 
   metadata NftMetadata?
+  tickets  Tickets[]
 
-  @@unique([id_lot, network], name: "id_lot_network_unique")
+  // @@unique([id_lot], name: "id_lot")
   @@index([token, token_id], name: "token_tokenID")
 }
 
@@ -71,6 +72,9 @@ model Tickets {
   bonus         Int
   created_at    DateTime @default(now())
   updated_at    DateTime @default(now()) @updatedAt
+
+  //connect to Nft via id_lot
+  nft Nft @relation(fields: [id_lot], references: [id_lot])
 
   @@unique([unique_id], name: "id_lot_id_user_unique")
   @@index([recipient], name: "recipient")

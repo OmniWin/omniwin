@@ -113,4 +113,76 @@ export class NftRepository {
 
     }
 
+
+    async fetchNFT(id: number) {
+        const { prisma } = this.fastify;
+
+        let rawQuery = `SELECT 
+                            Nft.id_nft, 
+                            Nft.id_lot, 
+                            Nft.total_tickets, 
+                            Nft.bonus_tickets,
+                            Nft.tickets_bought, 
+                            Nft.ticket_price, 
+                            Nft.transactions, 
+                            Nft.end_timestamp, 
+                            Nft.fee, 
+                            Nft.closed, 
+                            Nft.buyout, 
+                            Nft.asset_claimed, 
+                            Nft.tokens_claimed, 
+                            Nft.owner, 
+                            Nft.signer, 
+                            Nft.token,
+                            Nft.token_id, 
+                            Nft.amount, 
+                            Nft.asset_type, 
+                            Nft.data, 
+                            Nft.network, 
+                            Nft.created_at, 
+                            Nft.updated_at, 
+                            NftMetadata.name, 
+                            NftMetadata.collectionName, 
+                            NftMetadata.image_local
+                        FROM Nft
+                        LEFT JOIN NftMetadata ON Nft.id_lot = NftMetadata.id_lot
+                        WHERE Nft.id_lot = ? LIMIT 1`;
+
+        const queryParams = [id];
+        const nft = await prisma.$queryRawUnsafe(rawQuery, ...queryParams) as any;
+
+
+        let rawQuery2 = `SELECT 
+                            id_ticket,
+                            id_lot,
+                            unique_id,
+                            recipient,
+                            total_tickets,
+                            amount,
+                            bonus,
+                            tokens_spent
+                        FROM Tickets
+                        WHERE id_lot = ?`;
+
+        //id_lot 33 is fucked up
+        const queryParams2 = [id];
+        const tickets = await prisma.$queryRawUnsafe(rawQuery2, ...queryParams2) as any;
+
+        //@ts-ignore
+        const processedTickets = tickets.map(item => this.convertBigInts(item));
+        //@ts-ignore
+        const processedNft = nft.map(item => this.convertBigInts(item));
+
+        return { nft: processedNft, tickets: processedTickets };
+    }
+
+    convertBigInts(obj: any) {
+        for (let key in obj) {
+            if (typeof obj[key] === 'bigint') {
+                obj[key] = obj[key].toString();
+            }
+        }
+        return obj;
+    }
+
 }

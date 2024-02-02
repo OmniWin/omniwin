@@ -93,4 +93,35 @@ export class NftController {
             throw new HttpError(req.server, error.message);
         }
     }
+
+    public static async fetchNFT(req: FastifyRequest, res: FastifyReply) {
+        try {
+            //get activity
+            //get entrants
+            //date of draw
+            //prize
+            const nftId = (req.params as any).id;
+            console.log("nftId", nftId);
+
+
+            const nftService = new NftService(req.server as FastifyInstance);
+            const nft = await nftService.fetchNFT(nftId);
+
+            req.server.log.info(`Nft fetched successfully, id: ${nftId}`);
+
+            return res.code(201).send({
+                success: true,
+                data: nft,
+                message: "Nft fetched successfully",
+            });
+
+
+        } catch (error: any) {
+            console.log(error);
+            if (error.code === 'P2002') { // Prisma's code for unique constraint violation
+                throw new HttpError(req.server, "EMAIL_IN_USE");
+            }
+            throw new HttpError(req.server, error.message);
+        }
+    }
 }
