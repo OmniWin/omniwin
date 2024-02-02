@@ -338,11 +338,11 @@ export default function RaffleList() {
             >
                 {raffleList.map((item: any, index: number) => (
                     <>
-                        <div ref={index === raffleList.length - 1 ? lastRaffleElementRef : null} key={item.nft_id}>
+                        <span className="w-[calc(33%-.45rem)] sm:w-full inline-block" ref={index === raffleList.length - 1 ? lastRaffleElementRef : null} key={item.nft_id}>
                             {userSettingsState.userSettings.style === 1 && <RaffleMetaWin {...item} />}
                             {userSettingsState.userSettings.style === 2 && <RaffleEse {...item} />}
                             {userSettingsState.userSettings.style === 3 && <RaffleDefault {...item} />}
-                        </div>
+                        </span>
                     </>
                 ))}
             </div>

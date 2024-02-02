@@ -3,8 +3,15 @@ import Link from "next/link";
 // import { HeartIcon, TicketIcon, CheckBadgeIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
 
+import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFallback";
+
 import { Raffle } from "@/app/types";
 import { classNames, formatCountdown, shortenAddress, formatMoney } from "@/app/utils";
+
+interface RaffleMetaWinProps {
+    raffle: Raffle; // Assuming `Raffle` is an interface representing your data structure
+    className?: string; // Optional className for styling
+}
 
 export default function RaffleMetaWin(raffle: Raffle) {
     const progress = (raffle.tickets_bought / raffle.tickets_total) * 100;
@@ -12,13 +19,38 @@ export default function RaffleMetaWin(raffle: Raffle) {
     const timeLeft = formatCountdown(new Date(), new Date(raffle.time_left * 1000));
 
     return (
-        <Link href={"/raffles/" + raffle.nft_id} className="d-block w-[calc(33%-.45rem)] sm:w-full mx-1 sm:mx-0 flex flex-col items-center rounded-lg relative group hover:bg-smoke-800 transition-color duration-400">
+        <Link href={"/raffles/" + raffle.nft_id} className="mx-1 sm:mx-0 flex flex-col items-center rounded-lg relative group hover:bg-smoke-800 transition-color duration-400">
             {/* <a href="#" className="flex items-center rounded-lg relative xl:min-h-60 group"> */}
             {/* <div className="absolute left-0 bottom-[78px] z-10 w-full bg-smoke-900/20 group-hover:bg-smoke-900/90 transition-colors duration-700 rounded-t-xl rounded-b-lg overflow-hidden"> */}
             <div className="relative">
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                {/* <img className="object-cover rounded-t-lg h-full w-full xl:min-h-64" alt="img" src={`https://web3trust.app/nft/${raffle.nft_image}`} /> */}
-                <Image className="object-cover rounded-t-lg h-full w-full xl:min-h-64" alt={'Raffle for '+raffle.nft_name+' to win it'} src={`https://web3trust.app/nft/${raffle.nft_image}`} layout="fill" objectFit="cover" />
+                <div className="relative h-full w-full xl:min-h-64">
+                    <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                    {/* <Image
+                        className="object-cover rounded-t-lg h-full w-full xl:min-h-64"
+                        alt={"Raffle for " + raffle.nft_name + " to win it"}
+                        width={100} // Placeholder width for aspect ratio calculation
+                        height={100} // Placeholder height for aspect ratio calculation
+                        src={`https://web3trust.app/nft/${raffle.nft_image}`}
+                        layout="responsive"
+                        sizes="100%"
+                        style={{
+                            objectFit: "cover",
+                            width: "100%",
+                        }}
+                    /> */}
+                    <CustomImageWithFallback
+                        className="object-cover rounded-t-lg h-full w-full xl:min-h-64"
+                        alt={"Raffle for " + raffle.nft_name + " to win it"}
+                        width={100} // Placeholder width for aspect ratio calculation
+                        height={100} // Placeholder height for aspect ratio calculation
+                        src={`https://web3trust.app/nft/${raffle.nft_image}`}
+                        sizes="100%"
+                        style={{
+                            objectFit: "cover",
+                            width: "100%",
+                        }}
+                    />
+                </div>
 
                 <div className="absolute left-1 top-1 lg:left-2 lg:top-2 z-10">
                     <div className="inline-flex items-center py-1.5 px-2.5 rounded-3xl bg-smoke-900/20 group-hover:bg-smoke-900/90 transition-colors duration-400 gap-1">
@@ -81,13 +113,13 @@ export default function RaffleMetaWin(raffle: Raffle) {
                 <div className="overflow-hidden bg-white/20 h-1 lg:h-2 -mt-2 mb-2">
                     <div className={classNames("h-full bg-gradient-to-b from-jade-400 to-jade-500")} style={{ width: progress + `%` }}></div>
                 </div>
-                <p className="text-[11px] leading-3 lg:leading-none lg:text-xs font-bold text-smoke-300 flex items-center justify-center gap-1 truncate">
+                <div className="text-[11px] leading-3 lg:leading-none lg:text-xs font-bold text-smoke-300 flex items-center justify-center gap-1 truncate">
                     <div className="relative">
                         <CheckBadgeIcon className="inline-block h-4 lg:h-5 w-4 lg:w-5 text-[#1475e1] z-10 relative" />
                         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 inset-0 rounded-full bg-white h-3 w-3"></div>
                     </div>
                     <span className="truncate max-w-[90%]">{raffle.nft_name}</span>
-                </p>
+                </div>
                 <p className="lg:text-xl font-bold text-white truncate select-text">{formatMoney(raffle.full_price, "USD")}</p>
             </div>
             <div className={classNames("w-full text-center py-1.5 rounded-b-lg leading-4", timeLeft.hasEnded && "bg-smoke-950", !timeLeft.hasEnded && "bg-jade-400 hover:bg-jade-500 text-smoke-900")}>
@@ -95,7 +127,7 @@ export default function RaffleMetaWin(raffle: Raffle) {
                     {/* {timeLeft.hasEnded ? "Ended" : "Enter now"} */}
                     {timeLeft.hasEnded ? (
                         // <p className="text-smoke-900">Ended</p>
-                        <p className="text-jade-400 text-[11px] lg:text-sm lg:leading-6">Winner {raffle.nft_owner.length > 10 ? shortenAddress(raffle.nft_owner, 3, 3) : raffle.nft_owner}</p>
+                        <span className="text-jade-400 text-[11px] lg:text-sm lg:leading-6">Winner {raffle.nft_owner.length > 10 ? shortenAddress(raffle.nft_owner, 3, 3) : raffle.nft_owner}</span>
                     ) : (
                         <>Enter now</>
                     )}
