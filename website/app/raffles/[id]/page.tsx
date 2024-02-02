@@ -172,14 +172,14 @@ export default function RafflePage({
                         <div className={`relative`}>
                             <div
                                 style={{ backgroundImage: `url(${contest.image})` }}
-                                className="absolute rounded-xl w-full h-full mx-auto after:content-[''] after:w-full after:h-full after:block after:absolute after:-bottom-[15px] after:z-[-1] after:blur-[20px] after:bg-inherit"
+                                className="absolute rounded-xl w-full h-full mx-auto after:content-[''] after:w-full after:h-full after:block after:absolute after:-bottom-[6px] after:z-[-1] after:blur-[20px] after:bg-inherit opacity-80 max-w-[98%] max-h-[98%] left-0 right-0"
                             ></div>
                             <img className="relative z-1 object-cover rounded-xl h-full w-full xl:max-h-144" alt="img" src={contest.image} />
                             <button className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900/40">
                                 <ArrowsPointingOutIcon className="h-5 w-5 text-zinc-50" />
                             </button>
                         </div>
-                        <div className="flex items-center justify-between mt-5 text-sm">
+                        <div className="flex items-center justify-between mt-7 text-sm">
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2 text-zinc-400 cursor-pointer">
                                     <button

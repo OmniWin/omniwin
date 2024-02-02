@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 // import { HeartIcon, TicketIcon, CheckBadgeIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
@@ -16,7 +17,8 @@ export default function RaffleMetaWin(raffle: Raffle) {
             {/* <div className="absolute left-0 bottom-[78px] z-10 w-full bg-smoke-900/20 group-hover:bg-smoke-900/90 transition-colors duration-700 rounded-t-xl rounded-b-lg overflow-hidden"> */}
             <div className="relative">
                 <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                <img className="object-cover rounded-t-lg h-full w-full xl:min-h-64" alt="img" src={`https://web3trust.app/nft/${raffle.nft_image}`} />
+                {/* <img className="object-cover rounded-t-lg h-full w-full xl:min-h-64" alt="img" src={`https://web3trust.app/nft/${raffle.nft_image}`} /> */}
+                <Image className="object-cover rounded-t-lg h-full w-full xl:min-h-64" alt={'Raffle for '+raffle.nft_name+' to win it'} src={`https://web3trust.app/nft/${raffle.nft_image}`} layout="fill" objectFit="cover" />
 
                 <div className="absolute left-1 top-1 lg:left-2 lg:top-2 z-10">
                     <div className="inline-flex items-center py-1.5 px-2.5 rounded-3xl bg-smoke-900/20 group-hover:bg-smoke-900/90 transition-colors duration-400 gap-1">
