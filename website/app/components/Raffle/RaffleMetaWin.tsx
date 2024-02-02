@@ -17,7 +17,7 @@ export default function RaffleMetaWin(raffle: Raffle) {
             {/* <a href="#" className="flex items-center rounded-lg relative xl:min-h-60 group"> */}
             {/* <div className="absolute left-0 bottom-[78px] z-10 w-full bg-smoke-900/20 group-hover:bg-smoke-900/90 transition-colors duration-700 rounded-t-xl rounded-b-lg overflow-hidden"> */}
             <div className="relative">
-                <div className="relative h-full w-full xl:min-h-64">
+                <div className="relative h-full w-full min-h-28 xl:min-h-64">
                     <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                     {/* <Image
                         className="object-cover rounded-t-lg h-full w-full xl:min-h-64"

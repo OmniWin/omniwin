@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import CustomImageWithFallback from '@/app/components/Raffle/CustomImageWithFallback'
 
 import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
 import { TicketIcon, ClockIcon } from "@heroicons/react/24/outline";
@@ -13,8 +14,20 @@ export default function RaffleEse(raffle: Raffle) {
     const timeLeft = formatCountdown(new Date(), new Date(raffle.time_left * 1000));
 
     return (
-        <Link href={'/raffles/'+raffle.nft_id} className="flex items-center rounded-lg relative xl:min-h-96 group">
-            <img className="object-cover inset-0 rounded-lg h-full w-full min-h-[inherit]" alt="img" src={'https://web3trust.app/nft/'+ raffle.nft_image} />
+        <Link href={"/raffles/" + raffle.nft_id} className="flex items-center rounded-lg relative xl:min-h-96 group">
+            {/* <img className="object-cover inset-0 rounded-lg h-full w-full min-h-[inherit]" alt="img" src={'https://web3trust.app/nft/'+ raffle.nft_image} /> */}
+            <CustomImageWithFallback
+                className="object-cover inset-0 rounded-lg h-full w-full min-h-[inherit]"
+                alt={"Raffle for " + raffle.nft_name + " to win it"}
+                width={100} // Placeholder width for aspect ratio calculation
+                height={100} // Placeholder height for aspect ratio calculation
+                src={`https://web3trust.app/nft/${raffle.nft_image}`}
+                sizes="100%"
+                style={{
+                    objectFit: "cover",
+                    width: "100%",
+                }}
+            />
             <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/60 to-transparent    opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
             {/* <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/60 to-transparent group-hover:opacity-100 transition-opacity duration-700"></div> */}
             <div className="absolute left-0 top-0 z-10 w-full max-w-full flex justify-between px-3">
@@ -89,8 +102,15 @@ export default function RaffleEse(raffle: Raffle) {
                             <p className="text-[11px] xl:text-xs font-bold text-smoke-300">Market value</p>
                             <p className="2xl:text-xl xl:text-lg font-bold text-white truncate select-text">{formatMoney(raffle.full_price, "USD")}</p>
                         </div>
-                        <div className="flex max-w-[30%] min-w-[30%]">
-                            <button className="text-md font-bold text-smoke-900 bg-gradient-to-b from-jade-400 to-jade-500 group-hover:to-jade-400 rounded-lg px-3 py-1.5 w-full leading-5">Play</button>
+                        <div className={classNames("flex max-w-[30%] min-w-[30%]", timeLeft.hasEnded && 'flex-col items-center')}>
+                            {timeLeft.hasEnded ? (
+                                <>
+                                    <p className="text-[11px] xl:text-xs font-bold text-smoke-300">Winner</p>
+                                    <p className="2xl:text-xl xl:text-lg font-bold text-jade-400 truncate select-text">{raffle.nft_owner.length > 10 ? shortenAddress(raffle.nft_owner, 3, 3) : raffle.nft_owner}</p>
+                                </>
+                            ) : (
+                                <button className="text-md font-bold text-smoke-900 bg-gradient-to-b from-jade-400 to-jade-500 group-hover:to-jade-400 rounded-lg px-3 py-1.5 w-full leading-5">Play</button>
+                            )}
                         </div>
                         <div className="flex flex-col items-center max-w-[30%] min-w-[30%]">
                             <p className="text-[11px] xl:text-xs font-bold text-smoke-300">Ticket price</p>
