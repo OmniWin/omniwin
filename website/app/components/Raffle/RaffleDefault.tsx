@@ -1,3 +1,5 @@
+import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFallback";
+
 import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
 import { TicketIcon, ClockIcon } from "@heroicons/react/24/outline";
 
@@ -13,8 +15,20 @@ export default function RaffleDefault(raffle: Raffle) {
     return (
         <Link href={"/raffles/" + raffle.nft_id} className="max-w-xs w-full lg:max-w-full group hover:transform hover:scale-105 transition-all duration-300 ease-in-out">
             {/* // <div className="max-w-xs w-full lg:max-w-full lg:flex group"> */}
-            <div className="h-48 md:h-auto flex-none bg-cover text-center overflow-hidden relative" title="Woman holding a mug">
-                <img src={"https://web3trust.app/nft/" + raffle.nft_image} alt="" className="object-cover object-center h-full w-full md:min-h-64 2xl:min-h-72 rounded-t-xl" />
+            <div className="h-48 md:h-auto flex-none bg-cover text-center overflow-hidden relative rounded-t-xl border-l border-t border-r border-smoke-800 lg:border-smoke-800 group-hover:border-smoke-600" title="Woman holding a mug">
+                {/* <img src={"https://web3trust.app/nft/" + raffle.nft_image} alt="" className="object-cover object-center h-full w-full md:min-h-64 2xl:min-h-72 rounded-t-xl" /> */}
+                <CustomImageWithFallback
+                    className="object-cover object-center h-full w-full md:min-h-64 2xl:min-h-72 rounded-t-xl"
+                    alt={"Raffle for " + raffle.nft_name + " to win it"}
+                    width={100} // Placeholder width for aspect ratio calculation
+                    height={100} // Placeholder height for aspect ratio calculation
+                    src={`https://web3trust.app/nft/${raffle.nft_image}`}
+                    sizes="100%"
+                    style={{
+                        objectFit: "cover",
+                        width: "100%",
+                    }}
+                />
                 <div className="absolute right-3 top-3">
                     <button className="group/like relative z-[10] fill-blood-500 transition-colors duration-400 hover:fill-blood-700 bg-smoke-900/20 group-hover:bg-smoke-900/90 p-2 rounded-full">
                         <div className="border-box items-center flex gap-[4px]">
@@ -92,22 +106,33 @@ export default function RaffleDefault(raffle: Raffle) {
                 </div>
                 <div className="sm:flex justify-between gap-2 sm:gap-6">
                     {/* <p className="text-xs font-bold text-smoke-300 self-center">100 USDC lowest entry</p> */}
-                    <p className="text-[11px] xl:text-xs font-bold text-smoke-300 self-center hidden sm:inline-flex items-center">
-                        <span>
-                            {formatMoney(raffle.ticket_price, "USD")} <span className="2xl:hidden">per</span> entry <span className="hidden 2xl:inline">price</span>
-                        </span>
-                    </p>
-                    <div className="min-w-[6rem]">
-                        {/* <button className="text-sm font-bold text-smoke-900 bg-gradient-to-b from-sky-400 to-sky-500 hover:to-sky-600 rounded-md px-3 py-1.5 w-full leading-5"> */}
-                        {/* <button className="text-sm font-bold text-smoke-900 bg-gradient-to-b bg-[#23f7dd] hover:bg-[#08d3ba] rounded-md px-3 py-1.5 w-full leading-5"> */}
-                        <button className="text-sm font-bold text-white bg-[#1475e1] hover:bg-[#1475e1] rounded-md px-3 py-1.5 w-full leading-5">
-                            Enter Now
-                            {/* Enter
-                                                <br />
-                                                Now */}
-                            {/* Play */}
-                        </button>
-                    </div>
+                    {timeLeft.hasEnded ? (
+                        <>
+                            <div className="flex items-center gap-2">
+                                <p className="text-[11px] xl:text-xs font-bold text-smoke-300">Winner</p>
+                                <p className="2xl:text-xl xl:text-lg font-bold text-jade-400 truncate select-text">{raffle.nft_owner.length > 10 ? shortenAddress(raffle.nft_owner, 3, 3) : raffle.nft_owner}</p>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-[11px] xl:text-xs font-bold text-smoke-300 self-center hidden sm:inline-flex items-center">
+                                <span>
+                                    {formatMoney(raffle.ticket_price, "USD")} <span className="2xl:hidden">per</span> entry <span className="hidden 2xl:inline">price</span>
+                                </span>
+                            </p>
+                            <div className="min-w-[6rem]">
+                                {/* <button className="text-sm font-bold text-smoke-900 bg-gradient-to-b from-sky-400 to-sky-500 hover:to-sky-600 rounded-md px-3 py-1.5 w-full leading-5"> */}
+                                {/* <button className="text-sm font-bold text-smoke-900 bg-gradient-to-b bg-[#23f7dd] hover:bg-[#08d3ba] rounded-md px-3 py-1.5 w-full leading-5"> */}
+                                <button className="text-sm font-bold text-white bg-[#1475e1] hover:bg-[#1475e1] rounded-md px-3 py-1.5 w-full leading-5">
+                                    Enter Now
+                                    {/* Enter
+                                                        <br />
+                                                        Now */}
+                                    {/* Play */}
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </Link>
