@@ -1,6 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { HttpError } from '../errors/httpError';
-import ssx from "../helpers/_ssx";
 import { generateNonce, SiweMessage } from 'siwe';
 import { UserService } from "../services/userService";
 import { FastifyInstance } from 'fastify';
@@ -47,9 +46,18 @@ export class AuthController {
             };
 
             const token = await res.jwtSign({ payload })
-            console.log({ token })
 
-            res.send({ token });
+            res
+                .setCookie('token', token, {
+                    domain: '.localhost:3000',
+                    path: '/',
+                    // secure: true, // send cookie over HTTPS only
+                    httpOnly: true,
+                    sameSite: 'lax'
+                    // sameSite: false // alternative CSRF protection
+                })
+                .code(200)
+                .send(true)
         } catch (error: any) {
             console.log(error);
             res.send(false);
@@ -58,9 +66,13 @@ export class AuthController {
 
     public static async session(req: FastifyRequest, res: FastifyReply) {
         try {
+            //get token from cookie
+            const token = req.cookies.token;
+            console.log({ token })
             const session = {
                 address: "0x0000000",
                 chainId: 5,
+                token: token
             };
 
 
@@ -77,53 +89,19 @@ export class AuthController {
         }
     }
 
-    public static async signIn(req: FastifyRequest, res: FastifyReply) {
-        const body = req.body as {
-            siwe: string,
-            signature: string,
-            daoLogin: boolean,
-            resolveEns: boolean,
-            resolveLens: boolean,
-        };
-
-        // Accessing the cookie
-        const nonce = req.cookies.nonce;
-
+    public static async signout(req: FastifyRequest, res: FastifyReply) {
         try {
-            const loginResponse = await ssx.login(
-                body.siwe,
-                body.signature,
-                body.daoLogin,
-                body.resolveEns,
-                nonce ?? "",
-                body.resolveLens,
-            );
 
-            console.log({ loginResponse })
-
-            return res.code(200).send({
-                success: true,
-                data: loginResponse
+            res.clearCookie('token', {
+                // domain: 'localhost',
+                path: '/',
+                secure: false, // send cookie over HTTPS only
+                httpOnly: true,
+                sameSite: false // alternative CSRF protection
             });
+            return res.code(200).send(true);
         } catch (error: any) {
             console.log(error);
-            if (error.code === 'P2002') { // Prisma's code for unique constraint violation
-                throw new HttpError(req.server, "EMAIL_IN_USE");
-            }
-            throw new HttpError(req.server, error.message);
-        }
-    }
-
-    public static async logOut(req: FastifyRequest, res: FastifyReply) {
-        try {
-            return res.code(200).send({
-                success: await ssx.logout() ?? true,
-            });
-        } catch (error: any) {
-            console.log(error);
-            if (error.code === 'P2002') { // Prisma's code for unique constraint violation
-                throw new HttpError(req.server, "EMAIL_IN_USE");
-            }
             throw new HttpError(req.server, error.message);
         }
     }

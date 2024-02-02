@@ -1,7 +1,8 @@
-import fastifyPlugin from "fastify-plugin"
-import { FastifyInstance } from "fastify"
-import { FastifyPluginAsync } from "fastify";
-import { FastifyRequest, FastifyReply } from "fastify";
+import fp from "fastify-plugin"
+import fastifyJwt from '@fastify/jwt'
+import { FastifyRequest, FastifyReply, FastifyPluginAsync } from "fastify";
+import { HttpError } from "../errors/httpError";
+const accessTokenExpiry = process.env.ACCESS_TOKEN_EXPIRY || '1h';
 
 declare module 'fastify' {
     interface FastifyInstance {
@@ -9,18 +10,21 @@ declare module 'fastify' {
     }
 }
 
-const authenticate: FastifyPluginAsync = fastifyPlugin(async function (fastify: FastifyInstance, opts: any) {
-    fastify.register(require("@fastify/jwt"), {
-        secret: "supersecret"
+const jwtAuthMiddleware: FastifyPluginAsync = fp(async (fastify, options) => {
+    fastify.register(fastifyJwt, {
+        secret: "supersecret",
+        sign: {
+            expiresIn: accessTokenExpiry
+        }
     })
 
     fastify.decorate("authenticate", async function (request: FastifyRequest, reply: FastifyReply) {
         try {
             await request.jwtVerify()
         } catch (err) {
-            reply.send(err)
+            throw new HttpError(fastify, "UNAUTHORIZED")
         }
     })
 })
 
-export default authenticate
+export default jwtAuthMiddleware

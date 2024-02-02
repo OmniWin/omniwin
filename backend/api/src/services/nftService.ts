@@ -63,4 +63,42 @@ export class NftService {
                 return { custom: 'Newest' };
         }
     }
+
+
+    async fetchNFT(id: number) {
+        const fetchedNft = await this.nftRepository.fetchNFT(id);
+
+        const USDC_decimals = 6;
+
+        //@ts-ignore
+        const processedNft = fetchedNft.nft.map(item => ({
+            full_price: (Number(item.ticket_price) / Math.pow(10, USDC_decimals)) * item.total_tickets,
+            ticket_price: Number(item.ticket_price) / Math.pow(10, USDC_decimals),
+            tickets_bought: item.tickets_bought,
+            tickets_total: item.total_tickets,
+            time_left: item.end_timestamp,
+            nft_name: item.name,
+            nft_image: item.image_local,
+            nft_owner: item.owner,
+            // favorites: item.favorites,
+            asset_type: item.asset_type,
+            nft_id: item.id_lot,
+            token_id: item.token_id,
+            network: item.network,
+            collectionName: item.collectionName,
+            isVerified: false,
+        }));
+
+        //@ts-ignore
+        const processedTickets = fetchedNft.tickets.map(ticket => ({
+            recipient: ticket.recipient,
+            total_tickets: ticket.total_tickets,
+            amount: ticket.amount,
+            bonus: ticket.bonus,
+            tokens_spent: Number(ticket.tokens_spent) / Math.pow(10, USDC_decimals),
+        }));
+
+        return { nft: processedNft, tickets: processedTickets };
+
+    }
 }
