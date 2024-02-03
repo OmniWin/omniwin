@@ -49,12 +49,11 @@ export class AuthController {
 
             res
                 .setCookie('token', token, {
-                    domain: '.localhost:3000',
+                    // domain: 'localhost',
                     path: '/',
                     // secure: true, // send cookie over HTTPS only
                     httpOnly: true,
                     sameSite: 'lax'
-                    // sameSite: false // alternative CSRF protection
                 })
                 .code(200)
                 .send(true)
@@ -66,13 +65,15 @@ export class AuthController {
 
     public static async session(req: FastifyRequest, res: FastifyReply) {
         try {
-            //get token from cookie
-            const token = req.cookies.token;
-            console.log({ token })
+            const decodedToken = await req.jwtDecode() as any;
+            // console.log({ decodedToken })
+
             const session = {
-                address: "0x0000000",
-                chainId: 5,
-                token: token
+                address: decodedToken.address,
+                chainId: decodedToken.chainId,
+                userId: decodedToken.userId,
+                username: decodedToken.username,
+                email: decodedToken.email,
             };
 
 

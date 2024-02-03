@@ -1,5 +1,5 @@
 import type { SIWEVerifyMessageArgs } from '@web3modal/core'
-const domain = "http://localhost:4356"
+const domain = "http://localhost"
 
 export const getNonce = async () => {
     try {

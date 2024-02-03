@@ -114,7 +114,7 @@ export class NftService {
     }
 
     getPurchaseOptions(totalTickets: number) {
-        const purchaseOptions = [1, 10, 100, 250, 500]; // Default purchase options
+        const purchaseOptions = [1, 10, 100, 500]; // Default purchase options
         const validOptions = purchaseOptions.filter(option => option <= totalTickets); // Filter out options greater than totalTickets
         const optionsWithBonuses = validOptions.map(amount => {
             const bonus = this.calculateBonus(amount, totalTickets); // Assume calculateBonus is the function from previous messages

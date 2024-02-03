@@ -20,7 +20,13 @@ const jwtAuthMiddleware: FastifyPluginAsync = fp(async (fastify, options) => {
 
     fastify.decorate("authenticate", async function (request: FastifyRequest, reply: FastifyReply) {
         try {
-            await request.jwtVerify()
+            const token = request.cookies.token || ""; // Get the token from the cookie
+            console.log("Token verifying", token)
+            // fastify.jwt.verify(token);
+            //set Authorization header
+            request.headers.authorization = `Bearer ${token}`;
+
+            await request.jwtVerify();
         } catch (err) {
             throw new HttpError(fastify, "UNAUTHORIZED")
         }
