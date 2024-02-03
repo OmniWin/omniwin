@@ -13,7 +13,7 @@ import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/se
 import { classNames } from "@/app/utils";
 
 // Types
-import { Filter, SortOption, FetchRequestBody, Raffle } from "@/app/types";
+import { Filter, SortOption, FetchRafflesRequestBody, RaffleCard } from "@/app/types";
 
 // const raffleList = [
 //     {
@@ -212,7 +212,7 @@ import { Filter, SortOption, FetchRequestBody, Raffle } from "@/app/types";
 
 export default function RaffleList() {
     // Local states
-    const [raffleList, setRaffleList] = useState<Raffle[]>([]);
+    const [raffleList, setRaffleList] = useState<RaffleCard[]>([]);
     const [nextCursor, setNextCursor] = useState(0);
     const [sortOptions, setSortOptions] = useState<SortOption[]>([
         { id: "tickets_remaining", name: "% Tickets Remaining", href: "#", current: false },

@@ -1,22 +1,30 @@
 import React, { useState } from "react";
 import Image, { ImageProps } from "next/image";
+import { ArrowsPointingOutIcon } from "@heroicons/react/24/solid";
 
 // Define only the custom props here
 interface CustomProps {
     fallback?: string; // Define custom properties separately
+    showMaximizeButton?: boolean; // Option to show maximize button
+    glowEffect?: boolean; // Option to apply a glow effect
 }
 
 // Use intersection type for your component props
 type CustomImageWithFallbackProps = CustomProps & ImageProps;
 
-const CustomImageWithFallback: React.FC<CustomImageWithFallbackProps> = ({ src, alt, fallback = "/not-found.webp", ...props }) => {
+const CustomImageWithFallback: React.FC<CustomImageWithFallbackProps> = ({ src, alt, fallback = "/not-found.webp", showMaximizeButton = false, glowEffect = false, ...props }) => {
     const [imgSrc, setImgSrc] = useState(src);
     const [isLoading, setIsLoading] = useState(true);
+    const [isMaximized, setIsMaximized] = useState(false); // State to manage maximized image
 
     const handleError = () => {
         setIsLoading(false);
         setImgSrc(fallback);
     };
+
+    const toggleMaximize = () => setIsMaximized(!isMaximized); // Toggle the maximized state
+
+    const glowStyle = glowEffect ? { boxShadow: "0 0 20px rgba(255, 255, 255, 0.5)" } : {}; // Conditional glow effect styling
 
     const loadingIndicator = () => {
         return (
@@ -42,6 +50,21 @@ const CustomImageWithFallback: React.FC<CustomImageWithFallbackProps> = ({ src, 
         <div className="relative h-full w-full">
             {isLoading && loadingIndicator()}
             <Image {...props} src={imgSrc} alt={alt} onError={handleError} onLoadingComplete={() => setIsLoading(false)} />
+            {/* <div className={`${isMaximized ? "fixed top-0 left-0 z-50 w-full h-full object-cover" : "max-w-xs max-h-xs"}`} style={glowStyle}>
+                <Image {...props} src={imgSrc} alt={alt} onError={handleError} onLoadingComplete={() => setIsLoading(false)} layout="fill" />
+            </div> */}
+            {showMaximizeButton && (
+                <button onClick={toggleMaximize} className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900/40">
+                    <ArrowsPointingOutIcon className="h-5 w-5 text-zinc-50" />
+                </button>
+            )}
+            {glowEffect && (
+                <div
+                    style={{ backgroundImage: `url(${imgSrc})` }}
+                    // className="absolute rounded-xl w-full h-full mx-auto after:content-[''] after:w-full after:h-full after:block after:absolute after:-bottom-[6px] after:z-[-1] after:blur-[20px] after:bg-inherit opacity-80 max-w-[98%] max-h-[98%] left-0 right-0 top-0"
+                    className="absolute rounded-xl w-full h-full mx-auto after:content-[''] after:w-full after:h-full after:block after:absolute after:-bottom-[6px] after:z-[-1] after:blur-[20px] after:bg-inherit opacity-100 left-0 right-0 top-0"
+                ></div>
+            )}
         </div>
     );
 };

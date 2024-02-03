@@ -4,12 +4,22 @@ import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
 
 import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFallback";
 
-import { Raffle } from "@/app/types";
+import { RaffleCard } from "@/app/types";
 import { classNames, formatCountdown, shortenAddress, formatMoney } from "@/app/utils";
 
-export default function RaffleMetaWin(raffle: Raffle) {
-    const progress = (raffle.tickets_bought / raffle.tickets_total) * 100;
+/**
+ * TODO:
+ * ❌ Add winner if exists
+ * ❌ Show the status as incomplete if the raffle is not complete
+ * ❌ Add favorite logic
+ * ❌ Show favorites counts and likes if the user already liked the raffle
+ * ❌ Implement the ws connection to update the raffle status in real time
+ * ❌ Add fallback to the ws connection to update the raffle status in real time
+ * ❌ If none of the updates worked show user an allert to refresh the page
+ */
 
+export default function RaffleMetaWin(raffle: RaffleCard) {
+    const progress = (raffle.tickets_bought / raffle.tickets_total) * 100;
     const timeLeft = formatCountdown(new Date(), new Date(raffle.time_left * 1000));
 
     return (

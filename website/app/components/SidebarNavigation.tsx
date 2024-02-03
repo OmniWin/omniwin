@@ -166,7 +166,7 @@ export const SidebarNavigation = () => {
                                                                 <Link
                                                                     href={item.href}
                                                                     className={classNames(
-                                                                        item.current ? "text-jade-400" : "text-zinc-200 hover:text-jade-400",
+                                                                        item.current ? "text-jade-400" : "text-zinc-200 hover:bg-zinc-800 hover:text-white",
                                                                         "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                                                                     )}
                                                                 >
@@ -179,7 +179,7 @@ export const SidebarNavigation = () => {
                                                                         <>
                                                                             <Disclosure.Button
                                                                                 className={classNames(
-                                                                                    item.current ? "text-jade-400" : "text-zinc-200 hover:text-jade-400",
+                                                                                    item.current ? "text-jade-400" : "text-zinc-200 hover:bg-zinc-800 hover:text-white",
                                                                                     "flex items-center w-full text-left rounded-md p-2 gap-x-3 text-sm leading-6 font-semibold"
                                                                                 )}
                                                                             >
@@ -199,7 +199,7 @@ export const SidebarNavigation = () => {
                                                                                                 as={Link}
                                                                                                 href={subItem.href}
                                                                                                 className={classNames(
-                                                                                                    subItem.current ? "text-jade-400" : "text-zinc-200 hover:text-jade-400",
+                                                                                                    subItem.current ? "text-jade-400" : "text-zinc-200 hover:bg-zinc-800 hover:text-white",
                                                                                                     "block rounded-md py-2 pr-2 pl-9 text-sm leading-6"
                                                                                                 )}
                                                                                             >
@@ -262,7 +262,7 @@ export const SidebarNavigation = () => {
                                                 <Link
                                                     href={item.href}
                                                     className={classNames(
-                                                        item.current ? "text-jade-400" : "text-zinc-200 hover:text-jade-400",
+                                                        item.current ? "text-jade-400" : "text-zinc-200 hover:bg-zinc-800 hover:text-white",
                                                         "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-all duration-300"
                                                         // sidebarToggleState.toggleSidebar ? "pl-3" : ""
                                                     )}
@@ -279,7 +279,7 @@ export const SidebarNavigation = () => {
                                                         <>
                                                             <Disclosure.Button
                                                                 className={classNames(
-                                                                    item.current ? "text-jade-400" : "text-zinc-200 hover:text-jade-400",
+                                                                    item.current ? "text-jade-400" : "text-zinc-200 hover:bg-zinc-800 hover:text-white",
                                                                     // sidebarToggleState.toggleSidebar ? "pl-3" : "",
                                                                     "flex items-center w-full text-left rounded-md p-2 gap-x-3 text-sm leading-6 font-semibold"
                                                                 )}
@@ -307,7 +307,7 @@ export const SidebarNavigation = () => {
                                                                                 as="a"
                                                                                 href={subItem.href}
                                                                                 className={classNames(
-                                                                                    subItem.current ? "text-jade-400" : "text-zinc-400/90 hover:text-jade-400",
+                                                                                    subItem.current ? "text-jade-400" : "text-zinc-400/90 hover:bg-zinc-800 hover:text-white",
                                                                                     subItem.icon && "pl-2",
                                                                                     !sidebarToggleState.toggleSidebar && "!pl-10",
                                                                                     "rounded-md py-2 pr-2 text-sm leading-6 flex items-center w-full group-hover:pl-10 transition-all duration-300 self-center mx-auto gap-x-3"
@@ -336,7 +336,7 @@ export const SidebarNavigation = () => {
                                     <li>
                                         <button
                                             className={classNames(
-                                                "w-full group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-zinc-200 hover:text-jade-400"
+                                                "w-full group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-zinc-200 hover:bg-zinc-800 hover:text-white"
                                                 // sidebarToggleState.toggleSidebar ? "pl-3" : ""
                                             )}
                                         >
@@ -350,7 +350,7 @@ export const SidebarNavigation = () => {
                             {/* <li className="mt-auto">
                                 <a
                                     href="#"
-                                    className={classNames("group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-zinc-200 hover:text-jade-400", 
+                                    className={classNames("group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-zinc-200 hover:bg-zinc-800 hover:text-white", 
                                         // sidebarToggleState.toggleSidebar ? "pl-3" : ""
                                     )}
                                 >
@@ -362,7 +362,7 @@ export const SidebarNavigation = () => {
                                 <a
                                     href="#"
                                     className={classNames(
-                                        "group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-zinc-200 hover:text-jade-400 transition-all duration-300"
+                                        "group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-zinc-200 hover:bg-zinc-800 hover:text-white transition-all duration-300"
                                         // sidebarToggleState.toggleSidebar ? "pl-3" : ""
                                     )}
                                 >

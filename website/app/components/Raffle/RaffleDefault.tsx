@@ -5,17 +5,20 @@ import { TicketIcon, ClockIcon } from "@heroicons/react/24/outline";
 
 import Link from "next/link";
 
-import { Raffle } from "@/app/types";
+import { RaffleCard } from "@/app/types";
 import { classNames, formatCountdown, shortenAddress, formatMoney } from "@/app/utils";
 
-export default function RaffleDefault(raffle: Raffle) {
+export default function RaffleDefault(raffle: RaffleCard) {
     const progress = (raffle.tickets_bought / raffle.tickets_total) * 100;
     const timeLeft = formatCountdown(new Date(), new Date(raffle.time_left * 1000));
 
     return (
         <Link href={"/raffles/" + raffle.nft_id} className="max-w-xs w-full lg:max-w-full group hover:transform hover:scale-105 transition-all duration-300 ease-in-out">
             {/* // <div className="max-w-xs w-full lg:max-w-full lg:flex group"> */}
-            <div className="h-48 md:h-auto flex-none bg-cover text-center overflow-hidden relative rounded-t-xl border-l border-t border-r border-smoke-800 lg:border-smoke-800 group-hover:border-smoke-600" title="Woman holding a mug">
+            <div
+                className="h-48 md:h-auto flex-none bg-cover text-center overflow-hidden relative rounded-t-xl border-l border-t border-r border-smoke-800 lg:border-smoke-800 group-hover:border-smoke-600"
+                title="Woman holding a mug"
+            >
                 {/* <img src={"https://web3trust.app/nft/" + raffle.nft_image} alt="" className="object-cover object-center h-full w-full md:min-h-64 2xl:min-h-72 rounded-t-xl" /> */}
                 <CustomImageWithFallback
                     className="object-cover object-center h-full w-full md:min-h-64 2xl:min-h-72 rounded-t-xl"
