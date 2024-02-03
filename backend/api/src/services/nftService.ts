@@ -98,7 +98,32 @@ export class NftService {
             tokens_spent: Number(ticket.tokens_spent) / Math.pow(10, USDC_decimals),
         }));
 
-        return { nft: processedNft, tickets: processedTickets };
+        //bonus Tickets formula= (uint256(amount) * amount) / (uint256(4) * totalTickets);
+        //calculate bonus
+        const purchaseOptions = this.getPurchaseOptions(fetchedNft.nft[0].total_tickets);
+        console.log('purchaseOptions', purchaseOptions)
 
+        return { nft: processedNft, tickets: processedTickets, purchaseOptions };
+
+    }
+
+    calculateBonus(amount: number, totalTickets: number) {
+        const bonus = (amount * amount) / (4 * totalTickets);
+
+        return Math.floor(bonus);
+    }
+
+    getPurchaseOptions(totalTickets: number) {
+        const purchaseOptions = [1, 10, 100, 250, 500]; // Default purchase options
+        const validOptions = purchaseOptions.filter(option => option <= totalTickets); // Filter out options greater than totalTickets
+        const optionsWithBonuses = validOptions.map(amount => {
+            const bonus = this.calculateBonus(amount, totalTickets); // Assume calculateBonus is the function from previous messages
+            return {
+                amount,
+                bonus,
+                total: amount + bonus // This is the total number of tickets including bonuses
+            };
+        });
+        return optionsWithBonuses;
     }
 }
