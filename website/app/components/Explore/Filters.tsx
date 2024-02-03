@@ -54,7 +54,7 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
     return (
         <>
             {/* Mobile filter dialog */}
-            <Transition.Root show={open} as={Fragment}>
+            {/* <Transition.Root show={open} as={Fragment}>
                 <Dialog as="div" className="relative z-40 sm:hidden" onClose={setOpen}>
                     <Transition.Child
                         as={Fragment}
@@ -87,7 +87,6 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                                     </button>
                                 </div>
 
-                                {/* Filters */}
                                 <div className="mt-4">
                                     {filters.map((section) => (
                                         <Disclosure as="div" key={section.name} className="border-t border-zinc-700/80 px-4 py-6">
@@ -129,7 +128,7 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                         </Transition.Child>
                     </div>
                 </Dialog>
-            </Transition.Root>
+            </Transition.Root> */}
 
             {/* <div className="py-16 mx-auto max-w-7xl"> */}
             {/* <div className="py-16">
@@ -215,7 +214,7 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                                                     <Popover.Panel className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-zinc-800 p-4 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
                                                         <div className="space-y-4">
                                                             {section.options.map((option, optionIdx) => (
-                                                                <div className="flex items-center">
+                                                                <div className="flex items-center" key={option.label}>
                                                                     <input
                                                                         id={`filter-${section.id}-${optionIdx}`}
                                                                         name={`${section.id}[]`}

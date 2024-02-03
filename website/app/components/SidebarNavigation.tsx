@@ -14,26 +14,32 @@ import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
 import { useSelector, useDispatch, sidebarSlice } from "@/lib/redux";
 import { selectSidebarOpenState, selectSidebarToggleState } from "@/lib/redux/slices/sidebarSlice/selectors";
 
-const navigation = [
-    { name: "Home", href: "#", icon: HomeIcon, current: true },
-    { name: "Explore", href: "raffles", icon: BookOpenIcon, current: false },
-    {
-        name: "Account",
-        icon: UsersIcon,
-        current: false,
-        children: [
-            { name: "Engineering", href: "#", current: false },
-            { name: "Human Resources", href: "#", current: false },
-            { name: "Customer Success", href: "#", current: false },
-        ],
-    },
+interface NavigationItemChildren { name: string; href: string; current: boolean, icon: any }
+interface NavigationItem { name: string; href: string; icon: any; current: boolean; children: null | NavigationItemChildren[] };
+
+const initialNavigation = [
+    { name: "Home", href: "/", icon: HomeIcon, current: true, children: null },
+    { name: "Explore", href: "/raffles", icon: BookOpenIcon, current: false, children: null },
     {
         name: "Challenges",
         icon: TrophyIcon,
         current: false,
         children: [
-            { name: "Engineering", href: "#", current: false },
-            { name: "Human Resources", href: "#", current: false },
+            { name: "List", href: "#", current: false, icon: TableCellsIcon },
+            { name: "Leaderboard", href: "#", current: false, icon: ChartBarIcon },
+        ],
+    },
+    {
+        name: "Account",
+        icon: UserIcon,
+        current: false,
+        children: [
+            { name: "Profile", href: "#", current: false, icon: InformationCircleIcon },
+            { name: "Inventory", href: "#", current: false, icon: RectangleStackIcon },
+            { name: "Tickets", href: "#", current: false, icon: TicketIcon },
+            { name: "Favorites", href: "#", current: false, icon: HeartIcon },
+            { name: "Settings", href: "#", current: false, icon: Cog6ToothIcon },
+            { name: "Support", href: "#", current: false, icon: QuestionMarkCircleIcon },
         ],
     },
 ];
@@ -41,32 +47,7 @@ const navigation = [
 
 export const SidebarNavigation = () => {
     const path = usePathname();
-    const [navigation, setNavigation] = useState([
-        { name: "Home", href: "/", icon: HomeIcon, current: true, children: null },
-        { name: "Explore", href: "/raffles", icon: BookOpenIcon, current: false, children: null },
-        {
-            name: "Challenges",
-            icon: TrophyIcon,
-            current: false,
-            children: [
-                { name: "List", href: "#", current: false, icon: TableCellsIcon },
-                { name: "Leaderboard", href: "#", current: false, icon: ChartBarIcon },
-            ],
-        },
-        {
-            name: "Account",
-            icon: UserIcon,
-            current: false,
-            children: [
-                { name: "Profile", href: "#", current: false, icon: InformationCircleIcon },
-                { name: "Inventory", href: "#", current: false, icon: RectangleStackIcon },
-                { name: "Tickets", href: "#", current: false, icon: TicketIcon },
-                { name: "Favorites", href: "#", current: false, icon: HeartIcon },
-                { name: "Settings", href: "#", current: false, icon: Cog6ToothIcon },
-                { name: "Support", href: "#", current: false, icon: QuestionMarkCircleIcon },
-            ],
-        },
-    ] as { name: string; href: string; icon: any; current: boolean; children: null | { name: string; href: string; current: boolean, icon: any }[] }[]);
+    const [navigation, setNavigation] = useState(initialNavigation as NavigationItem[]);
 
     // const pathname = usePathname();
     const dispatch = useDispatch();
@@ -82,17 +63,16 @@ export const SidebarNavigation = () => {
     }, [dispatch]);
 
     useEffect(() => {
-        if (path === "/") {
-            setNavigation([
-                { name: "Home", href: "/", icon: HomeIcon, current: true, children: null },
-                { name: "Explore", href: "/raffles", icon: BookOpenIcon, current: false, children: null },
-            ]);
-        } else if (path === "/raffles") {
-            setNavigation([
-                { name: "Home", href: "/", icon: HomeIcon, current: false, children: null },
-                { name: "Explore", href: "/raffles", icon: BookOpenIcon, current: true, children: null },
-            ]);
-        }
+        setNavigation((navigation: NavigationItem[]) =>
+            navigation.map((navItem: NavigationItem) => ({
+                ...navItem,
+                current: navItem.href === path,
+                children: navItem?.children?.map((child: NavigationItemChildren) => ({
+                    ...child,
+                    current: child.href === path,
+                })),
+            }))
+        );
     }, [path]);
 
     // If user clicks inside the sidebar switch the toggle state to !toggleSidebar
