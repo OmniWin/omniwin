@@ -23,7 +23,7 @@ export type FilterComponentProps = {
     setFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
 };
 
-export type FetchRequestBody = {
+export type FetchRafflesRequestBody = {
     pagination: {
         pageSize: number;
         offset: number;
@@ -33,7 +33,7 @@ export type FetchRequestBody = {
     sortBy: string;
 };
 
-export type Raffle = {
+export type RaffleCard = {
     full_price: number;
     ticket_price: number;
     tickets_bought: number;
@@ -49,3 +49,57 @@ export type Raffle = {
     collectionName: string;
     isVerified: boolean;
 };
+
+export interface Raffle {
+    id_nft: number;
+    id_lot: number;
+    total_tickets: number;
+    bonus_tickets: number;
+    tickets_bought: number;
+    ticket_price: string;
+    transactions: number;
+    end_timestamp: number;
+    fee: number;
+    closed: number;
+    buyout: number;
+    asset_claimed: number;
+    tokens_claimed: number;
+    owner: string;
+    signer: string | null;
+    token: string;
+    token_id: string;
+    amount: string;
+    asset_type: string;
+    data: string;
+    network: string;
+    created_at: string;
+    updated_at: string;
+    name: string;
+    collectionName: string;
+    image_local: string;
+}
+
+export interface Ticket {
+    id_ticket: number;
+    id_lot: number;
+    unique_id: string;
+    recipient: string;
+    total_tickets: number;
+    amount: string;
+    bonus: number;
+    tokens_spent: string;
+}
+
+export interface PurchaseOption {
+    amount?: number;
+    bonus?: number;
+    total?: number;
+}
+
+export interface CountdownRendererProps {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+    completed: boolean;
+}

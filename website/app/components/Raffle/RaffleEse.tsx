@@ -5,10 +5,10 @@ import CustomImageWithFallback from '@/app/components/Raffle/CustomImageWithFall
 import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
 import { TicketIcon, ClockIcon } from "@heroicons/react/24/outline";
 
-import { Raffle } from "@/app/types";
+import { RaffleCard } from "@/app/types";
 import { classNames, formatCountdown, shortenAddress, formatMoney } from "@/app/utils";
 
-export default function RaffleEse(raffle: Raffle) {
+export default function RaffleEse(raffle: RaffleCard) {
     const progress = (raffle.tickets_bought / raffle.tickets_total) * 100;
 
     const timeLeft = formatCountdown(new Date(), new Date(raffle.time_left * 1000));
@@ -102,7 +102,7 @@ export default function RaffleEse(raffle: Raffle) {
                             <p className="text-[11px] xl:text-xs font-bold text-smoke-300">Market value</p>
                             <p className="2xl:text-xl xl:text-lg font-bold text-white truncate select-text">{formatMoney(raffle.full_price, "USD")}</p>
                         </div>
-                        <div className={classNames("flex max-w-[30%] min-w-[30%]", timeLeft.hasEnded && 'flex-col items-center')}>
+                        <div className={classNames("flex max-w-[30%] min-w-[30%]", timeLeft.hasEnded && "flex-col items-center")}>
                             {timeLeft.hasEnded ? (
                                 <>
                                     <p className="text-[11px] xl:text-xs font-bold text-smoke-300">Winner</p>
