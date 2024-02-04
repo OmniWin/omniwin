@@ -10,7 +10,7 @@ import { classNames, formatCountdown, shortenAddress, formatMoney } from "@/app/
 
 export default function RaffleDefault(raffle: RaffleCard) {
     const progress = (raffle.tickets_bought / raffle.tickets_total) * 100;
-    const timeLeft = formatCountdown(new Date(), new Date(raffle.time_left * 1000));
+    const timeLeft = formatCountdown(new Date(), new Date(raffle.end_timestamp * 1000));
 
     return (
         <Link href={"/raffles/" + raffle.nft_id} className="max-w-xs w-full lg:max-w-full group hover:transform hover:scale-105 transition-all duration-300 ease-in-out">

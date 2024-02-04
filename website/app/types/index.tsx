@@ -46,8 +46,8 @@ export type RaffleCard = {
     nft_id: number;
     token_id: string;
     network: string;
-    collectionName: string;
-    isVerified: boolean;
+    collection_name: string;
+    is_verified: boolean;
 };
 
 export interface Raffle {
@@ -75,7 +75,7 @@ export interface Raffle {
     created_at: string;
     updated_at: string;
     name: string;
-    collectionName: string;
+    collection_name: string;
     image_local: string;
 }
 

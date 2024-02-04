@@ -45,7 +45,7 @@ import { RaffleCard, Ticket, PurchaseOption } from "@/app/types";
 interface RaffleResponse {
     success: boolean;
     data: {
-        nft: RaffleCard[];
+        nft: RaffleCard;
         tickets: Ticket[];
         purchaseOptions: PurchaseOption[];
     };
@@ -60,10 +60,10 @@ export default function RafflePage({
         id: string;
     };
 }) {
-    const [raffleData, setRaffleData] = useState<{ nft: RaffleCard[]; tickets: Ticket[]; purchaseOptions: PurchaseOption[] } | null>(null);
+    const [raffleData, setRaffleData] = useState<{ nft: RaffleCard; tickets: Ticket[]; purchaseOptions: PurchaseOption[] } | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const progress = raffleData?.nft?.[0] ? ((raffleData?.nft?.[0]?.tickets_bought / raffleData?.nft?.[0]?.tickets_total) * 100) : 0;
-    const timeLeft = formatCountdown(new Date(), new Date(raffleData?.nft?.[0]?.end_timestamp * 1000));
+    const progress = raffleData?.nft ? ((raffleData.nft.tickets_bought / raffleData.nft.tickets_total) * 100) : 0;
+    const timeLeft = raffleData?.nft ? formatCountdown(new Date(), new Date(raffleData.nft.end_timestamp * 1000)) : { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
     useEffect(() => {
         const fetchRaffleData = async () => {
@@ -153,17 +153,17 @@ export default function RafflePage({
                 </Link>
                 <div className="lg:flex items-center justify-between">
                     <h1 className="text-2xl font-bold leading-7 text-zinc-100 sm:truncate sm:text-3xl sm:tracking-tight mb-5 lg:mb-0">
-                        {raffleData?.nft?.[0]?.isVerified && (
+                        {raffleData?.nft.is_verified && (
                             <div className="relative inline-block h-auto mr-2">
                                 <CheckBadgeIcon className="inline-block h-6 xl:h-8 w-6 xl:w-8 text-water-600 z-10 relative" />
                                 <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 inset-0 rounded-full bg-white h-3 w-3 xl:h-4 xl:w-4"></div>
                             </div>
                         )}
-                        {raffleData?.nft?.[0]?.nft_name}
+                        {raffleData?.nft.nft_name}
                         {/* <span className="text-gray-400">#{contest.id}</span> */}
                     </h1>
                     {/* <Countdown date={Date.now() + 1000000000} renderer={countdownRederer}></Countdown> */}
-                    <Countdown date={raffleData?.nft?.[0]?.end_timestamp * 1000} renderer={countdownRederer}></Countdown>
+                    <Countdown date={raffleData?.nft?.end_timestamp * 1000} renderer={countdownRederer}></Countdown>
                 </div>
 
                 <div className="grid items-center grid-cols-2 xl:grid-cols-5 mt-8 border-zinc-800 border rounded-xl">
@@ -177,7 +177,7 @@ export default function RafflePage({
                             <div className="text-zinc-400 text-sm">Owner</div>
                             {/* <div className="text-lg font-bold leading-7 text-zinc-100 sm:truncate sm:text-xl sm:tracking-tight">0x6d..d34</div> */}
                             <div className="text-lg font-bold leading-7 text-zinc-100 sm:truncate sm:text-base sm:tracking-tight">
-                                {raffleData?.nft?.[0]?.nft_owner?.length > 10 ? shortenAddress(raffleData?.nft?.[0]?.nft_owner, 3, 3) : raffleData?.nft?.[0]?.nft_owner}
+                                {raffleData?.nft?.nft_owner?.length > 10 ? shortenAddress(raffleData?.nft?.nft_owner, 3, 3) : raffleData?.nft?.nft_owner}
                             </div>
                         </div>
                     </div>
@@ -187,16 +187,16 @@ export default function RafflePage({
                             <span className="text-zinc-300">
                                 {!timeLeft.hasEnded && (
                                     <>
-                                        Only<span className="text-jade-400 inline-block mx-1">{raffleData?.nft?.[0]?.tickets_total - raffleData?.nft?.[0]?.tickets_bought}</span>
+                                        Only<span className="text-jade-400 inline-block mx-1">{raffleData?.nft?.tickets_total - raffleData?.nft?.tickets_bought}</span>
                                         tickets until the raffle starts
                                     </>
                                 )}
-                                {timeLeft.hasEnded && raffleData?.nft?.[0]?.tickets_total - raffleData?.nft?.[0]?.tickets_bought == 0 && <>Raffle filled</>}
+                                {timeLeft.hasEnded && raffleData?.nft?.tickets_total - raffleData?.nft?.tickets_bought == 0 && <>Raffle filled</>}
                             </span>
                             <div className="flex items-center space-x-1">
-                                <p className="text-jade-400 whitespace-nowrap">{raffleData?.nft?.[0]?.tickets_bought}</p>
+                                <p className="text-jade-400 whitespace-nowrap">{raffleData?.nft?.tickets_bought}</p>
                                 <p className="text-white">/</p>
-                                <p className="text-white">{raffleData?.nft?.[0]?.tickets_total}</p>
+                                <p className="text-white">{raffleData?.nft?.tickets_total}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -212,7 +212,7 @@ export default function RafflePage({
                         <div>
                             <div className="text-zinc-400 text-sm">Market value</div>
                             <div className="text-xl font-bold leading-7 text-zinc-100 sm:truncate sm:text-3xl sm:tracking-tight">
-                                {formatMoney(raffleData?.nft?.[0]?.full_price, "USD")}
+                                {formatMoney(raffleData?.nft?.full_price, "USD")}
                                 {/* <span className="text-zinc-400 text-sm">$</span> */}
                             </div>
                         </div>
@@ -233,10 +233,10 @@ export default function RafflePage({
                             <CustomImageWithFallback
                                 showMaximizeButton
                                 glowEffect
-                                alt={"Raffle for " + raffleData?.nft?.[0]?.nft_name + " to win it"}
+                                alt={"Raffle for " + raffleData?.nft?.nft_name + " to win it"}
                                 width={100} // Placeholder width for aspect ratio calculation
                                 height={100} // Placeholder height for aspect ratio calculation
-                                src={`https://web3trust.app/nft/${raffleData?.nft?.[0]?.nft_image}`}
+                                src={`https://web3trust.app/nft/${raffleData?.nft?.nft_image}`}
                                 sizes="100%"
                                 style={{
                                     objectFit: "cover",
