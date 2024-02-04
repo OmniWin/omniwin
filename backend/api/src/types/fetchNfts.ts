@@ -11,7 +11,7 @@ export type FetchNFTsResultType = {
         ticket_price: number;
         tickets_bought: number;
         tickets_total: number;
-        time_left: Date;
+        end_timestamp: Date;
         nft_name: string;
         nft_image: string;
         nft_owner: string;
