@@ -109,7 +109,7 @@ export class NftRepository {
         }
 
         if (sortBy === SortBy.TicketsRemaining) {
-            orderByClause += `= ORDER BY (total_tickets - tickets_bought) ASC LIMIT ?`;
+            orderByClause += ` ORDER BY (total_tickets - tickets_bought) / total_tickets ASC LIMIT ?`;
         }
 
         if (sortBy === SortBy.Newest) {
@@ -124,7 +124,7 @@ export class NftRepository {
             orderByClause += ` ORDER BY end_timestamp ASC LIMIT ?`;
         }
 
-        if (sortBy === 'Trending') {
+        if (sortBy === SortBy.Trending) {
             orderByClause += ` ORDER BY trendingScore DESC LIMIT ?`;
         }
 
@@ -138,8 +138,8 @@ export class NftRepository {
         rawQuery += orderByClause;
 
 
-        console.log("rawQuery", rawQuery);
-        console.log("queryParams", queryParams);
+        // console.log("rawQuery", rawQuery);
+        // console.log("queryParams", queryParams);
         // Execute the query with parameterized values
         const nfts = await prisma.$queryRawUnsafe(rawQuery, ...queryParams);
 

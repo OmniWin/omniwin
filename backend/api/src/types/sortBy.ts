@@ -5,4 +5,5 @@ export enum SortBy {
     Newest = 'newest',
     Oldest = 'oldest',
     TimeRemaining = 'time_remaining',
+    Trending = 'trending'
 }
