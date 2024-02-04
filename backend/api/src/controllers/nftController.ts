@@ -71,8 +71,8 @@ export class NftController {
                 nft_id: item.id_lot,
                 token_id: item.token_id,
                 network: item.network,
-                collectionName: item.collectionName,
-                isVerified: false,
+                collection_name: item.collectionName,
+                is_verified: false,
             }));
 
             req.server.log.info(`Nfts fetched successfully, page: ${cursor}, limit: ${limit}`);

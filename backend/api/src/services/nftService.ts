@@ -69,8 +69,8 @@ export class NftService {
             nft_id: item.id_lot,
             token_id: item.token_id,
             network: item.network,
-            collectionName: item.collectionName,
-            isVerified: false,
+            collection_name: item.collectionName,
+            is_verified: false,
         }));
 
         //@ts-ignore
