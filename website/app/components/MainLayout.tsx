@@ -21,7 +21,7 @@ export default function MainLayout(props: React.PropsWithChildren) {
             {/* <div className="lg:pl-72"> */}
             <div className={`${sidebarToggleState.toggleSidebar ? "lg:pl-8" : "lg:pl-64"} transition-all duration-300`}>
                 <TopNavigation />
-                <main ref={mainRef} className="py-3 md:py-12 px-3 md:px-12 mx-2 sm:mx-6 lg:mx-8 min-h-full bg-zinc-900 rounded-lg max-h-[calc(100vh-64px-.75rem)] overflow-y-auto no-scrollbar">
+                <main ref={mainRef} className="py-3 md:py-12 px-3 md:px-12 mx-2 sm:mx-6 lg:mx-8   bg-zinc-900 rounded-lg max-h-[calc(100vh-64px-.75rem)] overflow-y-auto no-scrollbar min-h-[calc(100vh-64px-1rem)]">
                     {props.children}
                 </main>
                 <MobileNavigation mainRef={mainRef} />

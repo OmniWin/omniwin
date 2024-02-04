@@ -13,7 +13,7 @@ import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/se
 import { classNames } from "@/app/utils";
 
 // Types
-import { Filter, SortOption, FetchRafflesRequestBody, RaffleCard } from "@/app/types";
+import { Filter, SortOption, FetchRafflesRequestBody, RaffleCard, FilterOption } from "@/app/types";
 
 // const raffleList = [
 //     {
@@ -266,20 +266,20 @@ export default function RaffleList() {
         setIsLoading(true);
 
         // Extract types from filters
-        const typesFilter = filters.find((filter) => filter.id === "types");
-        let types = typesFilter ? typesFilter.options.filter((option) => option.checked).map((option) => option.value) : [];
+        const typesFilter = filters.find((filter: Filter) => filter.id === "types");
+        let types = typesFilter ? typesFilter.options.filter((option: FilterOption) => option.checked).map((option: FilterOption) => option.value) : [];
         if (types.includes("nfts")) {
-            types = types.filter((type) => type !== "nfts").concat(nftsTypes);
+            types = types.filter((type: any) => type !== "nfts").concat(nftsTypes);
         }
 
         // Extract networks from filters
-        const networkFilter = filters.find((filter) => filter.id === "chain");
-        const networks = networkFilter ? networkFilter.options.filter((option) => option.checked).map((option) => option.value.toUpperCase()) : [];
+        const networkFilter = filters.find((filter: Filter) => filter.id === "chain");
+        const networks = networkFilter ? networkFilter.options.filter((option: FilterOption) => option.checked).map((option: FilterOption) => option.value.toUpperCase()) : [];
 
         // Determine sort option
-        const selectedSortOption = sortOptions.find((option) => option.current)?.id || "time_remaining";
+        const selectedSortOption = sortOptions.find((option: FilterOption) => option.checked)?.id || "time_remaining";
 
-        const requestBody: FetchRequestBody = {
+        const requestBody: FetchRafflesRequestBody = {
             pagination: {
                 pageSize: 20,
                 offset: nextCursor,
@@ -300,7 +300,7 @@ export default function RaffleList() {
             .then((response) => response.json())
             .then((data) => {
                 console.log(data);
-                setRaffleList((prevList) => [...prevList, ...data.data.items]); // Append new items
+                setRaffleList((prevList: RaffleCard[]) => [...prevList, ...data.data.items]); // Append new items
                 setNextCursor(data.data.nextCursor);
                 setIsLoading(false);
             })

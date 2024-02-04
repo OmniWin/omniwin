@@ -236,7 +236,7 @@ export const SidebarNavigation = () => {
                         <ul role="list" className="flex flex-1 flex-col gap-y-7">
                             <li>
                                 <ul role="list" className="-mx-2 space-y-1">
-                                    {navigation.map((item) => (
+                                    {navigation.map((item: NavigationItem) => (
                                         <li key={item.name}>
                                             {!item.children ? (
                                                 <Link

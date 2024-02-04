@@ -69,3 +69,14 @@ body {
   border-radius: 10px;
 
 }
+
+
+/* W3 Button */
+:root {
+  --wui-border-radius-m: 0.375rem !important;
+  --wui-color-accent-100: #3bcc8a !important;
+  --wui-color-accent-090: #3bcc8bde !important;
+  /* --wui-color-accent-100: #1b8df5 !important; */
+  /* --wui-color-accent-100: #1b8df5 !important; */
+  --wui-color-inverse-100: #09090b !important;
+}

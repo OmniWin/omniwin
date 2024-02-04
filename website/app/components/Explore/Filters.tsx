@@ -167,7 +167,7 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                                     <div className="py-1">
                                         {sortOptions.map((option) => (
                                             <Menu.Item key={option.name}>
-                                                {({ active }) => (
+                                                {({ active }: { active: boolean }) => (
                                                     <button
                                                         onClick={() => handleSortOptionClick(option)}
                                                         className={classNames(option.current ? "font-medium text-zinc-100" : "text-zinc-500", active ? "bg-zinc-800" : "", "block px-4 py-2 text-sm")}

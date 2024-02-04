@@ -66,7 +66,6 @@ export const TopNavigation = () => {
                             </svg>
                             Quick search...<span className="ml-auto pl-3 flex-none text-xs font-semibold">Ctrl K</span>
                         </button>
-                        <w3m-button />
                     </form>
                     <div className="flex items-center gap-x-4 lg:gap-x-6">
                         <button onClick={() => setOpen(true)} type="button" className="-m-2.5 p-2.5 text-zinc-400 hover:text-zinc-500 block lg:hidden">
@@ -82,7 +81,8 @@ export const TopNavigation = () => {
                         {/* <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-zinc-950/10" aria-hidden="true" /> */}
 
                         {/* Profile dropdown */}
-                        <Menu as="div" className="relative">
+                        <w3m-button />
+                        {/* <Menu as="div" className="relative">
                             <Menu.Button className="-m-1.5 flex items-center p-1.5">
                                 <span className="sr-only">Open user menu</span>
                                 <img
@@ -118,7 +118,7 @@ export const TopNavigation = () => {
                                     ))}
                                 </Menu.Items>
                             </Transition>
-                        </Menu>
+                        </Menu> */}
                     </div>
                 </div>
             </div>
