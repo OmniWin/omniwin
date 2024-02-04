@@ -62,7 +62,7 @@ export class NftController {
                 ticket_price: Number(item.ticket_price) / Math.pow(10, USDC_decimals),
                 tickets_bought: item.tickets_bought,
                 tickets_total: item.total_tickets,
-                time_left: item.end_timestamp,
+                end_timestamp: item.end_timestamp,
                 nft_name: item.name,
                 nft_image: item.image_local,
                 nft_owner: item.owner,
