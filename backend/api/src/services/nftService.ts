@@ -57,7 +57,7 @@ export class NftService {
         //@ts-ignore
         const processedNft = fetchedNft.nft.map(item => ({
             full_price: (Number(item.ticket_price) / Math.pow(10, USDC_decimals)) * item.total_tickets,
-            ticket_price: Number(item.ticket_price) / Math.pow(10, USDC_decimals),
+            ticket_price: this.convertBigInts(Number(item.ticket_price) / Math.pow(10, USDC_decimals)),
             tickets_bought: item.tickets_bought,
             tickets_total: item.total_tickets,
             time_left: item.end_timestamp,
@@ -77,9 +77,9 @@ export class NftService {
         const processedTickets = fetchedNft.tickets.map(ticket => ({
             recipient: ticket.recipient,
             total_tickets: ticket.total_tickets,
-            amount: ticket.amount,
+            amount: this.convertBigInts(Number(ticket.amount)),
             bonus: ticket.bonus,
-            tokens_spent: Number(ticket.tokens_spent) / Math.pow(10, USDC_decimals),
+            tokens_spent: this.convertBigInts(Number(ticket.tokens_spent) / Math.pow(10, USDC_decimals)),
         }));
 
         //bonus Tickets formula= (uint256(amount) * amount) / (uint256(4) * totalTickets);
@@ -87,8 +87,30 @@ export class NftService {
         const purchaseOptions = this.getPurchaseOptions(fetchedNft.nft[0].total_tickets);
         console.log('purchaseOptions', purchaseOptions)
 
-        return { nft: processedNft, tickets: processedTickets, purchaseOptions };
+        return { nft: processedNft[0], tickets: processedTickets, purchaseOptions };
 
+    }
+
+    async fetchNFTTickets(lotId: number, limit: number, cursor: number) {
+        const fetchedTickets = await this.nftRepository.fetchNFTTickets(lotId, limit, cursor);
+        const USDC_decimals = 6;
+
+        const processedTickets = fetchedTickets.map(ticket => ({
+            id_ticket: ticket.id_ticket,
+            recipient: ticket.recipient,
+            total_tickets: ticket.total_tickets,
+            amount: this.convertBigInts(Number(ticket.amount)),
+            bonus: ticket.bonus,
+            tokens_spent: this.convertBigInts(Number(ticket.tokens_spent) / Math.pow(10, USDC_decimals)),
+        }));
+
+        let nextCursor: string | null = null;
+        if (processedTickets.length > limit) {
+            nextCursor = processedTickets[limit - 1].id_ticket.toString();
+            processedTickets.pop(); // Remove the extra item
+        }
+
+        return { tickets: processedTickets, nextCursor };
     }
 
     calculateBonus(amount: number, totalTickets: number) {
@@ -109,5 +131,14 @@ export class NftService {
             };
         });
         return optionsWithBonuses;
+    }
+
+    convertBigInts(obj: any) {
+        for (let key in obj) {
+            if (typeof obj[key] === 'bigint') {
+                obj[key] = obj[key].toString();
+            }
+        }
+        return obj;
     }
 }

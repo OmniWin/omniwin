@@ -110,7 +110,7 @@ export class NftController {
 
             req.server.log.info(`Nft fetched successfully, id: ${nftId}`);
 
-            return res.code(201).send({
+            return res.code(200).send({
                 success: true,
                 data: nft,
                 message: "Nft fetched successfully",
@@ -122,6 +122,34 @@ export class NftController {
             if (error.code === 'P2002') { // Prisma's code for unique constraint violation
                 throw new HttpError(req.server, "EMAIL_IN_USE");
             }
+            throw new HttpError(req.server, error.message);
+        }
+    }
+
+    public static async fetchNFTTickets(req: FastifyRequest, res: FastifyReply) {
+        try {
+            const lotId = (req.params as any).id;
+            const nftService = new NftService(req.server as FastifyInstance);
+
+            let { cursor, limit } = req.query as { cursor: string, limit: string };
+
+            const lotId_ = parseInt(lotId, 10);
+            const limit_ = parseInt(limit, 10) || 10;
+            const cursor_ = cursor ? parseInt(cursor.toString()) : 0;
+
+            const { tickets, nextCursor } = await nftService.fetchNFTTickets(lotId_, limit_, cursor_);
+
+            return res.code(200).send({
+                success: true,
+                data: {
+                    items: tickets,
+                    nextCursor: nextCursor
+                },
+                message: "Nfts fetched successfully",
+            });
+
+        } catch (error: any) {
+            console.log(error);
             throw new HttpError(req.server, error.message);
         }
     }

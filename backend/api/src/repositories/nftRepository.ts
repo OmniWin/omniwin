@@ -204,12 +204,24 @@ export class NftRepository {
         const queryParams2 = [id];
         const tickets = await prisma.$queryRawUnsafe(rawQuery2, ...queryParams2) as any;
 
-        //@ts-ignore
-        const processedTickets = tickets.map(item => this.convertBigInts(item));
-        //@ts-ignore
-        const processedNft = nft.map(item => this.convertBigInts(item));
 
-        return { nft: processedNft, tickets: processedTickets };
+
+
+        return { nft, tickets };
+    }
+
+    async fetchNFTTickets(lotId: number, limit: number, cursor: number) {
+        const { prisma } = this.fastify;
+        const tickets = await prisma.tickets.findMany({
+            take: limit + 1,
+            cursor: cursor ? { id_ticket: cursor } : undefined,
+            orderBy: { id_ticket: 'asc' },
+            where: {
+                id_lot: lotId
+            }
+        });
+
+        return tickets;
     }
 
     convertBigInts(obj: any) {

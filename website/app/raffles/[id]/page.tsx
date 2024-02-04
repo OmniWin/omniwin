@@ -5,7 +5,7 @@
  * 
  * ❌ Add ws for activity
  * ❌ Add ws for participants
- * ❌ Fetch participants with pagination
+ * ✅ Fetch participants with pagination
  * ❌ Show winner if exists, if not show the raffle as incomplete
  * ❌ Add favorite logic
  * ❌ Show favorites counts and likes if the user already liked the raffle

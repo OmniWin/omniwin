@@ -10,6 +10,9 @@ import config from "../contracts/contractConfig";
 export async function getNFTData(nftContractAddress: string, tokenId: string, assetType: AssetType) {
     const nftContract = assetType === AssetType.ERC721 ? new ethers.Contract(nftContractAddress, NFT_721_ABI, goerliProvider) : new ethers.Contract(nftContractAddress, NFT_1155_ABI, goerliProvider);
 
+    console.log(nftContractAddress, nftContract, assetType);
+
+
     let response = {} as any;
     let tokenURI;
     try {
@@ -25,11 +28,8 @@ export async function getNFTData(nftContractAddress: string, tokenId: string, as
                     console.error("Error fetching collection name:", error);
                 }
 
-                console.log("collectionName_721", collectionName_721);
-
                 response = await fetchNFTData(tokenURI, tokenId) as any;
-
-
+                console.log("response", response);
                 response.collectionName = collectionName_721;
                 break;
             case AssetType.ERC1155:
@@ -53,7 +53,7 @@ export async function getNFTData(nftContractAddress: string, tokenId: string, as
                 break;
 
             case AssetType.ERC20:
-                 
+            //TODO: Implement ERC20 tokenURI fetching
             default:
                 console.log("Unknown asset type");
                 throw new Error("Unknown asset type");
@@ -217,6 +217,7 @@ async function fetchNFTData(uri: string, tokenId: string) {
 
             let imageUri = data.image;
 
+            console.log("imageUri", imageUri);
             const image_local = await downloadImage(imageUri, tokenId);
             if (image_local) data.image_local = image_local;
 
