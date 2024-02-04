@@ -63,7 +63,7 @@ export default function RafflePage({
     const [raffleData, setRaffleData] = useState<{ nft: RaffleCard[]; tickets: Ticket[]; purchaseOptions: PurchaseOption[] } | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const progress = raffleData?.nft?.[0] ? ((raffleData?.nft?.[0]?.tickets_bought / raffleData?.nft?.[0]?.tickets_total) * 100) : 0;
-    const timeLeft = formatCountdown(new Date(), new Date(raffleData?.nft?.[0]?.time_left * 1000));
+    const timeLeft = formatCountdown(new Date(), new Date(raffleData?.nft?.[0]?.end_timestamp * 1000));
 
     useEffect(() => {
         const fetchRaffleData = async () => {
@@ -163,7 +163,7 @@ export default function RafflePage({
                         {/* <span className="text-gray-400">#{contest.id}</span> */}
                     </h1>
                     {/* <Countdown date={Date.now() + 1000000000} renderer={countdownRederer}></Countdown> */}
-                    <Countdown date={raffleData?.nft?.[0]?.time_left * 1000} renderer={countdownRederer}></Countdown>
+                    <Countdown date={raffleData?.nft?.[0]?.end_timestamp * 1000} renderer={countdownRederer}></Countdown>
                 </div>
 
                 <div className="grid items-center grid-cols-2 xl:grid-cols-5 mt-8 border-zinc-800 border rounded-xl">

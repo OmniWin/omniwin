@@ -20,7 +20,7 @@ import { classNames, formatCountdown, shortenAddress, formatMoney } from "@/app/
 
 export default function RaffleMetaWin(raffle: RaffleCard) {
     const progress = (raffle.tickets_bought / raffle.tickets_total) * 100;
-    const timeLeft = formatCountdown(new Date(), new Date(raffle.time_left * 1000));
+    const timeLeft = formatCountdown(new Date(), new Date(raffle.end_timestamp * 1000));
 
     return (
         <Link href={"/raffles/" + raffle.nft_id} className="mx-1 sm:mx-0 flex flex-col items-center rounded-lg relative group hover:bg-smoke-800 transition-color duration-400">

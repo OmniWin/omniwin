@@ -38,7 +38,7 @@ export type RaffleCard = {
     ticket_price: number;
     tickets_bought: number;
     tickets_total: number;
-    time_left: number;
+    end_timestamp: number;
     nft_name: string;
     nft_image: string;
     nft_owner: string;
