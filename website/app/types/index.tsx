@@ -26,7 +26,7 @@ export type FilterComponentProps = {
 export type FetchRafflesRequestBody = {
     pagination: {
         pageSize: number;
-        offset: number;
+        cursor: number;
     };
     types: string[];
     networks: string[];

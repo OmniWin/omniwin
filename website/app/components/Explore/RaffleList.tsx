@@ -278,12 +278,12 @@ export default function RaffleList() {
         const networks = networkFilter ? networkFilter.options.filter((option: FilterOption) => option.checked).map((option: FilterOption) => option.value.toUpperCase()) : [];
 
         // Determine sort option
-        const selectedSortOption = sortOptions.find((option: FilterOption) => option.checked)?.id || "time_remaining";
+        const selectedSortOption = sortOptions.find((option: SortOption) => option.current)?.id || "time_remaining";
 
         const requestBody: FetchRafflesRequestBody = {
             pagination: {
                 pageSize: 20,
-                offset: nextCursor,
+                cursor: nextCursor,
             },
             types: types,
             networks: networks,
