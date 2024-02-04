@@ -25,7 +25,7 @@ const fastify = Fastify({
 })
 
 const corsOptions = {
-    origin: ['http://localhost:3000', 'http://localhost:4356'],
+    origin: ['http://localhost:3000', 'http://localhost:4356', 'http://localhost'],
     methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
     credentials: true
 };
