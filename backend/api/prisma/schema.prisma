@@ -32,11 +32,9 @@ model Nft {
   asset_type     AssetType
   data           String
   network        NetworkType
+  trendingScore  Int         @default(0)
   created_at     DateTime    @default(now())
   updated_at     DateTime    @default(now()) @updatedAt
-
-  metadata NftMetadata?
-  tickets  Tickets[]
 
   // @@unique([id_lot], name: "id_lot")
   @@index([token, token_id], name: "token_tokenID")
@@ -56,8 +54,6 @@ model NftMetadata {
   created_at     DateTime          @default(now())
   updated_at     DateTime          @default(now()) @updatedAt
 
-  nft Nft @relation(fields: [id_nft], references: [id_nft])
-
   @@index([id_nft], name: "id_nft")
 }
 
@@ -72,9 +68,6 @@ model Tickets {
   bonus         Int
   created_at    DateTime @default(now())
   updated_at    DateTime @default(now()) @updatedAt
-
-  //connect to Nft via id_lot
-  nft Nft @relation(fields: [id_lot], references: [id_lot])
 
   @@unique([unique_id], name: "id_lot_id_user_unique")
   @@index([recipient], name: "recipient")

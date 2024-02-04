@@ -215,6 +215,7 @@ export default function RaffleList() {
     const [raffleList, setRaffleList] = useState<RaffleCard[]>([]);
     const [nextCursor, setNextCursor] = useState(0);
     const [sortOptions, setSortOptions] = useState<SortOption[]>([
+        { id: "trending", name: "Trending", href: "#", current: false },
         { id: "tickets_remaining", name: "% Tickets Remaining", href: "#", current: false },
         { id: "newest", name: "Newest", href: "#", current: true },
         { id: "oldest", name: "Oldest", href: "#", current: false },

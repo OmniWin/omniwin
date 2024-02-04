@@ -22,18 +22,19 @@ export class NftController {
             const { pagination, types, networks, sortBy } = req.body as {
                 pagination: {
                     pageSize: string,
-                    offset: string
+                    cursor: string
                 },
                 types: AssetType[],
                 networks: NetworkType[],
-                sortBy: SortBy
+                sortBy: SortBy,
+                includeClosed: boolean
             };
 
             console.log("filters", req.body);
 
 
             const limit = parseInt(pagination.pageSize, 10) || 10;
-            const cursor = pagination?.offset ? parseInt(pagination.offset.toString()) : 0;
+            const cursor = pagination?.cursor ? parseInt(pagination.cursor.toString()) : 0;
 
             const filters = {
                 types,
@@ -76,13 +77,13 @@ export class NftController {
 
             req.server.log.info(`Nfts fetched successfully, page: ${cursor}, limit: ${limit}`);
 
-            return res.code(201).send({
+            return res.code(200).send({
                 success: true,
                 data: {
                     items: convertedItems,
                     nextCursor: nextCursor
                 } as FetchNFTsResultType,
-                message: "User created successfully",
+                message: "Nfts fetched successfully",
             });
 
         } catch (error: any) {

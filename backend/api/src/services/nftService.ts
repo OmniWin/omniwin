@@ -10,7 +10,7 @@ export class NftService {
         this.nftRepository = new NftRepository(this.fastify);
     }
 
-    async fetchNFTs(limit: number, cursor: number, filters: { types?: AssetType[], networks?: NetworkType[], sortBy?: SortBy }) {
+    async fetchNFTs(limit: number, cursor: number, filters: { types?: AssetType[], networks?: NetworkType[], sortBy?: SortBy, includeClosed?: boolean }) {
         let whereCondition = cursor ? { id_nft: { gt: cursor } } : {} as any;
 
         if (filters?.types) {
@@ -31,10 +31,14 @@ export class NftService {
             }
         }
 
-        let orderBy = this.mapSortBy(filters.sortBy);
+        if ('closed' in filters) {
+            whereCondition.includeClosed = filters.includeClosed;
+        } else {
+            whereCondition.includeClosed = false;
+        }
 
 
-        const items = await this.nftRepository.fetchNFTs(whereCondition, limit, orderBy);
+        const items = await this.nftRepository.fetchNFTs(whereCondition, limit, cursor, filters.sortBy);
 
         let nextCursor: string | null = null;
         if (items.length > limit) {
@@ -44,26 +48,6 @@ export class NftService {
 
         return { items, nextCursor };
     }
-
-    mapSortBy(sortBy: SortBy | undefined) {
-        switch (sortBy) {
-            case SortBy.TicketsRemaining:
-                return { custom: 'TicketsRemaining' };
-            case SortBy.PriceHighToLow:
-                return { custom: 'PriceHighToLow' };
-            case SortBy.PriceLowToHigh:
-                return { custom: 'PriceLowToHigh' };
-            case SortBy.Newest:
-                return { custom: 'Newest' };
-            case SortBy.Oldest:
-                return { custom: 'Oldest' };
-            case SortBy.TimeRemaining:
-                return { custom: 'TimeRemaining' }; // Modify as per your field name
-            default:
-                return { custom: 'Newest' };
-        }
-    }
-
 
     async fetchNFT(id: number) {
         const fetchedNft = await this.nftRepository.fetchNFT(id);
