@@ -27,12 +27,16 @@ import { cookieToInitialState } from 'wagmi'
 import { config } from '@/config'
 import { Web3Modal } from '@/context'
 
+
+
+
 export const metadata: Metadata = {
     title: 'Omniwin',
     description: 'Your one stop shop for all things crypto',
 }
 
 export default function RootLayout(props: React.PropsWithChildren) {
+
     // const sidebarToggleState = useSelector(selectSidebarToggleState);
     const initialState = cookieToInitialState(config, headers().get('cookie'))
 
