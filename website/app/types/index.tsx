@@ -79,6 +79,25 @@ export interface Raffle {
     image_local: string;
 }
 
+export type RaffleResponse = {
+    success: boolean;
+    data: {
+        nft: RaffleCard;
+        tickets: Ticket[];
+        purchaseOptions: PurchaseOption[];
+    };
+    message: string;
+}
+
+export type RaffleParticipantsResponse = {
+    success: boolean;
+    data: {
+        items: Ticket[];
+    };
+    message: string;
+}
+
+
 export interface Ticket {
     id_ticket: number;
     id_lot: number;
@@ -88,6 +107,7 @@ export interface Ticket {
     amount: string;
     bonus: number;
     tokens_spent: string;
+    created_at: string;
 }
 
 export interface PurchaseOption {

@@ -40,18 +40,13 @@ import { MinusIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { classNames, share, countdownRederer, formatCountdown, shortenAddress, formatMoney } from "@/app/utils";
 
 // Types
-import { RaffleCard, Ticket, PurchaseOption } from "@/app/types";
+import { RaffleResponse, RaffleParticipantsResponse } from "@/app/types";
 
-interface RaffleResponse {
-    success: boolean;
-    data: {
-        nft: RaffleCard;
-        tickets: Ticket[];
-        purchaseOptions: PurchaseOption[];
-    };
-    message: string;
-}
+import { fetchRaffleData, fetchRaffleParticipants } from '../../services/raffleService';
 
+
+
+import { useQuery } from '@tanstack/react-query';
 
 
 export default function RafflePage({
@@ -61,58 +56,35 @@ export default function RafflePage({
         id: string;
     };
 }) {
-    const [raffleData, setRaffleData] = useState<{ nft: RaffleCard; tickets: Ticket[]; purchaseOptions: PurchaseOption[] } | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const progress = raffleData?.nft ? ((raffleData.nft.tickets_bought / raffleData.nft.tickets_total) * 100) : 0;
-    const timeLeft = raffleData?.nft ? formatCountdown(new Date(), new Date(raffleData.nft.end_timestamp * 1000)) : { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    // const [raffleData, setRaffleData] = useState<{ nft: RaffleCard; tickets: Ticket[]; purchaseOptions: PurchaseOption[] } | null>(null);
+    // const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const { data: raffleData, isLoading, error } = useQuery<RaffleResponse['data'], Error>({
+        queryKey: ['raffleData', params.id],
+        queryFn: () => fetchRaffleData(params.id)
+    });
+
+    //fetch participants
+    const { data: participants, isLoading: participantsIsLoading, error: participantsError } = useQuery<RaffleParticipantsResponse['data'], Error>({
+        queryKey: ['participants', params.id],
+        queryFn: () => fetchRaffleParticipants(params.id, '10', '0')
+    });
 
 
-    useEffect(() => {
-        // Create a new EventSource instance to connect to the SSE endpoint
-        const eventSource = new EventSource('http://localhost/v1/events');
 
-        // Handle incoming messages
-        eventSource.onmessage = (event) => {
-            const newMessage = JSON.parse(event.data);
-            console.log('New message:', newMessage);
-        };
+    if (isLoading || !raffleData) return <div>Loading...</div>;
+    if (error) return <div>An error occurred: {error.message}</div>;
 
-        // Handle any errors
-        eventSource.onerror = (error) => {
-            console.error('EventSource failed:', error);
-            eventSource.close();
-        };
-
-        // Clean up the connection when the component unmounts
-        return () => {
-            eventSource.close();
-        };
-    }, []);
+    const progress = ((raffleData.nft.tickets_bought / raffleData.nft.tickets_total) * 100);
+    const timeLeft = formatCountdown(new Date(), new Date(raffleData.nft.end_timestamp * 1000))
 
 
-    useEffect(() => {
-        const fetchRaffleData = async () => {
-            const url = `${process.env.NEXT_PUBLIC_API_URL}/v1/nfts/${params.id}`;
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data: RaffleResponse = await response.json();
-                setRaffleData(data.data);
-            } catch (error) {
-                console.error("Failed to fetch raffle data:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchRaffleData();
-    }, [params.id]);
-
-    if (isLoading) {
-        return <div>Loading...</div>; // Implement your skeleton loader here
+    if (participantsIsLoading) {
+        return <div>Loading...</div>;
     }
+
+
+
 
     // if (!raffleData?.success) {
     //     return <div>Failed to load raffle data.</div>;
@@ -184,11 +156,11 @@ export default function RafflePage({
                                 <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 inset-0 rounded-full bg-white h-3 w-3 xl:h-4 xl:w-4"></div>
                             </div>
                         )}
-                        {raffleData?.nft.nft_name}
+                        {raffleData.nft.nft_name}
                         {/* <span className="text-gray-400">#{contest.id}</span> */}
                     </h1>
                     {/* <Countdown date={Date.now() + 1000000000} renderer={countdownRederer}></Countdown> */}
-                    <Countdown date={raffleData?.nft?.end_timestamp * 1000} renderer={countdownRederer}></Countdown>
+                    <Countdown date={raffleData.nft.end_timestamp * 1000} renderer={countdownRederer}></Countdown>
                 </div>
 
                 <div className="grid items-center grid-cols-2 xl:grid-cols-5 mt-8 border-zinc-800 border rounded-xl">
@@ -202,7 +174,7 @@ export default function RafflePage({
                             <div className="text-zinc-400 text-sm">Owner</div>
                             {/* <div className="text-lg font-bold leading-7 text-zinc-100 sm:truncate sm:text-xl sm:tracking-tight">0x6d..d34</div> */}
                             <div className="text-lg font-bold leading-7 text-zinc-100 sm:truncate sm:text-base sm:tracking-tight">
-                                {raffleData?.nft?.nft_owner?.length > 10 ? shortenAddress(raffleData?.nft?.nft_owner, 3, 3) : raffleData?.nft?.nft_owner}
+                                {raffleData.nft.nft_owner.length > 10 ? shortenAddress(raffleData.nft.nft_owner, 3, 3) : raffleData.nft.nft_owner}
                             </div>
                         </div>
                     </div>
@@ -212,23 +184,23 @@ export default function RafflePage({
                             <span className="text-zinc-300">
                                 {!timeLeft.hasEnded && (
                                     <>
-                                        Only<span className="text-jade-400 inline-block mx-1">{raffleData?.nft?.tickets_total - raffleData?.nft?.tickets_bought}</span>
+                                        Only<span className="text-jade-400 inline-block mx-1">{raffleData.nft.tickets_total - raffleData.nft.tickets_bought}</span>
                                         tickets until the raffle starts
                                     </>
                                 )}
-                                {timeLeft.hasEnded && raffleData?.nft?.tickets_total - raffleData?.nft?.tickets_bought == 0 && <>Raffle filled</>}
+                                {timeLeft.hasEnded && raffleData.nft.tickets_total - raffleData.nft.tickets_bought == 0 && <>Raffle filled</>}
                             </span>
                             <div className="flex items-center space-x-1">
-                                <p className="text-jade-400 whitespace-nowrap">{raffleData?.nft?.tickets_bought}</p>
+                                <p className="text-jade-400 whitespace-nowrap">{raffleData.nft.tickets_bought}</p>
                                 <p className="text-white">/</p>
-                                <p className="text-white">{raffleData?.nft?.tickets_total}</p>
+                                <p className="text-white">{raffleData.nft.tickets_total}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="overflow-hidden rounded-xl bg-white/20 h-2 w-full">
                                 <div className="h-full rounded-xl bg-gradient-to-b from-jade-400 to-jade-500" style={{ width: progress + `%` }}></div>
                             </div>
-                            <span className="text-xs text-zinc-400">{progress + `%`}</span>
+                            <span className="text-xs text-zinc-400">{parseInt(progress.toString()) + `%`}</span>
                         </div>
                     </div>
                     {/* <div className="p-4 flex items-center justify-center lg:col-span-1 bg-gradient-to-b from-zinc-900 to-zinc-800/50 rounded-tr-xl rounded-br-xl"> */}
@@ -237,7 +209,7 @@ export default function RafflePage({
                         <div>
                             <div className="text-zinc-400 text-sm">Market value</div>
                             <div className="text-xl font-bold leading-7 text-zinc-100 sm:truncate sm:text-3xl sm:tracking-tight">
-                                {formatMoney(raffleData?.nft?.full_price, "USD")}
+                                {formatMoney(raffleData.nft.full_price, "USD")}
                                 {/* <span className="text-zinc-400 text-sm">$</span> */}
                             </div>
                         </div>
@@ -258,10 +230,10 @@ export default function RafflePage({
                             <CustomImageWithFallback
                                 showMaximizeButton
                                 glowEffect
-                                alt={"Raffle for " + raffleData?.nft?.nft_name + " to win it"}
+                                alt={"Raffle for " + raffleData.nft.nft_name + " to win it"}
                                 width={100} // Placeholder width for aspect ratio calculation
                                 height={100} // Placeholder height for aspect ratio calculation
-                                src={`https://web3trust.app/nft/${raffleData?.nft?.nft_image}`}
+                                src={`https://web3trust.app/nft/${raffleData.nft.nft_image}`}
                                 sizes="100%"
                                 style={{
                                     objectFit: "cover",
@@ -454,7 +426,7 @@ export default function RafflePage({
                         <Activity />
                     </div>
                     <div className="">
-                        <Participants />
+                        {participants && <Participants participants={participants} />}
                     </div>
                 </div>
             </div>

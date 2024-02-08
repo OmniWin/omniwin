@@ -104,6 +104,7 @@ export class NftService {
             amount: this.convertBigInts(Number(ticket.amount)),
             bonus: ticket.bonus,
             tokens_spent: this.convertBigInts(Number(ticket.tokens_spent) / Math.pow(10, USDC_decimals)),
+            created_at: ticket.created_at,
         }));
 
         let nextCursor: string | null = null;

@@ -1,7 +1,7 @@
 // import { classNames } from "@/app/utils";
 import { ArrowTopRightOnSquareIcon, TicketIcon } from "@heroicons/react/24/outline";
 import { ListBulletIcon, QueueListIcon } from "@heroicons/react/24/solid";
-
+import { RaffleParticipantsResponse } from "@/app/types";
 type ActivityItem = {
     user: {
         name: string;
@@ -86,7 +86,11 @@ const activityItems: ActivityItem[] = [
     },
 ];
 
-export default function Participants() {
+interface ParticipantsProps {
+    participants: RaffleParticipantsResponse['data'];
+}
+
+export default function Participants({ participants }: ParticipantsProps) {
     return (
         <div className="bg-zinc-900 mt-10">
             <h2 className="flex items-center gap-2 text-md lg:text-xl text-zinc-100 font-semibold mt-8 mb-5">
@@ -116,23 +120,23 @@ export default function Participants() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                        {activityItems.map((item) => (
-                            <tr key={item.user.name} className="hover:bg-zinc-800">
+                        {participants.items.map((item) => (
+                            <tr key={item.recipient} className="hover:bg-zinc-800">
                                 <td className="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
                                     <div className="flex items-center gap-x-4">
-                                        <img src={item.user.imageUrl} alt="" className="h-8 w-8 rounded-full bg-zinc-800" />
-                                        <div className="truncate text-sm font-medium leading-6 text-white">{item.user.name}</div>
+                                        <img src={(item as any).imageUrl} alt="" className="h-8 w-8 rounded-full bg-zinc-800" />
+                                        <div className="truncate text-sm font-medium leading-6 text-white">{item.recipient}</div>
                                     </div>
                                 </td>
                                 <td className="hidden py-4 pl-0 pr-8 text-right text-sm leading-6 text-zinc-400 md:table-cell lg:pr-20">
                                     <div className="inline-flex items-center gap-2">
                                         <TicketIcon className="h-5 w-5 text-zinc-400" aria-hidden="true" />
-                                        <span className="text-zinc-100">{item.tickets}</span>
+                                        <span className="text-zinc-100">{item.amount}</span>
                                     </div>
                                 </td>
                                 <td className="hidden py-4 pl-0 pr-4 text-right text-sm leading-6 text-zinc-400 sm:table-cell sm:pr-6 lg:pr-8">
                                     <a href="#" className="inline-flex items-center gap-2 hover:text-zinc-200">
-                                        <time dateTime={item.dateTime}>{item.date}</time>
+                                        <time dateTime={item.created_at}>{item.created_at}</time>
                                         <ArrowTopRightOnSquareIcon className="h-5 w-5" aria-hidden="true" />
                                     </a>
                                 </td>
