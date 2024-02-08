@@ -53,6 +53,7 @@ interface RaffleResponse {
 }
 
 
+
 export default function RafflePage({
     params,
 }: {
@@ -65,9 +66,33 @@ export default function RafflePage({
     const progress = raffleData?.nft ? ((raffleData.nft.tickets_bought / raffleData.nft.tickets_total) * 100) : 0;
     const timeLeft = raffleData?.nft ? formatCountdown(new Date(), new Date(raffleData.nft.end_timestamp * 1000)) : { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
+
+    useEffect(() => {
+        // Create a new EventSource instance to connect to the SSE endpoint
+        const eventSource = new EventSource('http://localhost/v1/events');
+
+        // Handle incoming messages
+        eventSource.onmessage = (event) => {
+            const newMessage = JSON.parse(event.data);
+            console.log('New message:', newMessage);
+        };
+
+        // Handle any errors
+        eventSource.onerror = (error) => {
+            console.error('EventSource failed:', error);
+            eventSource.close();
+        };
+
+        // Clean up the connection when the component unmounts
+        return () => {
+            eventSource.close();
+        };
+    }, []);
+
+
     useEffect(() => {
         const fetchRaffleData = async () => {
-            const url = `https://api-omniwin.web3trust.app/v1/nfts/${params.id}`;
+            const url = `${process.env.NEXT_PUBLIC_API_URL}/v1/nfts/${params.id}`;
             try {
                 const response = await fetch(url);
                 if (!response.ok) {

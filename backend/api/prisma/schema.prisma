@@ -66,6 +66,7 @@ model Tickets {
   amount        BigInt
   tokens_spent  BigInt
   bonus         Int
+  block         Int      @default(0)
   created_at    DateTime @default(now())
   updated_at    DateTime @default(now()) @updatedAt
 

@@ -102,7 +102,7 @@ export class NftController {
             //date of draw
             //prize
             const nftId = (req.params as any).id;
-            console.log("nftId", nftId);
+            // console.log("nftId", nftId);
 
 
             const nftService = new NftService(req.server as FastifyInstance);

@@ -16,6 +16,7 @@ export async function insertBuyTickets(numberOfBlocks: number, all = false) {
     console.log(`Fetching events for block range ${fromBlock} to ${latestBlock}`);
 
     for (let block = fromBlock; block < latestBlock; block += blockSize) {
+        console.log(`Fetching events for block range ${block} to ${block + blockSize - 1}`);
         const endBlock = Math.min(block + blockSize - 1, latestBlock);
 
         try {
@@ -37,6 +38,7 @@ export async function insertBuyTickets(numberOfBlocks: number, all = false) {
                     tokensSpent: Number(tokensSpent),
                     bonus: Number(bonusTickets),
                     uniqueID: uniqueID,
+                    block: block,
                 } as {
                     lotID: number,
                     recipient: string,
@@ -45,6 +47,7 @@ export async function insertBuyTickets(numberOfBlocks: number, all = false) {
                     tokensSpent: number,
                     bonus: number,
                     uniqueID: string,
+                    block: number
                 }
 
                 await mysqlInstance.buyTickets(dataToInsert);
@@ -58,3 +61,14 @@ export async function insertBuyTickets(numberOfBlocks: number, all = false) {
         }
     }
 }
+
+// async function main() {
+//     insertBuyTickets(0, true); //get all
+//     // insertBuyTickets(30000); //last 120000 blocks * 12s = 40 days
+
+// }
+
+// main().catch((error) => {
+//     console.error(error);
+//     process.exit(1);
+// });

@@ -93,7 +93,7 @@ export default class MysqlRepository {
             const query = `INSERT INTO Nft (id_lot, token, token_id, amount, asset_type, data, owner, signer, total_tickets, ticket_price, end_timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), token_id = VALUES(token_id), amount = VALUES(amount), asset_type = VALUES(asset_type), data = VALUES(data), owner = VALUES(owner), signer = VALUES(signer), total_tickets = VALUES(total_tickets), ticket_price = VALUES(ticket_price), end_timestamp = VALUES(end_timestamp);`;
 
             const [rows,] = await conn.query(query, [
-                data.lotID, data.token, data.tokenID, data.amount, assetType, data.data, data.owner, data.signer, data.totalTickets, data.ticketPrice, data.endTimestamp,
+                data.lotID, data.token, data.tokenID, data.amount, assetType, data.data, data.owner, data.signer, data.totalTickets, data.ticketPrice, data.endTimestamp, 0
             ]);
 
             return rows;
@@ -112,13 +112,14 @@ export default class MysqlRepository {
         tokensSpent: number,
         bonus: number,
         uniqueID: string,
+        block: number,
     }) {
         try {
-            const query = `INSERT INTO Tickets (id_lot, unique_id, recipient, total_tickets, amount, tokens_spent, bonus) VALUES (?,?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE recipient = VALUES(recipient), total_tickets = VALUES(total_tickets), amount = VALUES(amount), tokens_spent = VALUES(tokens_spent), bonus = VALUES(bonus), updated_at = CURRENT_TIMESTAMP()
+            const query = `INSERT INTO Tickets (id_lot, unique_id, recipient, total_tickets, amount, tokens_spent, bonus,block) VALUES (?,?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE recipient = VALUES(recipient), total_tickets = VALUES(total_tickets), amount = VALUES(amount), tokens_spent = VALUES(tokens_spent), bonus = VALUES(bonus), block = VALUES(block), updated_at = CURRENT_TIMESTAMP()
             ;`;
 
             const [rows,] = await conn.query(query, [
-                data.lotID, data.uniqueID, data.recipient, data.totalTickets, data.amount, data.tokensSpent, data.bonus,
+                data.lotID, data.uniqueID, data.recipient, data.totalTickets, data.amount, data.tokensSpent, data.bonus, data.block
             ]);
 
             return rows;
@@ -166,6 +167,36 @@ export default class MysqlRepository {
         } catch (error) {
             logger.error(`Error getTicketsByLotID ${lotID} ${error}`);
             throw new Error("Error getTicketsByLotID");
+        }
+    }
+
+
+    public async ticketExists(uniqueId: string) {
+        try {
+            const query = `SELECT unique_id FROM Tickets WHERE unique_id = ?`;
+            const [rows,] = await conn.query(query, [
+                uniqueId,
+            ]);
+
+            return (rows as unknown as string[]).length > 0;
+        } catch (error) {
+            logger.error(`Error getTicketsByUniqueID ${uniqueId} ${error}`);
+            throw new Error("Error getTicketsByUniqueID");
+        }
+    }
+
+    public async updateTotalTickets(lotID: number, totalTickets: number) {
+        try {
+            const query = `UPDATE Nft SET total_tickets = ? WHERE id_lot = ?`;
+
+            const [rows,] = await conn.query(query, [
+                totalTickets, lotID,
+            ]);
+
+            return rows;
+        } catch (error) {
+            logger.error(`Error updateTotalTickets ${lotID} ${totalTickets} ${error}`);
+            throw new Error("Error updateTotalTickets");
         }
     }
 }

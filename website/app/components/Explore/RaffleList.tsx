@@ -290,13 +290,16 @@ export default function RaffleList() {
             sortBy: selectedSortOption,
         };
 
-        fetch("https://api-omniwin.web3trust.app/v1/nfts", {
+        console.log("process.env.NEXT_PUBLIC_API_URL: ", process.env.NEXT_PUBLIC_API_URL)
+
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/nfts`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 // Authorization: "Bearer " + localStorage.getItem("token"),
             },
             body: JSON.stringify(requestBody),
+
         })
             .then((response) => response.json())
             .then((data) => {

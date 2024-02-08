@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 // import { FetchNFTsResultType } from "../types/fetchNfts";
 import { SortBy } from "../types/sortBy";
 
+
 export class NftRepository {
     fastify: FastifyInstance;
     constructor(fastify: FastifyInstance) {
@@ -156,9 +157,7 @@ export class NftRepository {
         let rawQuery = `SELECT 
                             Nft.id_nft, 
                             Nft.id_lot, 
-                            Nft.total_tickets, 
-                            Nft.bonus_tickets,
-                            Nft.tickets_bought, 
+                            Nft.total_tickets,
                             Nft.ticket_price, 
                             Nft.transactions, 
                             Nft.end_timestamp, 
@@ -179,12 +178,20 @@ export class NftRepository {
                             Nft.updated_at, 
                             NftMetadata.name, 
                             NftMetadata.collectionName, 
-                            NftMetadata.image_local
+                            NftMetadata.image_local,
+                            TicketSum.total_amount AS tickets_bought,
+                            TicketSum.bonus_tickets
                         FROM Nft
                         LEFT JOIN NftMetadata ON Nft.id_lot = NftMetadata.id_lot
+                        LEFT JOIN (
+                            SELECT Tickets.id_lot, SUM(Tickets.amount) AS total_amount, SUM(Tickets.bonus) as bonus_tickets
+                            FROM Tickets
+                            WHERE Tickets.id_lot = ?
+                            GROUP BY Tickets.id_lot
+                        ) AS TicketSum ON Nft.id_lot = TicketSum.id_lot
                         WHERE Nft.id_lot = ? LIMIT 1`;
 
-        const queryParams = [id];
+        const queryParams = [id, id];
         const nft = await prisma.$queryRawUnsafe(rawQuery, ...queryParams) as any;
 
 
@@ -210,6 +217,55 @@ export class NftRepository {
         return { nft, tickets };
     }
 
+    async fetchNFTByIds(ids: number[]) {
+        const { prisma } = this.fastify;
+        const placeholders = ids.map(() => '?').join(', ');
+
+        let rawQuery = `SELECT 
+                            Nft.id_nft, 
+                            Nft.id_lot, 
+                            Nft.total_tickets,
+                            Nft.ticket_price, 
+                            Nft.transactions, 
+                            Nft.end_timestamp, 
+                            Nft.fee, 
+                            Nft.closed, 
+                            Nft.buyout, 
+                            Nft.asset_claimed, 
+                            Nft.tokens_claimed, 
+                            Nft.owner, 
+                            Nft.signer, 
+                            Nft.token,
+                            Nft.token_id, 
+                            Nft.amount, 
+                            Nft.asset_type, 
+                            Nft.data, 
+                            Nft.network, 
+                            Nft.created_at, 
+                            Nft.updated_at, 
+                            NftMetadata.name, 
+                            NftMetadata.collectionName, 
+                            NftMetadata.image_local,
+                            TicketSum.total_amount AS tickets_bought,
+                            TicketSum.bonus_tickets
+                        FROM Nft
+                        LEFT JOIN NftMetadata ON Nft.id_lot = NftMetadata.id_lot
+                        LEFT JOIN (
+                            SELECT Tickets.id_lot, SUM(Tickets.amount) AS total_amount, SUM(Tickets.bonus) as bonus_tickets
+                            FROM Tickets
+                            WHERE Tickets.id_lot IN (${placeholders})
+                            GROUP BY Tickets.id_lot
+                        ) AS TicketSum ON Nft.id_lot = TicketSum.id_lot
+                        WHERE Nft.id_lot IN (${placeholders})`;
+
+
+        const queryParams = [...ids, ...ids]; // Duplicate the ids array for both IN clauses
+
+        const nfts = await prisma.$queryRawUnsafe(rawQuery, ...queryParams) as any;
+
+        return nfts;
+    }
+
     async fetchNFTTickets(lotId: number, limit: number, cursor: number) {
         const { prisma } = this.fastify;
         const tickets = await prisma.tickets.findMany({
@@ -231,6 +287,27 @@ export class NftRepository {
             }
         }
         return obj;
+    }
+
+    async newBuyTickets(created_at: Date | null) {
+        const { prisma } = this.fastify
+
+        let gte = new Date(new Date().getTime() - 10 * 1000)
+
+        if (created_at !== null) {
+            gte = (created_at as Date)
+        }
+        //get tickets last 10 seconds
+        const tickets = await prisma.tickets.findMany({
+            orderBy: { id_ticket: 'desc' },
+            where: {
+                created_at: {
+                    gt: gte
+                }
+            }
+        })
+
+        return tickets;
     }
 
 }

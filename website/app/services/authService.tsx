@@ -59,11 +59,7 @@ export const validateMessage = async ({ message, signature }: SIWEVerifyMessageA
 export const signOut = async () => {
     try {
         const response = await fetch(`${domain}/v1/auth/signout`, {
-            method: 'POST',
             credentials: "include",
-            headers: {
-                'Content-Type': 'application/json'
-            }
         });
         if (!response.ok) {
             throw new Error('Network response was not ok');

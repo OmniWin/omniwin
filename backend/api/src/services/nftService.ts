@@ -52,13 +52,15 @@ export class NftService {
     async fetchNFT(id: number) {
         const fetchedNft = await this.nftRepository.fetchNFT(id);
 
+        // console.log('fetchedNft', fetchedNft)
+
         const USDC_decimals = 6;
 
         //@ts-ignore
-        const processedNft = fetchedNft.nft.map(item => ({
+        const processedNft = fetchedNft.nft?.map(item => ({
             full_price: (Number(item.ticket_price) / Math.pow(10, USDC_decimals)) * item.total_tickets,
             ticket_price: this.convertBigInts(Number(item.ticket_price) / Math.pow(10, USDC_decimals)),
-            tickets_bought: item.tickets_bought,
+            tickets_bought: item.tickets_bought || 0,
             tickets_total: item.total_tickets,
             end_timestamp: item.end_timestamp,
             nft_name: item.name,
@@ -84,10 +86,10 @@ export class NftService {
 
         //bonus Tickets formula= (uint256(amount) * amount) / (uint256(4) * totalTickets);
         //calculate bonus
-        const purchaseOptions = this.getPurchaseOptions(fetchedNft.nft[0].total_tickets);
+        const purchaseOptions = this.getPurchaseOptions(fetchedNft.nft?.[0]?.total_tickets || 0);
         console.log('purchaseOptions', purchaseOptions)
 
-        return { nft: processedNft[0], tickets: processedTickets, purchaseOptions };
+        return { nft: processedNft?.[0] || [], tickets: processedTickets, purchaseOptions };
 
     }
 
@@ -140,5 +142,37 @@ export class NftService {
             }
         }
         return obj;
+    }
+
+
+    async getEvents(created_at: Date | null) {
+        const newBuyTickets = await this.nftRepository.newBuyTickets(created_at);
+
+        if (newBuyTickets.length === 0) {
+            return { events: [], created_at: null };
+        }
+
+        const lotIds = newBuyTickets.map(ticket => ticket.id_lot);
+        const lots = await this.nftRepository.fetchNFTByIds(lotIds);
+
+        const processedTickets = newBuyTickets.map(ticket => ({
+            id_lot: ticket.id_lot,
+            tickets: this.convertBigInts(Number(ticket.amount)),
+            bonus: ticket.bonus,
+            recipient: ticket.recipient,
+        }));
+
+        //@ts-ignore
+        const processedNft = lots?.map(item => ({
+            tickets_bought: item.tickets_bought || 0,
+            nft_id: item.id_lot,
+            participants: processedTickets.filter(ticket => ticket.id_lot === item.id_lot).map(ticket => ({
+                recipient: ticket.recipient,
+                tickets: ticket.tickets,
+                bonus: ticket.bonus,
+            })),
+        }));
+
+        return { events: processedNft, created_at: newBuyTickets[0].created_at };
     }
 }
