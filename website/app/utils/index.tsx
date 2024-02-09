@@ -1,4 +1,6 @@
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from "date-fns";
+export * from './getExplorerLink';
+
 export const classNames = (...args: any[]) => {
     return args.filter(Boolean).join(" ");
 };

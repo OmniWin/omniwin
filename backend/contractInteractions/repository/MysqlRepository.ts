@@ -113,13 +113,15 @@ export default class MysqlRepository {
         bonus: number,
         uniqueID: string,
         block: number,
+        transactionHash: string,
+        network: string
     }) {
         try {
-            const query = `INSERT INTO Tickets (id_lot, unique_id, recipient, total_tickets, amount, tokens_spent, bonus,block) VALUES (?,?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE recipient = VALUES(recipient), total_tickets = VALUES(total_tickets), amount = VALUES(amount), tokens_spent = VALUES(tokens_spent), bonus = VALUES(bonus), block = VALUES(block), updated_at = CURRENT_TIMESTAMP()
+            const query = `INSERT INTO Tickets (id_lot, unique_id, recipient, total_tickets, amount, tokens_spent, bonus, block, transactionHash, network) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE recipient = VALUES(recipient), total_tickets = VALUES(total_tickets), amount = VALUES(amount), tokens_spent = VALUES(tokens_spent), bonus = VALUES(bonus), block = VALUES(block), transactionHash = VALUES(transactionHash), network = VALUES(network), updated_at = CURRENT_TIMESTAMP()
             ;`;
 
             const [rows,] = await conn.query(query, [
-                data.lotID, data.uniqueID, data.recipient, data.totalTickets, data.amount, data.tokensSpent, data.bonus, data.block
+                data.lotID, data.uniqueID, data.recipient, data.totalTickets, data.amount, data.tokensSpent, data.bonus, data.block, data.transactionHash
             ]);
 
             return rows;

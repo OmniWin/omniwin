@@ -131,13 +131,14 @@ export class NftController {
             const lotId = (req.params as any).id;
             const nftService = new NftService(req.server as FastifyInstance);
 
-            let { cursor, limit } = req.query as { cursor: string, limit: string };
+            let { cursor, limit, order } = req.query as { cursor: string, limit: string, order: string };
 
             const lotId_ = parseInt(lotId, 10);
             const limit_ = parseInt(limit, 10) || 10;
             const cursor_ = cursor ? parseInt(cursor.toString()) : 0;
+            const order_ = order === 'asc' ? 'asc' : 'desc';
 
-            const { tickets, nextCursor } = await nftService.fetchNFTTickets(lotId_, limit_, cursor_);
+            const { tickets, nextCursor } = await nftService.fetchNFTTickets(lotId_, limit_, cursor_, order_);
 
             return res.code(200).send({
                 success: true,
@@ -146,6 +147,96 @@ export class NftController {
                     nextCursor: nextCursor
                 },
                 message: "Nfts fetched successfully",
+            });
+
+        } catch (error: any) {
+            console.log(error);
+            throw new HttpError(req.server, error.message);
+        }
+    }
+
+    public static async fetchNFTActivity(req: FastifyRequest, res: FastifyReply) {
+        try {
+            const lotId = (req.params as any).id;
+            const nftService = new NftService(req.server as FastifyInstance);
+
+            let { cursor, limit } = req.query as { cursor: string, limit: string };
+
+            const lotId_ = parseInt(lotId, 10);
+            const limit_ = parseInt(limit, 10) || 10;
+            const cursor_ = cursor ? parseInt(cursor.toString()) : 0;
+
+            const { activity, nextCursor } = await nftService.fetchNFTActivity(lotId_, limit_, cursor_);
+
+            return res.code(200).send({
+                success: true,
+                data: {
+                    items: activity,
+                    nextCursor: nextCursor
+                },
+                message: "Activity fetched successfully",
+            });
+
+        } catch (error: any) {
+            console.log(error);
+            throw new HttpError(req.server, error.message);
+        }
+    }
+
+    public static async fetchNFTEntrants(req: FastifyRequest, res: FastifyReply) {
+        try {
+            const lotId = (req.params as any).id;
+            const nftService = new NftService(req.server as FastifyInstance);
+
+            let { cursor, limit } = req.query as { cursor: string, limit: string };
+
+            const lotId_ = parseInt(lotId, 10);
+            const limit_ = parseInt(limit, 10) || 10;
+            const cursor_ = cursor ? parseInt(cursor.toString()) : 0;
+
+            const { entrants, nextCursor } = await nftService.fetchNFTEntrants(lotId_, limit_, cursor_);
+
+            return res.code(200).send({
+                success: true,
+                data: {
+                    items: entrants,
+                    nextCursor: nextCursor
+                },
+                message: "Entrants fetched successfully",
+            });
+
+        } catch (error: any) {
+            console.log(error);
+            throw new HttpError(req.server, error.message);
+        }
+    }
+
+    public static async addFavorite(req: FastifyRequest, res: FastifyReply) {
+        try {
+            const lotId = (req.params as any).id;
+            const nftService = new NftService(req.server as FastifyInstance);
+
+            const decodedToken = await req.jwtDecode() as any;
+
+
+            const session = {
+                address: decodedToken.payload.address,
+                chainId: decodedToken.payload.chainId,
+                userId: decodedToken.payload.userId,
+                username: decodedToken.payload.username,
+                email: decodedToken.payload.email,
+            };
+
+
+            console.log("session", session);
+
+            const lotId_ = parseInt(lotId, 10);
+
+            await nftService.addFavorite(lotId_, session.userId);
+
+            return res.code(200).send({
+                success: true,
+                message: "Favorite added successfully",
             });
 
         } catch (error: any) {

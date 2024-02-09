@@ -93,8 +93,8 @@ export class NftService {
 
     }
 
-    async fetchNFTTickets(lotId: number, limit: number, cursor: number) {
-        const fetchedTickets = await this.nftRepository.fetchNFTTickets(lotId, limit, cursor);
+    async fetchNFTTickets(lotId: number, limit: number, cursor: number, order: string) {
+        const fetchedTickets = await this.nftRepository.fetchNFTTickets(lotId, limit, cursor, order);
         const USDC_decimals = 6;
 
         const processedTickets = fetchedTickets.map(ticket => ({
@@ -104,6 +104,7 @@ export class NftService {
             amount: this.convertBigInts(Number(ticket.amount)),
             bonus: ticket.bonus,
             tokens_spent: this.convertBigInts(Number(ticket.tokens_spent) / Math.pow(10, USDC_decimals)),
+            transaction_hash: ticket.transactionHash,
             created_at: ticket.created_at,
         }));
 
@@ -114,6 +115,53 @@ export class NftService {
         }
 
         return { tickets: processedTickets, nextCursor };
+    }
+
+    async fetchNFTActivity(lotId: number, limit: number, cursor: number) {
+        const fetchedActivity = await this.nftRepository.fetchNFTActivity(lotId, limit, cursor);
+        const USDC_decimals = 6;
+
+        const processedActivity = fetchedActivity.map(activity => ({
+            id_activity: activity.id_ticket,
+            recipient: activity.recipient,
+            total_tickets: activity.total_tickets,
+            amount: this.convertBigInts(Number(activity.amount)),
+            bonus: activity.bonus,
+            tokens_spent: this.convertBigInts(Number(activity.tokens_spent) / Math.pow(10, USDC_decimals)),
+            transaction_hash: activity.transactionHash,
+            created_at: activity.created_at,
+        }));
+
+        let nextCursor: string | null = null;
+        if (processedActivity.length > limit) {
+            nextCursor = processedActivity[limit - 1].id_activity.toString();
+            processedActivity.pop(); // Remove the extra item
+        }
+
+        return { activity: processedActivity, nextCursor };
+    }
+
+    async fetchNFTEntrants(lotId: number, limit: number, cursor: number) {
+        const fetchedEntrants = await this.nftRepository.fetchNFTEntrants(lotId, limit, cursor);
+        const USDC_decimals = 6;
+
+        const processedEntrants = fetchedEntrants.map(entrant => ({
+            recipient: entrant.recipient,
+            total_tickets: entrant.total_tickets,
+            amount: this.convertBigInts(Number(entrant.amount)),
+            bonus: entrant.bonus,
+            tokens_spent: this.convertBigInts(Number(entrant.tokens_spent) / Math.pow(10, USDC_decimals)),
+            transaction_hash: entrant.transactionHash,
+            created_at: entrant.created_at,
+        }));
+
+        let nextCursor: string | null = null;
+        if (processedEntrants.length > limit) {
+            nextCursor = processedEntrants[limit - 1].recipient;
+            processedEntrants.pop(); // Remove the extra item
+        }
+
+        return { entrants: processedEntrants, nextCursor };
     }
 
     calculateBonus(amount: number, totalTickets: number) {
@@ -175,5 +223,10 @@ export class NftService {
         }));
 
         return { events: processedNft, created_at: newBuyTickets[0].created_at };
+    }
+
+
+    async addFavorite(lotId: number, userId: string) {
+        return await this.nftRepository.addFavorite(lotId, userId);
     }
 }

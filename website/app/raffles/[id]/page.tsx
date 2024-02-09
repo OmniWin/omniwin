@@ -40,13 +40,14 @@ import { MinusIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { classNames, share, countdownRederer, formatCountdown, shortenAddress, formatMoney } from "@/app/utils";
 
 // Types
-import { RaffleResponse, RaffleParticipantsResponse } from "@/app/types";
+import { RaffleResponse } from "@/app/types";
 
-import { fetchRaffleData, fetchRaffleParticipants } from '../../services/raffleService';
+import { fetchRaffleData, addFavorite } from '../../services/raffleService';
 
 
 
 import { useQuery } from '@tanstack/react-query';
+import { useWeb3Modal } from '@web3modal/wagmi/react'
 
 
 export default function RafflePage({
@@ -64,11 +65,6 @@ export default function RafflePage({
         queryFn: () => fetchRaffleData(params.id)
     });
 
-    //fetch participants
-    const { data: participants, isLoading: participantsIsLoading, error: participantsError } = useQuery<RaffleParticipantsResponse['data'], Error>({
-        queryKey: ['participants', params.id],
-        queryFn: () => fetchRaffleParticipants(params.id, '10', '0')
-    });
 
 
 
@@ -79,11 +75,14 @@ export default function RafflePage({
     const timeLeft = formatCountdown(new Date(), new Date(raffleData.nft.end_timestamp * 1000))
 
 
-    if (participantsIsLoading) {
-        return <div>Loading...</div>;
-    }
+    const { open } = useWeb3Modal()
 
-
+    const handleAddFavorite = async (id: string) => {
+        const result = await addFavorite(id);
+        if (result.message === "Unauthorized") {
+            open();
+        }
+    };
 
 
     // if (!raffleData?.success) {
@@ -248,6 +247,7 @@ export default function RafflePage({
                                     <button
                                         type="button"
                                         className="flex items-center gap-2 text-sm leading-6 text-zinc-400 rounded-md ring-1 ring-zinc-900/10 shadow-sm p-2 ring-zinc-700 bg-zinc-800 highlight-white/5 hover:bg-zinc-700"
+                                        onClick={() => { handleAddFavorite(params.id) }}
                                     >
                                         <HeartIcon className="h-5 w-5 text-blood-500" />
                                         <span>3300</span>
@@ -423,10 +423,10 @@ export default function RafflePage({
                         </div> */}
                     </div>
                     <div className="">
-                        <Activity />
+                        <Activity lotId={params.id} />
                     </div>
                     <div className="">
-                        {participants && <Participants participants={participants} />}
+                        <Participants lotId={params.id} />
                     </div>
                 </div>
             </div>

@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 // import { FetchNFTsResultType } from "../types/fetchNfts";
 import { SortBy } from "../types/sortBy";
+import { Prisma } from '@prisma/client';
 
 
 export class NftRepository {
@@ -266,18 +267,46 @@ export class NftRepository {
         return nfts;
     }
 
-    async fetchNFTTickets(lotId: number, limit: number, cursor: number) {
+    async fetchNFTTickets(lotId: number, limit: number, cursor: number, order: string) {
         const { prisma } = this.fastify;
         const tickets = await prisma.tickets.findMany({
             take: limit + 1,
             cursor: cursor ? { id_ticket: cursor } : undefined,
-            orderBy: { id_ticket: 'asc' },
+            orderBy: { block: order as Prisma.SortOrder },
             where: {
                 id_lot: lotId
             }
         });
 
         return tickets;
+    }
+
+    async fetchNFTActivity(lotId: number, limit: number, cursor: number) {
+        const { prisma } = this.fastify;
+        const activities = await prisma.tickets.findMany({
+            take: limit + 1,
+            cursor: cursor ? { id_ticket: cursor } : undefined,
+            orderBy: { block: 'desc' },
+            where: {
+                id_lot: lotId
+            }
+        });
+
+        return activities;
+    }
+
+    async fetchNFTEntrants(lotId: number, limit: number, cursor: number) {
+        const { prisma } = this.fastify;
+        const entrants = await prisma.tickets.findMany({
+            take: limit + 1,
+            cursor: cursor ? { id_ticket: cursor } : undefined,
+            orderBy: { amount: 'desc' },
+            where: {
+                id_lot: lotId
+            }
+        });
+
+        return entrants;
     }
 
     convertBigInts(obj: any) {
@@ -310,4 +339,15 @@ export class NftRepository {
         return tickets;
     }
 
+    async addFavorite(id: number, user: string) {
+        const { prisma } = this.fastify;
+        const favorite = await prisma.favorites.create({
+            data: {
+                id_lot: id,
+                id_user: user
+            }
+        });
+
+        return favorite;
+    }
 }

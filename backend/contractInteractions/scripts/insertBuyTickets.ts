@@ -39,6 +39,8 @@ export async function insertBuyTickets(numberOfBlocks: number, all = false) {
                     bonus: Number(bonusTickets),
                     uniqueID: uniqueID,
                     block: block,
+                    transactionHash: event.transactionHash,
+                    network: config.network
                 } as {
                     lotID: number,
                     recipient: string,
@@ -47,7 +49,9 @@ export async function insertBuyTickets(numberOfBlocks: number, all = false) {
                     tokensSpent: number,
                     bonus: number,
                     uniqueID: string,
-                    block: number
+                    block: number,
+                    transactionHash: string,
+                    network: string
                 }
 
                 await mysqlInstance.buyTickets(dataToInsert);

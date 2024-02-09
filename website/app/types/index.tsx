@@ -106,6 +106,7 @@ export interface Ticket {
     total_tickets: number;
     amount: string;
     bonus: number;
+    transaction_hash: string;
     tokens_spent: string;
     created_at: string;
 }
@@ -122,4 +123,10 @@ export interface CountdownRendererProps {
     minutes: number;
     seconds: number;
     completed: boolean;
+}
+
+
+export enum LinkType {
+    address = 'address',
+    tx = 'tx',
 }

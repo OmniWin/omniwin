@@ -32,6 +32,9 @@ type EventTicketCustom = {
     bonus: number,
     uniqueID: string,
     block: number,
+    transactionHash: string,
+    network: string
+
 }
 
 export async function processTickets() {
@@ -40,7 +43,6 @@ export async function processTickets() {
 
     const createBuyTicketsEvent = config.contract.getEvent("BuyTickets");
     config.contract.on(createBuyTicketsEvent, async (ID, recipient, totalTickets, amount, tokensSpent, bonus, event: any) => {
-        console.log("BuyTickets event fired", { ID, recipient, totalTickets, amount, tokensSpent, bonus });
         //recipient = the buyer
         //tokensSpent = ticketPrice * amount
         //amount = how many tickets bought
@@ -62,7 +64,11 @@ export async function processTickets() {
             bonus: Number(bonus),
             uniqueID: uniqueID,
             block: event.log.blockNumber,
+            transactionHash: event.log.transactionHash,
+            network: config.network
         } as EventTicketCustom
+
+        console.log("BuyTickets event fired", ticketData);
 
         //after we processed all buy tickets, we enqueue events to be processed in order
         eventQueue.enqueue(ticketData, () => processBuyTicketEvent(ticketData, hashLots, uniqueID, lotID));

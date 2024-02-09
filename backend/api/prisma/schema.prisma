@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -32,12 +29,11 @@ model Nft {
   asset_type     AssetType
   data           String
   network        NetworkType
-  trendingScore  Int         @default(0)
   created_at     DateTime    @default(now())
   updated_at     DateTime    @default(now()) @updatedAt
+  trendingScore  Int         @default(0)
 
-  // @@unique([id_lot], name: "id_lot")
-  @@index([token, token_id], name: "token_tokenID")
+  @@index([token, token_id], map: "token_tokenID")
 }
 
 model NftMetadata {
@@ -45,7 +41,6 @@ model NftMetadata {
   id_nft         Int               @unique
   id_lot         Int
   name           String?
-  collectionName String?
   description    String?           @db.VarChar(2000)
   json           Json?
   image_url      String?
@@ -53,37 +48,50 @@ model NftMetadata {
   status         NFTMetadataStatus
   created_at     DateTime          @default(now())
   updated_at     DateTime          @default(now()) @updatedAt
+  collectionName String?
 
-  @@index([id_nft], name: "id_nft")
+  @@index([id_nft], map: "id_nft")
 }
 
 model Tickets {
-  id_ticket     Int      @id @default(autoincrement())
-  id_lot        Int
-  unique_id     String
-  recipient     String
-  total_tickets Int
-  amount        BigInt
-  tokens_spent  BigInt
-  bonus         Int
-  block         Int      @default(0)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @default(now()) @updatedAt
+  id_ticket       Int         @id @default(autoincrement())
+  id_lot          Int
+  unique_id       String      @unique
+  recipient       String
+  total_tickets   Int
+  amount          BigInt
+  bonus           Int
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @default(now()) @updatedAt
+  tokens_spent    BigInt
+  block           Int         @default(0)
+  transactionHash String      @default("")
+  network         NetworkType @default(GOERLI)
 
-  @@unique([unique_id], name: "id_lot_id_user_unique")
-  @@index([recipient], name: "recipient")
+  @@index([recipient], map: "recipient")
 }
 
 model User {
-  id_user    String   @id @default(uuid())
-  address    String   @unique
+  id_user    String    @id @default(uuid())
+  address    String    @unique
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
+  email      String?   @unique
+  username   String?   @unique
+  issuedAt   DateTime?
   chainId    Int
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now()) @updatedAt
+}
 
-  email    String?   @unique
-  username String?   @unique
-  issuedAt DateTime?
+model Favorites {
+  id_favorite Int      @id @default(autoincrement())
+  id_lot      Int
+  id_user     String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+
+  @@unique([id_lot, id_user], map: "id_lot_id_user")
+  @@index([id_lot], map: "id_lot")
+  @@index([id_user], map: "id_user")
 }
 
 enum NFTMetadataStatus {
