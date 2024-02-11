@@ -90,13 +90,9 @@ async function processBuyTicketEvent(ticketData: EventTicketCustom, hashLots: Ha
         if (!ticketExists) {
             //insert new ticket
             await mysqlInstance.buyTickets(ticketData);
-            //update totalTickets in NFT table
-            await mysqlInstance.updateTotalTickets(lotID, ticketData.totalTickets);
         }
-
     }
 }
-
 
 processTickets().catch((error) => {
     console.error(error);

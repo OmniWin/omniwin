@@ -36,7 +36,7 @@ export async function getLots(start: number) {
 
 
 async function main() {
-    getLots(164914); // 0 - start from the beginning
+    getLots(156080); // 0 - start from the beginning
 }
 main().catch((error) => {
     console.error(error);

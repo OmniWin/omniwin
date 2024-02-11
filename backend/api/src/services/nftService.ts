@@ -66,7 +66,7 @@ export class NftService {
             nft_name: item.name,
             nft_image: item.image_local,
             nft_owner: item.owner,
-            // favorites: item.favorites,
+            is_favorite: item.favorites ? !!item.favorites.length : false,
             asset_type: item.asset_type,
             nft_id: item.id_lot,
             token_id: item.token_id,

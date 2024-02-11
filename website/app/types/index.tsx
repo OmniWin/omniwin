@@ -48,6 +48,7 @@ export type RaffleCard = {
     network: string;
     collection_name: string;
     is_verified: boolean;
+    is_favorite: boolean;
 };
 
 export interface Raffle {

@@ -1,31 +1,28 @@
 'use client';
-// hooks/useSSE.ts
+
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-// import { updateCounts } from '../redux/actions'; // Adjust this import to your actual actions
+import eventSourceSingleton from '@/lib/eventSourceSingleton';
 
-const useSSE = () => {
-    const dispatch = useDispatch();
-
+// Adjust the hook to accept a callback function
+function useEventSourceListener(callback: (eventData: any) => void): void {
     useEffect(() => {
-        const eventSource = new EventSource('http://localhost/v1/events');
+        const eventSource = eventSourceSingleton.getEventSource();
 
-        eventSource.onmessage = (event) => {
-            const newMessage = JSON.parse(event.data);
-            console.log('New message:', newMessage);
-            // Dispatch an action to update the Redux store
-            // dispatch(updateCounts(newMessage));
+        const messageHandler = (event: MessageEvent) => {
+            try {
+                const eventData = JSON.parse(event.data);
+                callback(eventData);
+            } catch (error) {
+                console.error('Error parsing event data:', error, event.data);
+            }
         };
 
-        eventSource.onerror = (error) => {
-            console.error('EventSource failed:', error);
-            eventSource.close();
-        };
+        eventSource?.addEventListener('message', messageHandler);
 
         return () => {
-            eventSource.close();
+            eventSource?.removeEventListener('message', messageHandler);
         };
-    }, [dispatch]);
-};
+    }, [callback]);
+}
 
-export default useSSE;
+export default useEventSourceListener;

@@ -9,7 +9,13 @@ export class SSeController {
 
     public static async sse(req: FastifyRequest, res: FastifyReply) {
         try {
-            // Function to send data to the client
+
+            const sendHeartbeat = () => {
+                res.raw.write(':heartbeat\n\n');
+            };
+
+
+
             const sendEvent = (data: any) => {
                 const formattedData = `data: ${JSON.stringify(data)}\n\n`;
                 res.raw.write(formattedData);
@@ -33,16 +39,15 @@ export class SSeController {
 
             // Example: Send current time every 5 seconds
             const intervalId = setInterval(async () => {
-
-                const { events, created_at } = await nftService.getEvents(lastUpdate)
+                const { events, created_at } = await nftService.getEvents(lastUpdate);
 
                 console.log(util.inspect(events, false, null, true /* enable colors */));
 
-
-                lastUpdate = created_at;
-
                 if (events.length > 0) {
+                    lastUpdate = created_at;
                     sendEvent(events);
+                } else {
+                    sendHeartbeat();
                 }
             }, 3000);
 

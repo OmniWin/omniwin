@@ -66,13 +66,13 @@ export async function insertBuyTickets(numberOfBlocks: number, all = false) {
     }
 }
 
-// async function main() {
-//     insertBuyTickets(0, true); //get all
-//     // insertBuyTickets(30000); //last 120000 blocks * 12s = 40 days
+async function main() {
+    // insertBuyTickets(0, true); //get all
+    insertBuyTickets(30000); //last 120000 blocks * 12s = 40 days
 
-// }
+}
 
-// main().catch((error) => {
-//     console.error(error);
-//     process.exit(1);
-// });
+main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});

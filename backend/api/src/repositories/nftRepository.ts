@@ -181,9 +181,11 @@ export class NftRepository {
                             NftMetadata.collectionName, 
                             NftMetadata.image_local,
                             TicketSum.total_amount AS tickets_bought,
-                            TicketSum.bonus_tickets
+                            TicketSum.bonus_tickets,
+                            Favorites.id_user AS favorite
                         FROM Nft
                         LEFT JOIN NftMetadata ON Nft.id_lot = NftMetadata.id_lot
+                        LEFT JOIN Favorites ON Favorites.id_lot = Nft.id_lot
                         LEFT JOIN (
                             SELECT Tickets.id_lot, SUM(Tickets.amount) AS total_amount, SUM(Tickets.bonus) as bonus_tickets
                             FROM Tickets
@@ -341,13 +343,37 @@ export class NftRepository {
 
     async addFavorite(id: number, user: string) {
         const { prisma } = this.fastify;
-        const favorite = await prisma.favorites.create({
-            data: {
-                id_lot: id,
-                id_user: user
-            }
+
+        // Check if the favorite already exists
+        const existingFavorite = await prisma.favorites.findUnique({
+            where: {
+                id_lot_id_user: {
+                    id_lot: id,
+                    id_user: user,
+                },
+            },
         });
 
-        return favorite;
+        // If it exists, remove it
+        if (existingFavorite) {
+            await prisma.favorites.delete({
+                where: {
+                    id_lot_id_user: {
+                        id_lot: id,
+                        id_user: user,
+                    },
+                },
+            });
+            return { message: 'Favorite removed' };
+        } else {
+            // If it doesn't exist, create it
+            await prisma.favorites.create({
+                data: {
+                    id_lot: id,
+                    id_user: user,
+                },
+            });
+            return { message: 'Favorite added' };
+        }
     }
 }

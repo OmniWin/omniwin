@@ -46,8 +46,10 @@ import { fetchRaffleData, addFavorite } from '../../services/raffleService';
 
 
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useWeb3Modal } from '@web3modal/wagmi/react'
+
+import useEventSourceListener from '@/app/hooks/useSSE';
 
 
 export default function RafflePage({
@@ -57,16 +59,38 @@ export default function RafflePage({
         id: string;
     };
 }) {
-    // const [raffleData, setRaffleData] = useState<{ nft: RaffleCard; tickets: Ticket[]; purchaseOptions: PurchaseOption[] } | null>(null);
-    // const [isLoading, setIsLoading] = useState<boolean>(true);
+    const queryClient = useQueryClient();
+
 
     const { data: raffleData, isLoading, error } = useQuery<RaffleResponse['data'], Error>({
         queryKey: ['raffleData', params.id],
         queryFn: () => fetchRaffleData(params.id)
     });
 
+    const handleEvent = (eventData: {
+        nft_id: number;
+        participants: { bonus: number, recipient: string, tickets: number }[];
+        tickets_bought: number;
+    }[]) => {
+        for (let i = 0; i < eventData.length; i++) {
+            const eventData_ = eventData[i];
 
+            if (eventData_.nft_id === parseInt(params.id)) {
+                console.log('Event data for NFT:', eventData_);
+                queryClient.setQueryData(['raffleData', params.id], (oldData: RaffleResponse['data'] | undefined) => {
+                    return {
+                        ...oldData,
+                        nft: {
+                            ...oldData?.nft,
+                            tickets_bought: eventData_.tickets_bought
+                        },
+                    };
+                });
+            }
+        }
+    };
 
+    useEventSourceListener(handleEvent);
 
     if (isLoading || !raffleData) return <div>Loading...</div>;
     if (error) return <div>An error occurred: {error.message}</div>;
@@ -76,18 +100,25 @@ export default function RafflePage({
 
 
     const { open } = useWeb3Modal()
+    const [isFavorite, setIsFavorite] = useState(raffleData.nft.is_favorite);
 
-    const handleAddFavorite = async (id: string) => {
-        const result = await addFavorite(id);
-        if (result.message === "Unauthorized") {
-            open();
+
+    const toggleFavorite = async () => {
+        const newFavoriteStatus = !isFavorite;
+        setIsFavorite(newFavoriteStatus); // Optimistically update the UI
+
+        try {
+            const result = await addFavorite(params.id); // Send the update to the server
+
+            if (result.message === "Unauthorized") {
+                open();
+            }
+        } catch (error) {
+            setIsFavorite(!newFavoriteStatus); // Revert on error
+            // Handle error (e.g., show a message to the user)
         }
     };
 
-
-    // if (!raffleData?.success) {
-    //     return <div>Failed to load raffle data.</div>;
-    // }
 
     const contest = {
         id: 9750,
@@ -247,9 +278,12 @@ export default function RafflePage({
                                     <button
                                         type="button"
                                         className="flex items-center gap-2 text-sm leading-6 text-zinc-400 rounded-md ring-1 ring-zinc-900/10 shadow-sm p-2 ring-zinc-700 bg-zinc-800 highlight-white/5 hover:bg-zinc-700"
-                                        onClick={() => { handleAddFavorite(params.id) }}
+                                        onClick={() => { toggleFavorite() }}
                                     >
-                                        <HeartIcon className="h-5 w-5 text-blood-500" />
+                                        {isFavorite
+                                            && <HeartIcon className="h-5 w-5 text-blood-500" />}
+                                        {!isFavorite
+                                            && <HeartIcon className="h-5 w-5 text-zinc-400" />}
                                         <span>3300</span>
                                     </button>
                                 </div>

@@ -145,8 +145,6 @@ async function processBuyTicketEvent(ticketData: {
       if (ticket === undefined) {
         //insert new ticket
         await mysqlInstance.buyTickets(ticketData);
-        //update totalTickets in NFT table
-        await mysqlInstance.incrementTotalTickets(lotID);
       }
     }
   }

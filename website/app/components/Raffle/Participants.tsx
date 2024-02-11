@@ -1,11 +1,11 @@
-// import { classNames } from "@/app/utils";
 import { ArrowTopRightOnSquareIcon, TicketIcon } from "@heroicons/react/24/outline";
 import { ListBulletIcon, QueueListIcon } from "@heroicons/react/24/solid";
 import { RaffleParticipantsResponse, LinkType } from "@/app/types";
 import { shortenAddress } from "@/app/utils";
 import { ExplorerLink } from "@/app/components/Common/TransactionExplorerLink"
 import { fetchRaffleEntrants } from '../../services/raffleService';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import useEventSourceListener from '@/app/hooks/useSSE';
 
 type ActivityItem = {
     user: {
@@ -28,18 +28,51 @@ const activityItems: ActivityItem[] = [
     },
 ];
 
-interface ParticipantsProps {
-    participants: RaffleParticipantsResponse['data'];
-}
-
 export default function Participants({ lotId }: { lotId: string }) {
-
     //fetch participants
     const { data: participants, isLoading: participantsIsLoading, error: participantsError } = useQuery<RaffleParticipantsResponse['data'], Error>({
         queryKey: ['participants', lotId],
         queryFn: () => fetchRaffleEntrants(lotId, '10', '0')
     });
 
+    const queryClient = useQueryClient();
+    const handleEvent = (eventData: {
+        nft_id: number;
+        participants: { bonus: number, recipient: string, tickets: number }[];
+        tickets_bought: number;
+    }[]) => {
+        for (let i = 0; i < eventData.length; i++) {
+            const eventData_ = eventData[i];
+
+            if (eventData_.nft_id === parseInt(lotId)) {
+                queryClient.setQueryData(['activity', lotId], (oldData: RaffleParticipantsResponse['data'] | undefined) => {
+                    const updatedItems = eventData_.participants.map(participant => ({
+                        recipient: participant.recipient,
+                        amount: participant.tickets,
+                        created_at: new Date().toISOString(),
+                    }));
+
+                    if (!oldData) {
+                        return {
+                            items: updatedItems
+                        };
+                    }
+
+                    const unifiedItems = [
+                        ...updatedItems,
+                        ...oldData.items
+                    ].sort((a, b) => parseInt(b.amount.toString()) - parseInt(a.amount.toString()));
+
+                    return {
+                        ...oldData,
+                        items: unifiedItems
+                    };
+                });
+            }
+        }
+    };
+
+    useEventSourceListener(handleEvent);
 
 
     if (participantsIsLoading) {

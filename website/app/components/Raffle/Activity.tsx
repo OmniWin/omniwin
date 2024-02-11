@@ -5,9 +5,9 @@ import { RaffleParticipantsResponse, LinkType } from "@/app/types";
 import { ExplorerLink } from "@/app/components/Common/TransactionExplorerLink"
 import { shortenAddress } from "@/app/utils";
 import { fetchRaffleActivity } from '../../services/raffleService';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-
+import useEventSourceListener from '@/app/hooks/useSSE';
 type ActivityItem = {
     user: {
         name: string;
@@ -34,6 +34,44 @@ export default function Activity({ lotId }: { lotId: string }) {
         queryKey: ['activity', lotId],
         queryFn: () => fetchRaffleActivity(lotId, '10', '0')
     });
+
+    const queryClient = useQueryClient();
+    const handleEvent = (eventData: {
+        nft_id: number;
+        participants: { bonus: number, recipient: string, tickets: number }[];
+        tickets_bought: number;
+    }[]) => {
+        for (let i = 0; i < eventData.length; i++) {
+            const eventData_ = eventData[i];
+
+            if (eventData_.nft_id === parseInt(lotId)) {
+                queryClient.setQueryData(['activity', lotId], (oldData: RaffleParticipantsResponse['data'] | undefined) => {
+                    const updatedItems = eventData_.participants.map(participant => ({
+                        recipient: participant.recipient,
+                        amount: participant.tickets,
+                        created_at: new Date().toISOString(),
+                    }));
+
+                    if (!oldData) {
+                        return {
+                            items: updatedItems
+                        };
+                    }
+
+                    return {
+                        ...oldData,
+                        items: [
+                            ...updatedItems,
+                            ...oldData.items
+                        ]
+                    };
+                });
+            }
+        }
+    };
+
+    useEventSourceListener(handleEvent);
+
 
     if (participantsIsLoading) {
         return <div>Loading...</div>;

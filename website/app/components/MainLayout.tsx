@@ -10,10 +10,9 @@ import { useSelector } from "@/lib/redux";
 import { selectSidebarToggleState } from "@/lib/redux/slices/sidebarSlice/selectors";
 import React, { useRef } from "react";
 
-import useSSE from '../hooks/useSSE';
+
 
 export default function MainLayout(props: React.PropsWithChildren) {
-    useSSE();
     const sidebarToggleState = useSelector(selectSidebarToggleState);
     const mainRef = useRef(null); // Reference to the main tag
 

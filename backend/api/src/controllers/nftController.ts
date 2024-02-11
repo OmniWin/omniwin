@@ -227,16 +227,12 @@ export class NftController {
                 email: decodedToken.payload.email,
             };
 
-
-            console.log("session", session);
-
             const lotId_ = parseInt(lotId, 10);
-
-            await nftService.addFavorite(lotId_, session.userId);
+            const favorite = await nftService.addFavorite(lotId_, session.userId);
 
             return res.code(200).send({
                 success: true,
-                message: "Favorite added successfully",
+                message: favorite.message,
             });
 
         } catch (error: any) {
