@@ -29,44 +29,45 @@ model Nft {
   asset_type     AssetType
   data           String
   network        NetworkType
+  count_views    Int         @default(0)
+  trending_score Int         @default(0)
   created_at     DateTime    @default(now())
   updated_at     DateTime    @default(now()) @updatedAt
-  trendingScore  Int         @default(0)
 
   @@index([token, token_id], map: "token_tokenID")
 }
 
 model NftMetadata {
-  id_nftMetadata Int               @id @default(autoincrement())
-  id_nft         Int               @unique
-  id_lot         Int
-  name           String?
-  description    String?           @db.VarChar(2000)
-  json           Json?
-  image_url      String?
-  image_local    String?
-  status         NFTMetadataStatus
-  created_at     DateTime          @default(now())
-  updated_at     DateTime          @default(now()) @updatedAt
-  collectionName String?
+  id_nftMetadata  Int               @id @default(autoincrement())
+  id_nft          Int               @unique
+  id_lot          Int
+  name            String?
+  description     String?           @db.VarChar(2000)
+  json            Json?
+  image_url       String?
+  image_local     String?
+  status          NFTMetadataStatus
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @default(now()) @updatedAt
+  collection_name String?
 
   @@index([id_nft], map: "id_nft")
 }
 
 model Tickets {
-  id_ticket       Int         @id @default(autoincrement())
-  id_lot          Int
-  unique_id       String      @unique
-  recipient       String
-  total_tickets   Int
-  amount          BigInt
-  bonus           Int
-  created_at      DateTime    @default(now())
-  updated_at      DateTime    @default(now()) @updatedAt
-  tokens_spent    BigInt
-  block           Int         @default(0)
-  transactionHash String      @default("")
-  network         NetworkType @default(GOERLI)
+  id_ticket        Int         @id @default(autoincrement())
+  id_lot           Int
+  unique_id        String      @unique
+  recipient        String
+  total_tickets    Int
+  amount           BigInt
+  bonus            Int
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @default(now()) @updatedAt
+  tokens_spent     BigInt
+  block            Int         @default(0)
+  transaction_hash String      @default("")
+  network          NetworkType @default(GOERLI)
 
   @@index([recipient], map: "recipient")
 }
@@ -78,7 +79,7 @@ model User {
   updated_at DateTime  @default(now()) @updatedAt
   email      String?   @unique
   username   String?   @unique
-  issuedAt   DateTime?
+  issued_at  DateTime?
   chainId    Int
 }
 

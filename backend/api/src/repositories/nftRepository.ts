@@ -35,7 +35,7 @@ export class NftRepository {
         created_at: Date;
         updated_at: Date;
         name: string;
-        collectionName: string;
+        collection_name: string;
         image_local: string;
 
     }[]> {
@@ -68,7 +68,7 @@ export class NftRepository {
                             Nft.created_at, 
                             Nft.updated_at, 
                             NftMetadata.name, 
-                            NftMetadata.collectionName, 
+                            NftMetadata.collection_name, 
                             NftMetadata.image_local 
                         FROM Nft
                         LEFT JOIN NftMetadata ON Nft.id_nft = NftMetadata.id_nft
@@ -178,11 +178,13 @@ export class NftRepository {
                             Nft.created_at, 
                             Nft.updated_at, 
                             NftMetadata.name, 
-                            NftMetadata.collectionName, 
+                            NftMetadata.collection_name, 
                             NftMetadata.image_local,
                             TicketSum.total_amount AS tickets_bought,
                             TicketSum.bonus_tickets,
-                            Favorites.id_user AS favorite
+                            count_views,
+                            Favorites.id_user AS favorite,
+                            (SELECT count(*) FROM Favorites WHERE Favorites.id_lot = ?) as favorites_count
                         FROM Nft
                         LEFT JOIN NftMetadata ON Nft.id_lot = NftMetadata.id_lot
                         LEFT JOIN Favorites ON Favorites.id_lot = Nft.id_lot
@@ -194,7 +196,7 @@ export class NftRepository {
                         ) AS TicketSum ON Nft.id_lot = TicketSum.id_lot
                         WHERE Nft.id_lot = ? LIMIT 1`;
 
-        const queryParams = [id, id];
+        const queryParams = [id, id, id];
         const nft = await prisma.$queryRawUnsafe(rawQuery, ...queryParams) as any;
 
 
@@ -218,6 +220,21 @@ export class NftRepository {
 
 
         return { nft, tickets };
+    }
+
+    async increaseNFTViews(id: number) {
+        const { prisma } = this.fastify;
+
+        await prisma.nft.update({
+            where: {
+                id_lot: id
+            },
+            data: {
+                count_views: {
+                    increment: 1
+                }
+            }
+        })
     }
 
     async fetchNFTByIds(ids: number[]) {
@@ -247,7 +264,7 @@ export class NftRepository {
                             Nft.created_at, 
                             Nft.updated_at, 
                             NftMetadata.name, 
-                            NftMetadata.collectionName, 
+                            NftMetadata.collection_name, 
                             NftMetadata.image_local,
                             TicketSum.total_amount AS tickets_bought,
                             TicketSum.bonus_tickets

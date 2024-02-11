@@ -49,6 +49,8 @@ export type RaffleCard = {
     collection_name: string;
     is_verified: boolean;
     is_favorite: boolean;
+    favorites_count: number;
+    count_views: number;
 };
 
 export interface Raffle {

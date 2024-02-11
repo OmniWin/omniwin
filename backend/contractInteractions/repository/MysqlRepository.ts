@@ -35,20 +35,20 @@ export default class MysqlRepository {
     public async insertMetadata(nftID: number, lotID: number, metadata: NFTMetadata | null) {
         try {
             if (!metadata) {
-                const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, collectionName, description, json, image_url, image_local, status) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
+                const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, collection_name, description, json, image_url, image_local, status) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
 
                 await conn.query(metadataQuery, [nftID, lotID, null, null, null, null, null, null, "FAILED", "FAILED"]);
 
                 return;
             }
 
-            const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, collectionName, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_lot = ?, name = ?, description = ?, json = ?, image_url = ?, image_local = ?, status = ?`;
+            const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, collection_name, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_lot = ?, name = ?, description = ?, json = ?, image_url = ?, image_local = ?, status = ?`;
 
             await conn.query(metadataQuery, [nftID, lotID, metadata?.name || null, metadata?.collectionName || null, metadata?.description || null, JSON.stringify(metadata) || null, null, metadata?.image_local || null, "SUCCESS", lotID, metadata?.name || null, metadata?.description || null, JSON.stringify(metadata) || null, null, metadata?.image_local || null, "SUCCESS"]);
 
         } catch (error) {
             console.log(error);
-            const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, collectionName, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
+            const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, collection_name, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
             await conn.query(metadataQuery, [nftID, lotID, null, null, null, null, null, null, null, "ERROR", "ERROR"]);
             logger.error(`Error insertMetadata ${nftID} ${lotID} ${metadata} ${error}`);
             throw new Error("Error insertMetadata");

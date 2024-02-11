@@ -101,11 +101,12 @@ export class NftController {
             //get entrants
             //date of draw
             //prize
-            const nftId = (req.params as any).id;
+            const nftId = parseInt((req.params as any).id.toString(), 10);
             // console.log("nftId", nftId);
 
-
             const nftService = new NftService(req.server as FastifyInstance);
+            //increase count views by 1
+            await nftService.increaseNFTViews(nftId);
             const nft = await nftService.fetchNFT(nftId);
 
             req.server.log.info(`Nft fetched successfully, id: ${nftId}`);

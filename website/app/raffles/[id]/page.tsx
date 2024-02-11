@@ -60,7 +60,7 @@ export default function RafflePage({
     };
 }) {
     const queryClient = useQueryClient();
-
+    const { open } = useWeb3Modal()
 
     const { data: raffleData, isLoading, error } = useQuery<RaffleResponse['data'], Error>({
         queryKey: ['raffleData', params.id],
@@ -96,25 +96,42 @@ export default function RafflePage({
     if (error) return <div>An error occurred: {error.message}</div>;
 
     const progress = ((raffleData.nft.tickets_bought / raffleData.nft.tickets_total) * 100);
-    const timeLeft = formatCountdown(new Date(), new Date(raffleData.nft.end_timestamp * 1000))
+    const timeLeft = formatCountdown(new Date(), new Date(raffleData.nft.end_timestamp * 1000));
 
-
-    const { open } = useWeb3Modal()
-    const [isFavorite, setIsFavorite] = useState(raffleData.nft.is_favorite);
 
 
     const toggleFavorite = async () => {
-        const newFavoriteStatus = !isFavorite;
-        setIsFavorite(newFavoriteStatus); // Optimistically update the UI
+        // Optimistically update the UI
+        queryClient.setQueryData(['raffleData', params.id], (oldData: RaffleResponse['data']) => {
+            if (!oldData) return undefined; // or however you want to handle this case
+            return {
+                ...oldData,
+                nft: {
+                    ...oldData.nft,
+                    is_favorite: !oldData.nft.is_favorite,
+                    favorites_count: oldData.nft.is_favorite ? oldData.nft.favorites_count - 1 : oldData.nft.favorites_count + 1,
+                },
+            };
+        });
 
         try {
             const result = await addFavorite(params.id); // Send the update to the server
-
             if (result.message === "Unauthorized") {
-                open();
+                open(); // This might require additional handling to ensure state consistency
             }
         } catch (error) {
-            setIsFavorite(!newFavoriteStatus); // Revert on error
+            // Revert to previous state in case of an error
+            queryClient.setQueryData(['raffleData', params.id], (oldData: RaffleResponse['data']) => {
+                if (!oldData) return undefined; // or however you want to handle this case
+                return {
+                    ...oldData,
+                    nft: {
+                        ...oldData.nft,
+                        is_favorite: !oldData.nft.is_favorite,
+                        favorites_count: oldData.nft.is_favorite ? oldData.nft.favorites_count + 1 : oldData.nft.favorites_count - 1,
+                    },
+                };
+            });
             // Handle error (e.g., show a message to the user)
         }
     };
@@ -280,16 +297,16 @@ export default function RafflePage({
                                         className="flex items-center gap-2 text-sm leading-6 text-zinc-400 rounded-md ring-1 ring-zinc-900/10 shadow-sm p-2 ring-zinc-700 bg-zinc-800 highlight-white/5 hover:bg-zinc-700"
                                         onClick={() => { toggleFavorite() }}
                                     >
-                                        {isFavorite
+                                        {raffleData.nft.is_favorite
                                             && <HeartIcon className="h-5 w-5 text-blood-500" />}
-                                        {!isFavorite
+                                        {!raffleData.nft.is_favorite
                                             && <HeartIcon className="h-5 w-5 text-zinc-400" />}
-                                        <span>3300</span>
+                                        <span>{raffleData.nft.favorites_count}</span>
                                     </button>
                                 </div>
                                 <div className="flex items-center gap-2 text-zinc-400">
                                     <EyeIcon className="h-5 w-5 text-blue-500" />
-                                    <span>3300</span>
+                                    <span>{raffleData.nft.count_views}</span>
                                 </div>
                             </div>
                             <div

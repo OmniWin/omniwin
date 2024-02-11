@@ -58,21 +58,23 @@ export class NftService {
 
         //@ts-ignore
         const processedNft = fetchedNft.nft?.map(item => ({
-            full_price: (Number(item.ticket_price) / Math.pow(10, USDC_decimals)) * item.total_tickets,
+            full_price: (this.convertBigInts(Number(item.ticket_price)) / Math.pow(10, USDC_decimals)) * item.total_tickets,
             ticket_price: this.convertBigInts(Number(item.ticket_price) / Math.pow(10, USDC_decimals)),
-            tickets_bought: item.tickets_bought || 0,
+            tickets_bought: parseInt(item.tickets_bought.toString(), 10) || 0,
             tickets_total: item.total_tickets,
             end_timestamp: item.end_timestamp,
             nft_name: item.name,
             nft_image: item.image_local,
             nft_owner: item.owner,
-            is_favorite: item.favorites ? !!item.favorites.length : false,
+            is_favorite: item.favorite ? !!item.favorite.length : false,
+            favorites_count: this.convertBigInts(Number(item.favorites_count)) > 0 ? this.convertBigInts(Number(item.favorites_count)) : 0,
             asset_type: item.asset_type,
             nft_id: item.id_lot,
-            token_id: item.token_id,
+            token_id: parseInt(item.token_id.toString(), 10),
             network: item.network,
-            collection_name: item.collectionName,
+            collection_name: item.collection_name,
             is_verified: false,
+            count_views: item.count_views,
         }));
 
         //@ts-ignore
@@ -93,6 +95,10 @@ export class NftService {
 
     }
 
+    async increaseNFTViews(id: number) {
+        return await this.nftRepository.increaseNFTViews(id);
+    }
+
     async fetchNFTTickets(lotId: number, limit: number, cursor: number, order: string) {
         const fetchedTickets = await this.nftRepository.fetchNFTTickets(lotId, limit, cursor, order);
         const USDC_decimals = 6;
@@ -104,7 +110,7 @@ export class NftService {
             amount: this.convertBigInts(Number(ticket.amount)),
             bonus: ticket.bonus,
             tokens_spent: this.convertBigInts(Number(ticket.tokens_spent) / Math.pow(10, USDC_decimals)),
-            transaction_hash: ticket.transactionHash,
+            transaction_hash: ticket.transaction_hash,
             created_at: ticket.created_at,
         }));
 
@@ -128,7 +134,7 @@ export class NftService {
             amount: this.convertBigInts(Number(activity.amount)),
             bonus: activity.bonus,
             tokens_spent: this.convertBigInts(Number(activity.tokens_spent) / Math.pow(10, USDC_decimals)),
-            transaction_hash: activity.transactionHash,
+            transaction_hash: activity.transaction_hash,
             created_at: activity.created_at,
         }));
 
@@ -151,7 +157,7 @@ export class NftService {
             amount: this.convertBigInts(Number(entrant.amount)),
             bonus: entrant.bonus,
             tokens_spent: this.convertBigInts(Number(entrant.tokens_spent) / Math.pow(10, USDC_decimals)),
-            transaction_hash: entrant.transactionHash,
+            transaction_hash: entrant.transaction_hash,
             created_at: entrant.created_at,
         }));
 
