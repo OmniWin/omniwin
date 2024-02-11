@@ -71,7 +71,7 @@ export class NftController {
                 nft_id: item.id_lot,
                 token_id: item.token_id,
                 network: item.network,
-                collection_name: item.collectionName,
+                collection_name: item.collection_name,
                 is_verified: false,
             }));
 
