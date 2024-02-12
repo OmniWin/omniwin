@@ -1,5 +1,6 @@
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds, format } from "date-fns";
 import { EventDetails } from "@/app/types";
+export * from './getExplorerLink';
 
 export const classNames = (...args: any[]) => {
     return args.filter(Boolean).join(" ");

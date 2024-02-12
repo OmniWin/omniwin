@@ -69,11 +69,11 @@ export class AuthController {
             // console.log({ decodedToken })
 
             const session = {
-                address: decodedToken.address,
-                chainId: decodedToken.chainId,
-                userId: decodedToken.userId,
-                username: decodedToken.username,
-                email: decodedToken.email,
+                address: decodedToken.payload.address,
+                chainId: decodedToken.payload.chainId,
+                userId: decodedToken.payload.userId,
+                username: decodedToken.payload.username,
+                email: decodedToken.payload.email,
             };
 
 

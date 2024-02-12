@@ -48,6 +48,9 @@ export type RaffleCard = {
     network: string;
     collection_name: string;
     is_verified: boolean;
+    is_favorite: boolean;
+    favorites_count: number;
+    count_views: number;
 };
 
 export interface Raffle {
@@ -79,6 +82,25 @@ export interface Raffle {
     image_local: string;
 }
 
+export type RaffleResponse = {
+    success: boolean;
+    data: {
+        nft: RaffleCard;
+        tickets: Ticket[];
+        purchaseOptions: PurchaseOption[];
+    };
+    message: string;
+}
+
+export type RaffleParticipantsResponse = {
+    success: boolean;
+    data: {
+        items: Ticket[];
+    };
+    message: string;
+}
+
+
 export interface Ticket {
     id_ticket: number;
     id_lot: number;
@@ -87,7 +109,9 @@ export interface Ticket {
     total_tickets: number;
     amount: string;
     bonus: number;
+    transaction_hash: string;
     tokens_spent: string;
+    created_at: string;
 }
 
 export interface PurchaseOption {
@@ -110,4 +134,9 @@ export interface EventDetails {
     location: string;
     startTime: Date; // Using Date object for start time
     endTime: Date; // Using Date object for end time
+}
+
+export enum LinkType {
+    address = 'address',
+    tx = 'tx',
 }

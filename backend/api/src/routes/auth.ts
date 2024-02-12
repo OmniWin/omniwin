@@ -7,7 +7,7 @@ async function routes(fastify: FastifyInstance, options: any) {
     fastify.get('/auth/session', {
         onRequest: [fastify.authenticate]
     }, AuthController.session)
-    fastify.post('/auth/signout', {
+    fastify.get('/auth/signout', {
         onRequest: [fastify.authenticate]
     }, AuthController.signout)
 }

@@ -1,5 +1,4 @@
-import type { SIWEVerifyMessageArgs } from '@web3modal/core'
-const domain = "http://localhost"
+const domain = process.env.NEXT_PUBLIC_DOMAIN;
 
 export const getNonce = async () => {
     try {
@@ -33,7 +32,7 @@ export const getSession = async () => {
     }
 }
 
-export const validateMessage = async ({ message, signature }: SIWEVerifyMessageArgs) => {
+export const validateMessage = async ({ message, signature }: any) => {
     try {
         const response = await fetch(`${domain}/v1/auth/verify`, {
             method: 'POST',
@@ -59,11 +58,7 @@ export const validateMessage = async ({ message, signature }: SIWEVerifyMessageA
 export const signOut = async () => {
     try {
         const response = await fetch(`${domain}/v1/auth/signout`, {
-            method: 'POST',
             credentials: "include",
-            headers: {
-                'Content-Type': 'application/json'
-            }
         });
         if (!response.ok) {
             throw new Error('Network response was not ok');

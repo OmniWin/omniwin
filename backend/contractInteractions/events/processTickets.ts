@@ -1,8 +1,7 @@
 import { EventQueue } from "../queue/EventQueue";
 import { ethers } from "ethers";
-import { blocksByTime, getNFTData, cleanHashLots } from "../utils";
+import { blocksByTime } from "../utils";
 import { insertBuyTickets } from "../scripts/insertBuyTickets";
-import { getLotByID } from "../contractInteractions/contractMain";
 import config from "../contracts/contractConfig";
 import { mysqlInstance } from '../repository/MysqlRepository';
 
@@ -32,6 +31,10 @@ type EventTicketCustom = {
     tokensSpent: number,
     bonus: number,
     uniqueID: string,
+    block: number,
+    transactionHash: string,
+    network: string
+
 }
 
 export async function processTickets() {
@@ -40,7 +43,6 @@ export async function processTickets() {
 
     const createBuyTicketsEvent = config.contract.getEvent("BuyTickets");
     config.contract.on(createBuyTicketsEvent, async (ID, recipient, totalTickets, amount, tokensSpent, bonus, event: any) => {
-        console.log("BuyTickets event fired", { ID, recipient, totalTickets, amount, tokensSpent, bonus });
         //recipient = the buyer
         //tokensSpent = ticketPrice * amount
         //amount = how many tickets bought
@@ -52,6 +54,7 @@ export async function processTickets() {
 
         const lotID = Number(ID);
 
+
         const ticketData = {
             lotID: lotID,
             recipient,
@@ -60,7 +63,12 @@ export async function processTickets() {
             tokensSpent: Number(tokensSpent),
             bonus: Number(bonus),
             uniqueID: uniqueID,
+            block: event.log.blockNumber,
+            transactionHash: event.log.transactionHash,
+            network: config.network
         } as EventTicketCustom
+
+        console.log("BuyTickets event fired", ticketData);
 
         //after we processed all buy tickets, we enqueue events to be processed in order
         eventQueue.enqueue(ticketData, () => processBuyTicketEvent(ticketData, hashLots, uniqueID, lotID));
@@ -68,49 +76,25 @@ export async function processTickets() {
     });
 
     //We first get all the tickets from the chain and insert them in our db
-    const timeFromBlock = 60 * 10; //10 minutes
+    const timeFromBlock = 60 * 10 * 10 * 10; //10 minutes * 10 blocks per minute * 10 minutes
     const numberOfBlocks = blocksByTime(config.network, timeFromBlock)
-    eventQueue.enqueue("", () => insertBuyTickets(numberOfBlocks, config.contract));
-
-    setInterval(() => {
-        cleanHashLots(hashLots);
-    }, 60000);
+    eventQueue.enqueue("", () => insertBuyTickets(numberOfBlocks));
 }
 
 
 async function processBuyTicketEvent(ticketData: EventTicketCustom, hashLots: HashLots, uniqueID: string, lotID: number) {
     if (hashLots[lotID] === undefined) {
-        //first time we see lot in ur hashmap. We want to create a starting point for the hashmap 
-        //1. Get all tickets from chain last X days
-        //2. Now that we have all ticket events in our db, we can get the lot data from the chain. We should now have a starting point for our hashmap (all tickets up until current event in db, clean totalTickets count)
-        const nftData = await getLotByID(config.contract, lotID);
-        await mysqlInstance.insertNFT(nftData);
-
-
         //3. Get all tickets from db
-        const ticketsDB = await mysqlInstance.getTicketsByLotID(lotID)
-        hashLots[lotID] = {
-            timestamp: Date.now(),
-            tickets: ticketsDB
-        }
+        const ticketExists = await mysqlInstance.ticketExists(uniqueID)
 
-        if (ticketsDB.length === 0) {
-            //first insert
-            const dataToInsert = await getLotByID(config.contract, lotID);
-            const nftMetadata = await getNFTData(dataToInsert.token, dataToInsert.tokenID, dataToInsert.assetType);
-            const nftID = await mysqlInstance.insertNFT(dataToInsert);
-            await mysqlInstance.insertMetadata(nftID, dataToInsert.lotID, nftMetadata);
-        }
-
-        if (ticketsDB.length > 0) {
-            //check if incoming ticket is already in the db
-            const ticket = ticketsDB.find(ticket => ticket.uniqueID === uniqueID);
-            if (ticket === undefined) {
-                //insert new ticket
-                await mysqlInstance.buyTickets(ticketData);
-                //update totalTickets in NFT table
-                await mysqlInstance.incrementTotalTickets(lotID);
-            }
+        if (!ticketExists) {
+            //insert new ticket
+            await mysqlInstance.buyTickets(ticketData);
         }
     }
 }
+
+processTickets().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});

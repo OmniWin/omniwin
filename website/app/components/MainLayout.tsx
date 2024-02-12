@@ -11,6 +11,7 @@ import { selectSidebarToggleState } from "@/lib/redux/slices/sidebarSlice/select
 import React, { useRef } from "react";
 
 
+
 export default function MainLayout(props: React.PropsWithChildren) {
     const sidebarToggleState = useSelector(selectSidebarToggleState);
     const mainRef = useRef(null); // Reference to the main tag

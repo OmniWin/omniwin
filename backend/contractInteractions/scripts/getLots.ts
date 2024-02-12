@@ -19,7 +19,7 @@ export async function getLots(start: number) {
             // dataToInsert.token = "0xA89Af8DC152933a1b225048527b4fF6776e93213"
             // dataToInsert.tokenID = "30561";
             // dataToInsert.assetType = 0;
-            if (dataToInsert.token = "0x0000000000000000000000000000000000000000") {
+            if (dataToInsert.token == "0x0000000000000000000000000000000000000000") {
                 //lot has been deleted
                 continue;
             }
@@ -35,10 +35,10 @@ export async function getLots(start: number) {
 }
 
 
-// async function main() {
-//     getLots(119402); // 0 - start from the beginning
-// }
-// main().catch((error) => {
-//     console.error(error);
-//     process.exit(1);
-// });
+async function main() {
+    getLots(0); // 0 - start from the beginning
+}
+main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});

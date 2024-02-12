@@ -1,6 +1,8 @@
 import { FastifyInstance } from 'fastify';
 // import { FetchNFTsResultType } from "../types/fetchNfts";
 import { SortBy } from "../types/sortBy";
+import { Prisma } from '@prisma/client';
+
 
 export class NftRepository {
     fastify: FastifyInstance;
@@ -33,7 +35,7 @@ export class NftRepository {
         created_at: Date;
         updated_at: Date;
         name: string;
-        collectionName: string;
+        collection_name: string;
         image_local: string;
 
     }[]> {
@@ -66,7 +68,7 @@ export class NftRepository {
                             Nft.created_at, 
                             Nft.updated_at, 
                             NftMetadata.name, 
-                            NftMetadata.collectionName, 
+                            NftMetadata.collection_name, 
                             NftMetadata.image_local 
                         FROM Nft
                         LEFT JOIN NftMetadata ON Nft.id_nft = NftMetadata.id_nft
@@ -156,9 +158,7 @@ export class NftRepository {
         let rawQuery = `SELECT 
                             Nft.id_nft, 
                             Nft.id_lot, 
-                            Nft.total_tickets, 
-                            Nft.bonus_tickets,
-                            Nft.tickets_bought, 
+                            Nft.total_tickets,
                             Nft.ticket_price, 
                             Nft.transactions, 
                             Nft.end_timestamp, 
@@ -178,13 +178,25 @@ export class NftRepository {
                             Nft.created_at, 
                             Nft.updated_at, 
                             NftMetadata.name, 
-                            NftMetadata.collectionName, 
-                            NftMetadata.image_local
+                            NftMetadata.collection_name, 
+                            NftMetadata.image_local,
+                            TicketSum.total_amount AS tickets_bought,
+                            TicketSum.bonus_tickets,
+                            count_views,
+                            Favorites.id_user AS favorite,
+                            (SELECT count(*) FROM Favorites WHERE Favorites.id_lot = ?) as favorites_count
                         FROM Nft
                         LEFT JOIN NftMetadata ON Nft.id_lot = NftMetadata.id_lot
+                        LEFT JOIN Favorites ON Favorites.id_lot = Nft.id_lot
+                        LEFT JOIN (
+                            SELECT Tickets.id_lot, SUM(Tickets.amount) AS total_amount, SUM(Tickets.bonus) as bonus_tickets
+                            FROM Tickets
+                            WHERE Tickets.id_lot = ?
+                            GROUP BY Tickets.id_lot
+                        ) AS TicketSum ON Nft.id_lot = TicketSum.id_lot
                         WHERE Nft.id_lot = ? LIMIT 1`;
 
-        const queryParams = [id];
+        const queryParams = [id, id, id];
         const nft = await prisma.$queryRawUnsafe(rawQuery, ...queryParams) as any;
 
 
@@ -210,18 +222,110 @@ export class NftRepository {
         return { nft, tickets };
     }
 
-    async fetchNFTTickets(lotId: number, limit: number, cursor: number) {
+    async increaseNFTViews(id: number) {
+        const { prisma } = this.fastify;
+
+        await prisma.nft.update({
+            where: {
+                id_lot: id
+            },
+            data: {
+                count_views: {
+                    increment: 1
+                }
+            }
+        })
+    }
+
+    async fetchNFTByIds(ids: number[]) {
+        const { prisma } = this.fastify;
+        const placeholders = ids.map(() => '?').join(', ');
+
+        let rawQuery = `SELECT 
+                            Nft.id_nft, 
+                            Nft.id_lot, 
+                            Nft.total_tickets,
+                            Nft.ticket_price, 
+                            Nft.transactions, 
+                            Nft.end_timestamp, 
+                            Nft.fee, 
+                            Nft.closed, 
+                            Nft.buyout, 
+                            Nft.asset_claimed, 
+                            Nft.tokens_claimed, 
+                            Nft.owner, 
+                            Nft.signer, 
+                            Nft.token,
+                            Nft.token_id, 
+                            Nft.amount, 
+                            Nft.asset_type, 
+                            Nft.data, 
+                            Nft.network, 
+                            Nft.created_at, 
+                            Nft.updated_at, 
+                            NftMetadata.name, 
+                            NftMetadata.collection_name, 
+                            NftMetadata.image_local,
+                            TicketSum.total_amount AS tickets_bought,
+                            TicketSum.bonus_tickets
+                        FROM Nft
+                        LEFT JOIN NftMetadata ON Nft.id_lot = NftMetadata.id_lot
+                        LEFT JOIN (
+                            SELECT Tickets.id_lot, SUM(Tickets.amount) AS total_amount, SUM(Tickets.bonus) as bonus_tickets
+                            FROM Tickets
+                            WHERE Tickets.id_lot IN (${placeholders})
+                            GROUP BY Tickets.id_lot
+                        ) AS TicketSum ON Nft.id_lot = TicketSum.id_lot
+                        WHERE Nft.id_lot IN (${placeholders})`;
+
+
+        const queryParams = [...ids, ...ids]; // Duplicate the ids array for both IN clauses
+
+        const nfts = await prisma.$queryRawUnsafe(rawQuery, ...queryParams) as any;
+
+        return nfts;
+    }
+
+    async fetchNFTTickets(lotId: number, limit: number, cursor: number, order: string) {
         const { prisma } = this.fastify;
         const tickets = await prisma.tickets.findMany({
             take: limit + 1,
             cursor: cursor ? { id_ticket: cursor } : undefined,
-            orderBy: { id_ticket: 'asc' },
+            orderBy: { block: order as Prisma.SortOrder },
             where: {
                 id_lot: lotId
             }
         });
 
         return tickets;
+    }
+
+    async fetchNFTActivity(lotId: number, limit: number, cursor: number) {
+        const { prisma } = this.fastify;
+        const activities = await prisma.tickets.findMany({
+            take: limit + 1,
+            cursor: cursor ? { id_ticket: cursor } : undefined,
+            orderBy: { block: 'desc' },
+            where: {
+                id_lot: lotId
+            }
+        });
+
+        return activities;
+    }
+
+    async fetchNFTEntrants(lotId: number, limit: number, cursor: number) {
+        const { prisma } = this.fastify;
+        const entrants = await prisma.tickets.findMany({
+            take: limit + 1,
+            cursor: cursor ? { id_ticket: cursor } : undefined,
+            orderBy: { amount: 'desc' },
+            where: {
+                id_lot: lotId
+            }
+        });
+
+        return entrants;
     }
 
     convertBigInts(obj: any) {
@@ -233,4 +337,60 @@ export class NftRepository {
         return obj;
     }
 
+    async newBuyTickets(created_at: Date | null) {
+        const { prisma } = this.fastify
+
+        let gte = new Date(new Date().getTime() - 10 * 1000)
+
+        if (created_at !== null) {
+            gte = (created_at as Date)
+        }
+        //get tickets last 10 seconds
+        const tickets = await prisma.tickets.findMany({
+            orderBy: { id_ticket: 'desc' },
+            where: {
+                created_at: {
+                    gt: gte
+                }
+            }
+        })
+
+        return tickets;
+    }
+
+    async addFavorite(id: number, user: string) {
+        const { prisma } = this.fastify;
+
+        // Check if the favorite already exists
+        const existingFavorite = await prisma.favorites.findUnique({
+            where: {
+                id_lot_id_user: {
+                    id_lot: id,
+                    id_user: user,
+                },
+            },
+        });
+
+        // If it exists, remove it
+        if (existingFavorite) {
+            await prisma.favorites.delete({
+                where: {
+                    id_lot_id_user: {
+                        id_lot: id,
+                        id_user: user,
+                    },
+                },
+            });
+            return { message: 'Favorite removed' };
+        } else {
+            // If it doesn't exist, create it
+            await prisma.favorites.create({
+                data: {
+                    id_lot: id,
+                    id_user: user,
+                },
+            });
+            return { message: 'Favorite added' };
+        }
+    }
 }

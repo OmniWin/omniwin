@@ -35,20 +35,20 @@ export default class MysqlRepository {
     public async insertMetadata(nftID: number, lotID: number, metadata: NFTMetadata | null) {
         try {
             if (!metadata) {
-                const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, collectionName, description, json, image_url, image_local, status) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
+                const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, collection_name, description, json, image_url, image_local, status) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
 
                 await conn.query(metadataQuery, [nftID, lotID, null, null, null, null, null, null, "FAILED", "FAILED"]);
 
                 return;
             }
 
-            const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, collectionName, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_lot = ?, name = ?, description = ?, json = ?, image_url = ?, image_local = ?, status = ?`;
+            const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, collection_name, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_lot = ?, name = ?, description = ?, json = ?, image_url = ?, image_local = ?, status = ?`;
 
             await conn.query(metadataQuery, [nftID, lotID, metadata?.name || null, metadata?.collectionName || null, metadata?.description || null, JSON.stringify(metadata) || null, null, metadata?.image_local || null, "SUCCESS", lotID, metadata?.name || null, metadata?.description || null, JSON.stringify(metadata) || null, null, metadata?.image_local || null, "SUCCESS"]);
 
         } catch (error) {
             console.log(error);
-            const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, collectionName, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
+            const metadataQuery = `INSERT INTO NftMetadata (id_nft, id_lot, name, collection_name, description, json, image_url, image_local, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?`;
             await conn.query(metadataQuery, [nftID, lotID, null, null, null, null, null, null, null, "ERROR", "ERROR"]);
             logger.error(`Error insertMetadata ${nftID} ${lotID} ${metadata} ${error}`);
             throw new Error("Error insertMetadata");
@@ -93,7 +93,7 @@ export default class MysqlRepository {
             const query = `INSERT INTO Nft (id_lot, token, token_id, amount, asset_type, data, owner, signer, total_tickets, ticket_price, end_timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), token_id = VALUES(token_id), amount = VALUES(amount), asset_type = VALUES(asset_type), data = VALUES(data), owner = VALUES(owner), signer = VALUES(signer), total_tickets = VALUES(total_tickets), ticket_price = VALUES(ticket_price), end_timestamp = VALUES(end_timestamp);`;
 
             const [rows,] = await conn.query(query, [
-                data.lotID, data.token, data.tokenID, data.amount, assetType, data.data, data.owner, data.signer, data.totalTickets, data.ticketPrice, data.endTimestamp,
+                data.lotID, data.token, data.tokenID, data.amount, assetType, data.data, data.owner, data.signer, data.totalTickets, data.ticketPrice, data.endTimestamp, 0
             ]);
 
             return rows;
@@ -112,13 +112,16 @@ export default class MysqlRepository {
         tokensSpent: number,
         bonus: number,
         uniqueID: string,
+        block: number,
+        transactionHash: string,
+        network: string
     }) {
         try {
-            const query = `INSERT INTO Tickets (id_lot, unique_id, recipient, total_tickets, amount, tokens_spent, bonus) VALUES (?,?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE recipient = VALUES(recipient), total_tickets = VALUES(total_tickets), amount = VALUES(amount), tokens_spent = VALUES(tokens_spent), bonus = VALUES(bonus), updated_at = CURRENT_TIMESTAMP()
+            const query = `INSERT INTO Tickets (id_lot, unique_id, recipient, total_tickets, amount, tokens_spent, bonus, block, transactionHash, network) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE recipient = VALUES(recipient), total_tickets = VALUES(total_tickets), amount = VALUES(amount), tokens_spent = VALUES(tokens_spent), bonus = VALUES(bonus), block = VALUES(block), transactionHash = VALUES(transactionHash), network = VALUES(network), updated_at = CURRENT_TIMESTAMP()
             ;`;
 
             const [rows,] = await conn.query(query, [
-                data.lotID, data.uniqueID, data.recipient, data.totalTickets, data.amount, data.tokensSpent, data.bonus,
+                data.lotID, data.uniqueID, data.recipient, data.totalTickets, data.amount, data.tokensSpent, data.bonus, data.block, data.transactionHash, data.network
             ]);
 
             return rows;
@@ -166,6 +169,36 @@ export default class MysqlRepository {
         } catch (error) {
             logger.error(`Error getTicketsByLotID ${lotID} ${error}`);
             throw new Error("Error getTicketsByLotID");
+        }
+    }
+
+
+    public async ticketExists(uniqueId: string) {
+        try {
+            const query = `SELECT unique_id FROM Tickets WHERE unique_id = ?`;
+            const [rows,] = await conn.query(query, [
+                uniqueId,
+            ]);
+
+            return (rows as unknown as string[]).length > 0;
+        } catch (error) {
+            logger.error(`Error getTicketsByUniqueID ${uniqueId} ${error}`);
+            throw new Error("Error getTicketsByUniqueID");
+        }
+    }
+
+    public async updateTotalTickets(lotID: number, totalTickets: number) {
+        try {
+            const query = `UPDATE Nft SET total_tickets = ? WHERE id_lot = ?`;
+
+            const [rows,] = await conn.query(query, [
+                totalTickets, lotID,
+            ]);
+
+            return rows;
+        } catch (error) {
+            logger.error(`Error updateTotalTickets ${lotID} ${totalTickets} ${error}`);
+            throw new Error("Error updateTotalTickets");
         }
     }
 }

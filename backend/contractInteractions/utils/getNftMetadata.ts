@@ -10,7 +10,7 @@ import config from "../contracts/contractConfig";
 export async function getNFTData(nftContractAddress: string, tokenId: string, assetType: AssetType) {
     const nftContract = assetType === AssetType.ERC721 ? new ethers.Contract(nftContractAddress, NFT_721_ABI, goerliProvider) : new ethers.Contract(nftContractAddress, NFT_1155_ABI, goerliProvider);
 
-    console.log(nftContractAddress, nftContract, assetType);
+    // console.log(nftContractAddress, nftContract, assetType);
 
 
     let response = {} as any;
