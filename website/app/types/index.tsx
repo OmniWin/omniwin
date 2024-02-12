@@ -103,3 +103,11 @@ export interface CountdownRendererProps {
     seconds: number;
     completed: boolean;
 }
+
+export interface EventDetails {
+    title: string;
+    description: string;
+    location: string;
+    startTime: Date; // Using Date object for start time
+    endTime: Date; // Using Date object for end time
+}

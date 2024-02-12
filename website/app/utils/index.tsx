@@ -1,4 +1,6 @@
-import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from "date-fns";
+import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds, format } from "date-fns";
+import { EventDetails } from "@/app/types";
+
 export const classNames = (...args: any[]) => {
     return args.filter(Boolean).join(" ");
 };
@@ -149,3 +151,44 @@ export const countdownRederer = ({ days, hours, minutes, seconds, completed }: C
         );
     }
 };
+
+
+function formatICSDate(date: Date): string {
+    // Format date to YYYYMMDDTHHmm00Z (UTC time for .ics)
+    return format(date, "yyyyMMdd'T'HHmmss'Z'");
+}
+
+function createICSContent(eventDetails: EventDetails): string {
+    const { title, description, location, startTime, endTime } = eventDetails;
+    const startDate = formatICSDate(startTime);
+    const endDate = formatICSDate(endTime);
+
+    return [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "BEGIN:VEVENT",
+        `URL:${document.location.href}`,
+        `DTSTART:${startDate}`,
+        `DTEND:${endDate}`,
+        `SUMMARY:${title}`,
+        `DESCRIPTION:${description}`,
+        `LOCATION:${location}`,
+        "END:VEVENT",
+        "END:VCALENDAR",
+    ].join("\n");
+}
+
+// Example usage
+export function downloadICS(eventDetails: EventDetails) {
+    const icsContent = createICSContent(eventDetails);
+    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "event.ics"; // The file name for the download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url); // Clean up the URL object
+}

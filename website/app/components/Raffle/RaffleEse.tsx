@@ -11,7 +11,7 @@ import { classNames, formatCountdown, shortenAddress, formatMoney } from "@/app/
 export default function RaffleEse(raffle: RaffleCard) {
     const progress = (raffle.tickets_bought / raffle.tickets_total) * 100;
 
-    const timeLeft = formatCountdown(new Date(), new Date(raffle.time_left * 1000));
+    const timeLeft = formatCountdown(new Date(), new Date(raffle.end_timestamp * 1000));
 
     return (
         <Link href={"/raffles/" + raffle.nft_id} className="flex items-center rounded-lg relative xl:min-h-96 group">
