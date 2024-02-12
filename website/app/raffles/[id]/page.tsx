@@ -51,6 +51,219 @@ import { useWeb3Modal } from '@web3modal/wagmi/react'
 
 import useEventSourceListener from '@/app/hooks/useSSE';
 
+function raffleSkeleton() {
+    return (
+        <div className="mx-auto max-w-7xl">
+            <a className="flex items-center text-sm font-medium text-zinc-400 hover:text-zinc-200 mb-4 animate-pulse">
+                <div className="h-4 w-4 mr-2 bg-zinc-700 rounded"></div>
+                <div className="h-4 w-24 bg-zinc-700 rounded"></div>
+            </a>
+            <div className="lg:flex items-center justify-between">
+                <div className="h-6 w-48 bg-zinc-700 rounded mb-5 lg:mb-0 animate-pulse"></div>
+            </div>
+            <div className="grid items-center grid-cols-2 xl:grid-cols-5 mt-8 border-zinc-700 border rounded-xl">
+                <div className="p-4 flex items-center justify-center gap-3 col-span-1 xl:border-r border-zinc-700 h-full animate-pulse">
+                    <div className="w-10 h-10 bg-zinc-700 rounded-full"></div>
+                    <div className="ml-3">
+                        <div className="h-4 bg-zinc-700 rounded w-16 mb-1"></div>
+                        <div className="h-6 bg-zinc-700 rounded w-24 animate-pulse"></div>
+                    </div>
+                </div>
+                <div className="py-4 px-4 lg:px-8 flex flex-col justify-center col-span-2 xl:col-span-3 xl:border-r border-zinc-700 h-full animate-pulse">
+                    <div className="flex items-center justify-between gap-x-2 w-full font-bold text-sm mb-3">
+                        <div className="w-24 h-4 bg-zinc-700 rounded animate-pulse"></div>
+                        <div className="w-24 h-4 bg-zinc-700 rounded animate-pulse"></div>
+                    </div>
+                    <div className="flex items-center gap-2 animate-pulse">
+                        <div className="overflow-hidden rounded-xl bg-white/20 h-2 w-full">
+                            <div className="h-full rounded-xl bg-gradient-to-b from-zinc-700 to-zinc-700 w-100"></div>
+                        </div>
+                        <span className="text-xs bg-zinc-700 animate-pulse w-10 h-2"></span>
+                    </div>
+                </div>
+                <div className="p-4 flex items-center justify-center col-span-1 col-start-2 row-start-1 xl:col-start-5 xl:bg-gradient-to-b from-zinc-900 to-emerald-800/5 rounded-tr-xl rounded-br-xl animate-pulse">
+                    <div>
+                        <div className="h-4 bg-zinc-700 rounded w-16 mb-1"></div>
+                        <div className="h-6 bg-zinc-700 rounded w-24"></div>
+                    </div>
+                </div>
+            </div>
+            <div className="grid gap-10 xl:grid-cols-2 mt-10">
+                <div className="">
+                    <div className="relative">
+                        <div className="relative h-full w-full animate-pulse">
+                            <div className="object-cover h-full w-full min-h-52 xl:min-h-144 bg-zinc-700 rounded-xl"></div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h2 className="flex items-center gap-2 text-md lg:text-xl text-zinc-100 font-semibold mb-5 animate-pulse">
+                        <div className="h-5 bg-zinc-700 rounded w-1/4"></div>
+                    </h2>
+                    <div className="flex flex-col rounded-xl border border-zinc-700 bg-zinc-700 animate-pulse">
+                        <div className="flex items-center justify-between p-4 pb-5 lg:!p-4 border-zinc-700 relative space-x-3 xl:space-x-0 animate-pulse h-24"></div>
+                        <div className="flex items-center justify-between p-4 pb-5 lg:!p-4 border-zinc-700 relative space-x-3 xl:space-x-0 animate-pulse h-24"></div>
+                        <div className="flex items-center justify-between p-4 pb-5 lg:!p-4 border-zinc-700 relative space-x-3 xl:space-x-0 animate-pulse h-24"></div>
+                        <div className="flex items-center justify-between p-4 pb-5 lg:!p-4 border-zinc-700 relative space-x-3 xl:space-x-0 animate-pulse h-24"></div>
+                    </div>
+                    <div className="animate-pulse">
+                        <div className="h-5 bg-zinc-700 rounded w-1/3 mt-8 mb-5"></div>
+                        <div className="relative border border-zinc-700 bg-zinc-700 py-5 px-4 rounded-xl h-16"></div>
+                    </div>
+                </div>
+                <div className="animate-pulse">
+                    <div className="sm:flex sm:items-center">
+                        <div className="sm:flex-auto">
+                            <div className="h-4 bg-zinc-700 rounded w-1/4"></div>
+                            <div className="mt-2 h-4 bg-zinc-700 rounded w-full"></div>
+                        </div>
+                        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+                            <div className="h-10 bg-zinc-700 rounded"></div>
+                        </div>
+                    </div>
+                    <div className="mt-8 flow-root">
+                        <table className="min-w-full divide-y divide-gray-700">
+                            <thead>
+                                <tr>
+                                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/4"></div>
+                                    </th>
+                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/4"></div>
+                                    </th>
+                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/4"></div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-700">
+                                <tr>
+                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap p x-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div className="animate-pulse">
+                    <div className="sm:flex sm:items-center">
+                        <div className="sm:flex-auto">
+                            <div className="h-4 bg-zinc-700 rounded w-1/4"></div>
+                            <div className="mt-2 h-4 bg-zinc-700 rounded w-full"></div>
+                        </div>
+                        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+                            <div className="h-10 bg-zinc-700 rounded"></div>
+                        </div>
+                    </div>
+                    <div className="mt-8 flow-root">
+                        <table className="min-w-full divide-y divide-gray-700">
+                            <thead>
+                                <tr>
+                                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/4"></div>
+                                    </th>
+                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/4"></div>
+                                    </th>
+                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/4"></div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-700">
+                                <tr>
+                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 
 export default function RafflePage({
     params,
@@ -92,7 +305,7 @@ export default function RafflePage({
 
     useEventSourceListener(handleEvent);
 
-    if (isLoading || !raffleData) return <div>Loading...</div>;
+    if (isLoading || !raffleData) return raffleSkeleton();
     if (error) return <div>An error occurred: {error.message}</div>;
 
     const progress = ((raffleData.nft.tickets_bought / raffleData.nft.tickets_total) * 100);
