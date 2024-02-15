@@ -88,8 +88,20 @@ export type RaffleResponse = {
         nft: RaffleCard;
         tickets: Ticket[];
         purchaseOptions: PurchaseOption[];
+        activity: RaffleActivity[];
+        participants: RaffleActivity[];
     };
     message: string;
+}
+
+type RaffleActivity = {
+    recipient: string;
+    total_tickets: number;
+    amount: string;
+    bonus: number;
+    tokens_spent: string;
+    created_at: string;
+    transaction_hash: string;
 }
 
 export type RaffleParticipantsResponse = {

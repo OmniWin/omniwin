@@ -127,7 +127,7 @@ export class NftRepository {
         }
 
         if (sortBy === SortBy.Trending) {
-            orderByClause += ` ORDER BY trendingScore DESC LIMIT ?`;
+            orderByClause += ` ORDER BY trending_score DESC LIMIT ?`;
         }
 
         if (whereClauses.length > 0) {

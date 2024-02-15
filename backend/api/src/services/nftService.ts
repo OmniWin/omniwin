@@ -89,10 +89,16 @@ export class NftService {
         //bonus Tickets formula= (uint256(amount) * amount) / (uint256(4) * totalTickets);
         //calculate bonus
         const purchaseOptions = this.getPurchaseOptions(fetchedNft.nft?.[0]?.total_tickets || 0);
-        console.log('purchaseOptions', purchaseOptions)
 
-        return { nft: processedNft?.[0] || [], tickets: processedTickets, purchaseOptions };
+        let obj = {
+            nft: processedNft?.[0] || [],
+            tickets: processedTickets,
+            purchaseOptions,
+            activity: (await this.fetchNFTActivity(id, 30, 0)).activity,
+            participants: (await this.fetchNFTEntrants(id, 30, 0)).entrants,
+        }
 
+        return obj;
     }
 
     async increaseNFTViews(id: number) {
