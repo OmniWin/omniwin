@@ -25,8 +25,6 @@ const CustomImageWithFallback: React.FC<CustomImageWithFallbackProps> = ({ src, 
 
     const toggleMaximize = () => setIsMaximized(!isMaximized); // Toggle the maximized state
 
-    const glowStyle = glowEffect ? { boxShadow: "0 0 20px rgba(255, 255, 255, 0.5)" } : {}; // Conditional glow effect styling
-
     const loadingIndicator = () => {
         return (
             <>
@@ -50,15 +48,17 @@ const CustomImageWithFallback: React.FC<CustomImageWithFallbackProps> = ({ src, 
     return (
         <div className="relative h-full w-full">
             {isLoading && loadingIndicator()}
+
             <Image {...props} src={imgSrc} alt={alt} onError={handleError} onLoadingComplete={() => setIsLoading(false)} />
-            {/* <div className={`${isMaximized ? "fixed top-0 left-0 z-50 w-full h-full object-cover" : "max-w-xs max-h-xs"}`} style={glowStyle}>
-                <Image {...props} src={imgSrc} alt={alt} onError={handleError} onLoadingComplete={() => setIsLoading(false)} layout="fill" />
-            </div> */}
+
+            {/* With maximize icon to view it full screen */}
             {showMaximizeButton && (
                 <button onClick={toggleMaximize} className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900/40">
                     <ArrowsPointingOutIcon className="h-5 w-5 text-zinc-50" />
                 </button>
             )}
+
+            {/* Glow Effect */}
             {glowEffect && (
                 <div
                     style={{ backgroundImage: `url(${imgSrc})` }}

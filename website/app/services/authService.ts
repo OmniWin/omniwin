@@ -1,4 +1,4 @@
-const domain = process.env.NEXT_PUBLIC_DOMAIN;
+const domain = process.env.NEXT_PUBLIC_API_URL;
 
 export const getNonce = async () => {
     try {

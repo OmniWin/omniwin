@@ -25,8 +25,8 @@ const initialNavigation = [
         icon: TrophyIcon,
         current: false,
         children: [
-            { name: "List", href: "#", current: false, icon: TableCellsIcon },
-            { name: "Leaderboard", href: "#", current: false, icon: ChartBarIcon },
+            { name: "List", href: "/challenges/list", current: false, icon: TableCellsIcon },
+            { name: "Leaderboard", href: "/challenges/leaderboard", current: false, icon: ChartBarIcon },
         ],
     },
     {
@@ -221,7 +221,10 @@ export const SidebarNavigation = () => {
                 {/* Sidebar component, swap this element with another sidebar if you like */}
                 {/* <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-zinc-950 px-6 pb-4"> */}
                 <div className={classNames("flex h-16 shrink-0 items-center", sidebarOpenState.toggleSidebar ? "ml-3" : "self-center")}>
-                    <img className="h-8  w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" />
+                    <Link href="/" className="font-himagsikan text-[#6cf60f] text-4xl inline-flex items-center gap-3 hue-rotate-[45deg]">
+                        <img className="h-10  w-auto" src="/images/omniwin-logo.png" alt="Your Company" />
+                        <span className={classNames(sidebarToggleState.toggleSidebar && 'hidden')}>OmniWin</span>
+                    </Link>
                 </div>
                 <div className={`group flex grow flex-col bg-zinc-950 pb-4 relative transition-all duration-300 ${sidebarOpenState.toggleSidebar ? "px-4 w-[64px] hover:!w-72 " : "pl-4 pr-4 lg:w-72"}`}>
                     <nav className="flex flex-1 flex-col sidebar relative">
@@ -254,7 +257,7 @@ export const SidebarNavigation = () => {
                                                     </span>
                                                 </Link>
                                             ) : (
-                                                <Disclosure as="div">
+                                                <Disclosure as="div" defaultOpen={item.children.some((child) => child.current)} key={item.children.some((child) => child.current)}>
                                                     {({ open }) => (
                                                         <>
                                                             <Disclosure.Button

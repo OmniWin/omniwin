@@ -1,15 +1,17 @@
+import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFallback";
+
 export default function PromoBanner() {
     return (
         <div className="relative overflow-hidden bg-zinc-800 rounded-xl">
             <div className="pb-80 pt-16 sm:pb-40 sm:pt-24 lg:pb-48 lg:pt-40">
                 <div className="relative mx-auto max-w-7xl px-4 sm:static sm:px-6 lg:px-8">
-                    <div className="sm:max-w-lg">
-                        <h1 className="text-4xl font-bold tracking-tight text-zinc-100 sm:text-6xl">
-                            Sell NFTs Faster
+                    <div className="sm:max-w-xl">
+                        <h1 className="text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl">
+                            NFT Raffles Made Easy:
                             <br />
-                            Easy Raffles, Quicker Cash!
+                            Sell Smarter, Not Harder
                         </h1>
-                        <p className="mt-4 text-xl text-zinc-400">This year, our new summer collection will shelter you from the harsh elements of a world that doesn't care if you live or die.</p>
+                        <p className="mt-5 text-xl text-zinc-400">Sell NFTs fast with raffles. Engage buyers, amplify excitement. Dive in now!</p>
                     </div>
                     <div>
                         <div className="mt-10">
@@ -19,29 +21,71 @@ export default function PromoBanner() {
                                     <div className="flex items-center space-x-6 lg:space-x-8">
                                         <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
                                             <div className="h-64 w-44 overflow-hidden rounded-lg sm:opacity-0 lg:opacity-100">
-                                                <img src="https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/1.png" alt="" className="h-full w-full object-cover object-center" />
+                                                <CustomImageWithFallback
+                                                    width={300} // Placeholder width for aspect ratio calculation
+                                                    height={300} // Placeholder height for aspect ratio calculation
+                                                    src="/images/banner/1.jpg"
+                                                    alt=""
+                                                    className="h-full w-full object-cover object-center"
+                                                />
                                             </div>
                                             <div className="h-64 w-44 overflow-hidden rounded-lg">
-                                                <img src="https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/2.png" alt="" className="h-full w-full object-cover object-center" />
+                                                <CustomImageWithFallback
+                                                    width={300} // Placeholder width for aspect ratio calculation
+                                                    height={300} // Placeholder height for aspect ratio calculation
+                                                    src="/images/banner/2.jpg"
+                                                    alt=""
+                                                    className="h-full w-full object-cover object-center"
+                                                />
                                             </div>
                                         </div>
                                         <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
                                             <div className="h-64 w-44 overflow-hidden rounded-lg">
-                                                <img src="https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/3.png" alt="" className="h-full w-full object-cover object-center" />
+                                                <CustomImageWithFallback
+                                                    width={300} // Placeholder width for aspect ratio calculation
+                                                    height={300} // Placeholder height for aspect ratio calculation
+                                                    src="/images/banner/3.jpg"
+                                                    alt=""
+                                                    className="h-full w-full object-cover object-center"
+                                                />
                                             </div>
                                             <div className="h-64 w-44 overflow-hidden rounded-lg">
-                                                <img src="https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/4.png" alt="" className="h-full w-full object-cover object-center" />
+                                                <CustomImageWithFallback
+                                                    width={300} // Placeholder width for aspect ratio calculation
+                                                    height={300} // Placeholder height for aspect ratio calculation
+                                                    src="/images/banner/4.jpg"
+                                                    alt=""
+                                                    className="h-full w-full object-cover object-center"
+                                                />
                                             </div>
                                             <div className="h-64 w-44 overflow-hidden rounded-lg">
-                                                <img src="https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/5.png" alt="" className="h-full w-full object-cover object-center" />
+                                                <CustomImageWithFallback
+                                                    width={300} // Placeholder width for aspect ratio calculation
+                                                    height={300} // Placeholder height for aspect ratio calculation
+                                                    src="/images/banner/5.jpg"
+                                                    alt=""
+                                                    className="h-full w-full object-cover object-center"
+                                                />
                                             </div>
                                         </div>
                                         <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
                                             <div className="h-64 w-44 overflow-hidden rounded-lg">
-                                                <img src="https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/6.png" alt="" className="h-full w-full object-cover object-center" />
+                                                <CustomImageWithFallback
+                                                    width={300} // Placeholder width for aspect ratio calculation
+                                                    height={300} // Placeholder height for aspect ratio calculation
+                                                    src="/images/banner/6.jpg"
+                                                    alt=""
+                                                    className="h-full w-full object-cover object-center"
+                                                />
                                             </div>
                                             <div className="h-64 w-44 overflow-hidden rounded-lg">
-                                                <img src="https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/6.png" alt="" className="h-full w-full object-cover object-center" />
+                                                <CustomImageWithFallback
+                                                    width={300} // Placeholder width for aspect ratio calculation
+                                                    height={300} // Placeholder height for aspect ratio calculation
+                                                    src="/images/banner/7.jpg"
+                                                    alt=""
+                                                    className="h-full w-full object-cover object-center"
+                                                />
                                             </div>
                                         </div>
                                     </div>

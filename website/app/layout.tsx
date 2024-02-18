@@ -45,6 +45,9 @@ export default function RootLayout(props: React.PropsWithChildren) {
             <Web3Modal initialState={initialState}>
                 <ThemeContextProvider>
                     <html lang="en" className="dark">
+                        <head>
+                            <link rel="preload" href="/fonts/Himagsikan-MoXB.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
+                        </head>
                         <body className={inter.className}>
                             <MainLayout>
                                 {props.children}
