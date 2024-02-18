@@ -128,10 +128,6 @@ export type RaffleParticipantsResponse = {
     success: boolean;
     data: {
         items: Participants[];
-        next_cursor: {
-            last_block: string | null;
-            last_ticket_id: string | null;
-        }
     };
     message: string;
 }

@@ -49,7 +49,7 @@ export class NftService {
         return { items, nextCursor };
     }
 
-    async fetchNFT(id: number) {
+    async fetchNFT(id: number, limit: number) {
         const fetchedNft = await this.nftRepository.fetchNFT(id);
 
         // console.log('fetchedNft', fetchedNft)
@@ -78,13 +78,13 @@ export class NftService {
         }));
 
         //@ts-ignore
-        const processedTickets = fetchedNft.tickets.map(ticket => ({
-            recipient: ticket.recipient,
-            total_tickets: ticket.total_tickets,
-            amount: this.convertBigInts(Number(ticket.amount)),
-            bonus: ticket.bonus,
-            tokens_spent: this.convertBigInts(Number(ticket.tokens_spent) / Math.pow(10, USDC_decimals)),
-        }));
+        // const processedTickets = fetchedNft.tickets.map(ticket => ({
+        //     recipient: ticket.recipient,
+        //     total_tickets: ticket.total_tickets,
+        //     amount: this.convertBigInts(Number(ticket.amount)),
+        //     bonus: ticket.bonus,
+        //     tokens_spent: this.convertBigInts(Number(ticket.tokens_spent) / Math.pow(10, USDC_decimals)),
+        // }));
 
         //bonus Tickets formula= (uint256(amount) * amount) / (uint256(4) * totalTickets);
         //calculate bonus
@@ -92,10 +92,10 @@ export class NftService {
 
         let obj = {
             nft: processedNft?.[0] || [],
-            tickets: processedTickets,
+            // tickets: processedTickets,
             purchaseOptions,
-            activity: (await this.fetchNFTActivity(id, 30, 0)).activity,
-            participants: (await this.fetchNFTEntrants(id, 30, 0)).entrants,
+            activity: (await this.fetchNFTActivity(id, limit, 0)).activity,
+            participants: (await this.fetchNFTEntrants(id, limit, 0)).entrants,
         }
 
         return obj;
@@ -153,27 +153,21 @@ export class NftService {
         return { activity: processedActivity, nextCursor };
     }
 
-    async fetchNFTEntrants(lotId: number, limit: number, cursor: number) {
-        const fetchedEntrants = await this.nftRepository.fetchNFTEntrants(lotId, limit, cursor);
+    async fetchNFTEntrants(lotId: number, limit: number, offset: number) {
+        const fetchedEntrants = await this.nftRepository.fetchNFTEntrants(lotId, limit, offset);
         const USDC_decimals = 6;
 
         const processedEntrants = fetchedEntrants.map(entrant => ({
+            max_id_ticket: entrant.max_id_ticket || 0,
+            block: entrant.max_block,
             recipient: entrant.recipient,
-            total_tickets: entrant.total_tickets,
-            amount: this.convertBigInts(Number(entrant.amount)),
-            bonus: entrant.bonus,
-            tokens_spent: this.convertBigInts(Number(entrant.tokens_spent) / Math.pow(10, USDC_decimals)),
-            transaction_hash: entrant.transaction_hash,
-            created_at: entrant.created_at,
+            total_tickets: parseInt(entrant.total_tickets),
+            total_bonus: parseInt(entrant.total_bonus.toString()),
+            total_tokens_spent: this.convertBigInts(Number(entrant.total_tokens_spent) / Math.pow(10, USDC_decimals)),
+            username: entrant.username,
         }));
 
-        let nextCursor: string | null = null;
-        if (processedEntrants.length > limit) {
-            nextCursor = processedEntrants[limit - 1].recipient;
-            processedEntrants.pop(); // Remove the extra item
-        }
-
-        return { entrants: processedEntrants, nextCursor };
+        return { entrants: processedEntrants };
     }
 
     calculateBonus(amount: number, totalTickets: number) {

@@ -81,7 +81,7 @@ export class NftController {
                 success: true,
                 data: {
                     items: convertedItems,
-                    nextCursor: nextCursor
+                    next_cursor: nextCursor
                 } as FetchNFTsResultType,
                 message: "Nfts fetched successfully",
             });
@@ -102,12 +102,13 @@ export class NftController {
             //date of draw
             //prize
             const nftId = parseInt((req.params as any).id.toString(), 10);
+            const limit = 10
             // console.log("nftId", nftId);
 
             const nftService = new NftService(req.server as FastifyInstance);
             //increase count views by 1
             await nftService.increaseNFTViews(nftId);
-            const nft = await nftService.fetchNFT(nftId);
+            const nft = await nftService.fetchNFT(nftId, limit);
 
             req.server.log.info(`Nft fetched successfully, id: ${nftId}`);
 
@@ -145,7 +146,7 @@ export class NftController {
                 success: true,
                 data: {
                     items: tickets,
-                    nextCursor: nextCursor
+                    next_cursor: nextCursor
                 },
                 message: "Nfts fetched successfully",
             });
@@ -173,7 +174,7 @@ export class NftController {
                 success: true,
                 data: {
                     items: activity,
-                    nextCursor: nextCursor
+                    next_cursor: nextCursor
                 },
                 message: "Activity fetched successfully",
             });
@@ -189,19 +190,26 @@ export class NftController {
             const lotId = (req.params as any).id;
             const nftService = new NftService(req.server as FastifyInstance);
 
-            let { cursor, limit } = req.query as { cursor: string, limit: string };
+            let { offset, limit, ticketId } = req.query as { offset: string, limit: string, ticketId: string };
 
             const lotId_ = parseInt(lotId, 10);
             const limit_ = parseInt(limit, 10) || 10;
-            const cursor_ = cursor ? parseInt(cursor.toString()) : 0;
+            const offset_ = offset ? parseInt(offset.toString()) : 0;
+            const last_page_last_id_ticket = ticketId ? parseInt(ticketId.toString()) : 0;
 
-            const { entrants, nextCursor } = await nftService.fetchNFTEntrants(lotId_, limit_, cursor_);
+            console.log({
+                lotId_,
+                limit_,
+                offset_,
+                last_page_last_id_ticket
+            });
+
+            const { entrants } = await nftService.fetchNFTEntrants(lotId_, limit_, offset_);
 
             return res.code(200).send({
                 success: true,
                 data: {
                     items: entrants,
-                    nextCursor: nextCursor
                 },
                 message: "Entrants fetched successfully",
             });
