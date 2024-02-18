@@ -223,7 +223,10 @@ export const SidebarNavigation = () => {
                 <div className={classNames("flex h-16 shrink-0 items-center", sidebarOpenState.toggleSidebar ? "ml-3" : "self-center")}>
                     <Link href="/" className="font-himagsikan text-[#6cf60f] text-4xl inline-flex items-center gap-3 hue-rotate-[45deg]">
                         <img className="h-10  w-auto" src="/images/omniwin-logo.png" alt="Your Company" />
-                        <span className={classNames(sidebarToggleState.toggleSidebar && 'hidden')}>OmniWin</span>
+                        <span className={classNames(sidebarToggleState.toggleSidebar && 'hidden')} style={{
+                            '-webkit-text-stroke-width': '1px',
+                            '-webkit-text-stroke-color': 'black'
+                        }}>OmniWin</span>
                     </Link>
                 </div>
                 <div className={`group flex grow flex-col bg-zinc-950 pb-4 relative transition-all duration-300 ${sidebarOpenState.toggleSidebar ? "px-4 w-[64px] hover:!w-72 " : "pl-4 pr-4 lg:w-72"}`}>
