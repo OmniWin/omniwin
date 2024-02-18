@@ -110,7 +110,7 @@ export default function List() {
         <>
             <ChallengesHeader />
             <section className="relative z-20 mx-auto -mt-32 max-w-md sm:max-w-3xl lg:max-w-7xl lg:px-8" aria-labelledby="contact-heading">
-                <Button variant="secondary" size="default" className="mb-40">Create a challenge</Button>
+                <Button variant="soft" size="default" className="mb-40">Create a challenge</Button>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-20 xl:grid-cols-3 lg:gap-x-8">
                     {challenges.map((challenge, key) => (
                         <div key={challenge.name} className="flex flex-col rounded-2xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300">

@@ -20,7 +20,7 @@ const buttonVariants = cva(
         link: "text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-50",
 
         primary: "bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600",
-        soft: "bg-emerald-50 text-emerald-600 shadow-sm hover:bg-emerald-100",
+        soft: "bg-emerald-500/10 text-emerald-400 shadow-sm hover:bg-emerald-500/20",
       },
       size: {
         default: "h-10 px-4 py-2",
