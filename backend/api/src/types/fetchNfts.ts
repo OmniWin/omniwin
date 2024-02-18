@@ -20,5 +20,5 @@ export type FetchNFTsResultType = {
         token_id: string;
         network: NetworkType;
     }[],
-    nextCursor: string | null;
+    next_cursor: string | null;
 }

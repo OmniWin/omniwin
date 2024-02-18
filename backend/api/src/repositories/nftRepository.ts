@@ -210,7 +210,7 @@ export class NftRepository {
                             bonus,
                             tokens_spent
                         FROM Tickets
-                        WHERE id_lot = ?`;
+                        WHERE id_lot = ? LIMIT 10`;
 
         //id_lot 33 is fucked up
         const queryParams2 = [id];
@@ -304,6 +304,7 @@ export class NftRepository {
         const { prisma } = this.fastify;
         const activities = await prisma.tickets.findMany({
             take: limit + 1,
+            skip: 1, // Skip the cursor
             cursor: cursor ? { id_ticket: cursor } : undefined,
             orderBy: { block: 'desc' },
             where: {
@@ -314,19 +315,43 @@ export class NftRepository {
         return activities;
     }
 
-    async fetchNFTEntrants(lotId: number, limit: number, cursor: number) {
+    async fetchNFTEntrants(lotId: number, limit: number, offset: number) {
         const { prisma } = this.fastify;
-        const entrants = await prisma.tickets.findMany({
-            take: limit + 1,
-            cursor: cursor ? { id_ticket: cursor } : undefined,
-            orderBy: { amount: 'desc' },
-            where: {
-                id_lot: lotId
-            }
-        });
 
-        return entrants;
+        const rawQuery = `
+                        SELECT 
+                            MAX(id_ticket) AS max_id_ticket,
+                            MAX(block) AS max_block,
+                            recipient, 
+                            SUM(amount) AS total_tickets, 
+                            SUM(bonus) as total_bonus,
+                            SUM(tokens_spent) AS total_tokens_spent,
+                            User.username
+                        FROM 
+                            Tickets
+                        LEFT JOIN User ON User.address = Tickets.recipient    
+                        WHERE 
+                            id_lot = ? 
+                        GROUP BY 
+                            recipient
+                        ORDER BY 
+                            total_tickets DESC, max_block DESC
+                        LIMIT ? OFFSET ?;
+                        `;
+
+        const queryParams = [lotId, limit, offset];
+        const entrants = await prisma.$queryRawUnsafe(rawQuery, ...queryParams) as any;
+        return entrants as {
+            max_id_ticket: number;
+            max_block: number;
+            recipient: string;
+            total_tickets: string;
+            total_bonus: string;
+            total_tokens_spent: number;
+            username: string;
+        }[];
     }
+
 
     convertBigInts(obj: any) {
         for (let key in obj) {
