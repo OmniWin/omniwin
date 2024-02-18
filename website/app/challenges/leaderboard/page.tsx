@@ -64,7 +64,7 @@ export default function Leaderboard() {
     return (
         <>
             <ChallengesHeader />
-            <section className="relative z-10 mx-auto -mt-32 max-w-md sm:max-w-3xl lg:max-w-7xl lg:px-8" aria-labelledby="contact-heading">
+            <section className="relative z-10 mx-auto -mt-36 max-w-md sm:max-w-3xl lg:max-w-7xl lg:px-8" aria-labelledby="contact-heading">
                 <div className="border border-zinc-800 rounded-xl bg-zinc-800">
                     <table className="w-full whitespace-nowrap text-left">
                         <colgroup>

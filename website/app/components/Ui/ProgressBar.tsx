@@ -34,7 +34,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ value, maxValue, size, labelI
     return (
         <div>
             {labelOutside && (
-                <div className="flex justify-between mb-1">
+                <div className="flex justify-between mb-2">
                     <span className={`${labelSizeClass} font-medium dark:text-white`}>{labelOutsideText}</span>
                     <span className={`${labelSizeClass} font-medium dark:text-white`}>{`${percentage}%`}</span>
                 </div>
