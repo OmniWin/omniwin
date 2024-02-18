@@ -1,7 +1,7 @@
 // import { classNames } from "@/app/utils";
 import { ArrowTopRightOnSquareIcon, TicketIcon } from "@heroicons/react/24/outline";
 import { QueueListIcon } from "@heroicons/react/24/solid";
-import { RaffleParticipantsResponse, LinkType } from "@/app/types";
+import { RaffleParticipantsResponse, LinkType, RaffleResponse } from "@/app/types";
 import { ExplorerLink } from "@/app/components/Common/TransactionExplorerLink"
 import { shortenAddress } from "@/app/utils";
 import { fetchRaffleActivity } from '../../services/raffleService';
@@ -29,11 +29,13 @@ const activityItems: ActivityItem[] = [
     },
 ];
 
-export default function Activity({ lotId }: { lotId: string }) {
+export default function Activity({ lotId, initialActivity }: { lotId: string, initialActivity: RaffleResponse['data']['participants'] }) {
     const { data: participants, isLoading: participantsIsLoading, error: participantsError } = useQuery<RaffleParticipantsResponse['data'], Error>({
         queryKey: ['activity', lotId],
         queryFn: () => fetchRaffleActivity(lotId, '10', '0')
     });
+
+    console.log(initialActivity)
 
     const queryClient = useQueryClient();
     const handleEvent = (eventData: {

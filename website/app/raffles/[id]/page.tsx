@@ -687,7 +687,7 @@ export default function RafflePage({
                         </div> */}
                     </div>
                     <div className="">
-                        <Activity lotId={params.id} />
+                        <Activity lotId={params.id} initialActivity={raffleData.activity} />
                     </div>
                     <div className="">
                         <Participants lotId={params.id} />
