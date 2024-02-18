@@ -4,6 +4,7 @@ import { Bars3Icon, UserGroupIcon, NewspaperIcon, PlayIcon, XMar, HeartIconk, Pl
 import { classNames } from "@/app/utils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const challenges = [
     {
@@ -117,7 +118,7 @@ export default function List() {
                     {challenges.map((challenge, key) => (
                         <div
                             key={challenge.name}
-                            className="flex flex-col rounded-2xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300"
+                            className={classNames('flex flex-col rounded-2xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300', challenge.completed && '')}
                         >
                             <div className="relative flex-1 px-6 pb-8 pt-16 md:px-8">
                                 {/* <div className="absolute top-0 inline-block -translate-y-1/2 transform rounded-xl bg-emerald-600/5 p-5 shadow-lg group-hover:bg-emerald-600/20 transition-all ease-in-out duration-300">
@@ -136,10 +137,17 @@ export default function List() {
                                 {/* <div className="absolute top-0 inline-block -translate-y-1/2 transform rounded-xl bg-emerald-600/5 p-5 shadow-lg group-hover:bg-emerald-600/20 transition-all ease-in-out duration-300">
                                     <challenge.icon className="h-6 w-6 text-white" aria-hidden="true" />
                                 </div> */}
-                                <h3 className="text-xl font-medium text-zinc-50 flex items-center gap-2">
+                                <h3 className="text-xl font-medium text-zinc-50 flex items-center justify-between gap-2">
                                     {challenge.name}
                                     {challenge.completed && (
-                                        <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">Completed</span>
+                                        <Badge variant="emerald">
+                                            Completed
+                                        </Badge>
+                                    )}
+                                    {!challenge.completed && challenge.currentStep > 0 && (
+                                        <Badge variant="blue">
+                                            In progress
+                                        </Badge>
                                     )}
                                 </h3>
                                 <p className="mt-4 text-base text-zinc-300 line-clamp-2" title={challenge.description}>

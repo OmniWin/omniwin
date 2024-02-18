@@ -89,12 +89,32 @@ export type RaffleResponse = {
         tickets: Ticket[];
         purchaseOptions: PurchaseOption[];
         activity: RaffleActivity[];
-        participants: RaffleActivity[];
+        participants: Participants[];
     };
     message: string;
 }
 
-type RaffleActivity = {
+export type Participants = {
+    max_id_ticket: number;
+    block: number,
+    recipient: string,
+    total_tickets: number,
+    total_bonus: number,
+    total_tokens_spent: number,
+    username: string,
+}
+
+export type RaffleActivityResponse = {
+    success: boolean;
+    data: {
+        items: RaffleActivity[];
+        nextCursor: string | null;
+    };
+    message: string;
+}
+
+export type RaffleActivity = {
+    id_activity: number;
     recipient: string;
     total_tickets: number;
     amount: string;
@@ -107,7 +127,11 @@ type RaffleActivity = {
 export type RaffleParticipantsResponse = {
     success: boolean;
     data: {
-        items: Ticket[];
+        items: Participants[];
+        next_cursor: {
+            last_block: string | null;
+            last_ticket_id: string | null;
+        }
     };
     message: string;
 }

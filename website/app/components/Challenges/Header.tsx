@@ -1,7 +1,12 @@
 "use client";
 
 import { classNames } from "@/app/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+// import { Link } from "lucide-react";
+// import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ProgressBar from "@/app/components/Ui/ProgressBar";
 
 const tabs = [
     { name: "Challenges", href: "/challenges/list" },
@@ -14,9 +19,9 @@ export default function ChallengesHeader() {
     return (
         // <div className="relative pb-36 -mt-3 md:-mt-12 -mx-3 md:-mx-12 pt-12 bg-gradient-to-r from-zinc-500/10 to-zinc-400/10">
         // <div className="relative pb-36 sm:px-12 -mt-3 md:-mt-12 -mx-3 md:-mx-12 pt-20 bg-zinc-800/50">
-        <div className="relative pb-36 sm:px-12 -mt-3 md:-mt-12 -mx-3 md:-mx-12 pt-20 bg-gradient-to-b from-zinc-800/80 to-zinc-900/40">
+        <div className="relative pb-36 sm:px-12 -mt-3 md:-mt-12 -mx-3 md:-mx-12 pt-20 bg-gradient-to-tl overflow-hidden shadow shadow-zinc-900 from-transparent to-zinc-900">
             {/* <div className="relative pb-36"> */}
-            <svg className="absolute left-0 -top-20 right-0 w-full h-auto opacity-30 rotate-180 scale-x-[-1]" xmlns="http://www.w3.org/2000/svg" version="1.1" height="700" viewBox="0 0 2560 700">
+            <svg className="absolute left-0 -top-20 right-0 w-full h-auto opacity-60 rotate-180 scale-x-[-1] bg-gradient-to-tl from-transparent to-zinc-800" xmlns="http://www.w3.org/2000/svg" version="1.1" height="700" viewBox="0 0 2560 700">
                 <g mask='url("#SvgjsMask1062")' fill="none">
                     <path d="M-37.81 537.57L-37.81 537.57" stroke="rgba(52, 211, 153, 0.08)" stroke-width="1.5"></path>
                     <path d="M-37.81 537.57L77.82 516.7" stroke="rgba(52, 211, 153, 0.08)" stroke-width="1.5"></path>
@@ -845,38 +850,80 @@ export default function ChallengesHeader() {
                 </defs>
             </svg>
             <div className="relative mx-auto max-w-md px-6 pb-32 sm:max-w-3xl lg:max-w-7xl lg:px-8 z-10">
-                <h1 className="text-4xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">
-                    <span className="text-emerald-400">Season 1</span> Challenges
+                <h1 className="text-4xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl inline-flex items-center gap-2">
+                    <span className="text-emerald-400 uppercase">Season 1</span> Quests
                 </h1>
-                <p className="mt-6 max-w-3xl text-lg text-slate-300">
+                <p className="mt-6 max-w-3xl text-lg text-zinc-300">
                     Earn points through in-app activities and quests. The more active you are, the more challenges you complete, the more points you'll accumulate. Top the leaderboard and secure exclusive prizes for your
                     efforts.
                 </p>
-                <div className="pt-24">
+                <div className="flex items-center gap-6 lg:gap-16 mt-12 justify-between w-full">
+                    <div className="flex items-center gap-6 lg:gap-16 w-full">
+                        <div className="space-y-2">
+                            <p className="max-w-3xl text-lg text-zinc-400">Status</p>
+                            <Badge form="round" variant="blue">In progress</Badge>
+                        </div>
+                        <div className="space-y-2">
+                            <p className="max-w-3xl text-lg text-zinc-400">Ending in</p>
+                            <Badge form="round" variant="zinc">TBU</Badge>
+                        </div>
+                        <div className="space-y-2">
+                            <p className="max-w-3xl text-lg text-zinc-400">Total points</p>
+                            {/* <Badge form="round" variant="blood">100 000</Badge> */}
+                            <p className="text-md text-zinc-100">100,000</p>
+                        </div>
+                        <div className="space-y-2 w-1/2">
+                            <p className="max-w-3xl text-lg text-zinc-400">Progress</p>
+                            {/* <Badge form="round" variant="blood">100 000</Badge> */}
+                            <ProgressBar
+                                value={1}
+                                maxValue={9}
+                                size="large"
+                                color="emerald-400"
+                                labelOutside
+                                labelOutsideText={'8 more quests to go'}
+                            />
+                        </div>
+                    </div>
+                    {/* <div className="w-1/2 !text-sm">
+                        <ProgressBar
+                            value={1}
+                            maxValue={9}
+                            size="large"
+                            color="emerald-400"
+                            labelOutside
+                            labelOutsideText={'8 more quests to go'}
+                        />
+                    </div> */}
+                </div>
+                <div className="mt-16">
+                    {path === '/challenges/list' && <Button href="/challenges/list" variant="primary">
+                        View leaderboard
+                    </Button>}
+                    {path === '/challenges/leaderboard' && <Button href="/challenges/list" variant="primary">
+                        View quests
+                    </Button>}
+                </div>
+                {/* <div className="pt-24">
                     <div className="mx-auto max-w-7xl">
                         <div className="block">
-                            {/* <nav className="flex border-b border-white/10"> */}
                             <nav className="flex">
                                 <ul role="list" className="flex min-w-full flex-none gap-x-6 text-md font-semibold leading-6 text-gray-400">
                                     {tabs.map((tab) => (
                                         <li key={tab.name}>
-                                            {/* <a href={tab.href} className={classNames(path === tab.href ? "text-emerald-400 border-emerald-400" : "border-transparent", 'border-b pb-4 -mb-px block')}>
-                                                {tab.name}
-                                            </a> */}
-                                            <a
+                                            <Link
                                                 href={tab.href}
                                                 className={classNames(path === tab.href ? "bg-emerald-100/10 text-emerald-400" : "text-zinc-400 hover:text-zinc-300", "rounded-md px-4 py-3 font-medium")}
-                                                // className={classNames(path === tab.href ? "text-emerald-400 border-emerald-400" : "border-transparent", 'border-b pb-4 -mb-px block')}
                                             >
                                                 {tab.name}
-                                            </a>
+                                            </Link>
                                         </li>
                                     ))}
                                 </ul>
                             </nav>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
         </div>
     );
