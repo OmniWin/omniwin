@@ -52,7 +52,11 @@ const badgeVariants = cva(
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-  VariantProps<typeof badgeVariants> { }
+  VariantProps<typeof badgeVariants> {
+    variant?: "default" | "secondary" | "destructive" | "outline" | "gray" | "red" | "yellow" | "green" | "blue" | "indigo" | "purple" | "pink" | "sky" | "lime" | "emerald" | "blood" | "water" | "zinc" | "lemon"
+    size?: "default" | "sm" | "lg" | "xl"
+    form?: "pill" | "round"
+   }
 
 function Badge({ className, variant, size, form, ...props }: BadgeProps) {
   return (

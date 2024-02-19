@@ -114,7 +114,7 @@ export default function List() {
     return (
         <>
             <ChallengesHeader />
-            <section className="relative z-20 mx-auto -mt-36 sm:max-w-3xl lg:max-w-7xl lg:px-8" aria-labelledby="contact-heading">
+            <section className="relative z-20 mx-auto -mt-36 sm:max-w-3xl lg:max-w-7xl lg:px-8 pb-20" aria-labelledby="contact-heading">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-20 xl:grid-cols-3 lg:gap-x-8">
                     {challenges.map((challenge, key) => (
                         <div key={challenge.name} className="bg-zinc-900 rounded-2xl p-px flex flex-col">
@@ -193,7 +193,7 @@ export default function List() {
                                                 )}
                                             </div>
                                         </DialogTrigger>
-                                        <DialogContent className="sm:max-w-[425px] text-zinc-100">
+                                        <DialogContent className="sm:max-w-[425px] lg:max-w-2xl text-zinc-100">
                                             <DialogHeader className="space-y-5">
                                                 <DialogTitle className="text-zinc-100">{challenge.name} Challenges</DialogTitle>
                                                 <DialogDescription>{challenge.description}</DialogDescription>
@@ -215,7 +215,7 @@ export default function List() {
                                                                 }
                                                             />
                                                             <div className="flex justify-between mt-2 text-xs">
-                                                                <p className="text-zinc-500">Total points earned</p>
+                                                                <p className="text-zinc-400">Total points earned</p>
                                                                 <p className="text-zinc-100">1000</p>
                                                             </div>
                                                         </div>

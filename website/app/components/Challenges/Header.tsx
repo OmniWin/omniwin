@@ -1,18 +1,18 @@
 "use client";
 
-import { classNames } from "@/app/utils";
+// import { classNames } from "@/app/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 // import { Link } from "lucide-react";
-// import Link from "next/link";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ProgressBar from "@/app/components/Ui/ProgressBar";
 import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFallback";
 
-const tabs = [
-    { name: "Challenges", href: "/challenges/list" },
-    { name: "Leaderboard", href: "/challenges/leaderboard" },
-];
+// const tabs = [
+//     { name: "Challenges", href: "/challenges/list" },
+//     { name: "Leaderboard", href: "/challenges/leaderboard" },
+// ];
 
 export default function ChallengesHeader() {
     const path = usePathname();
@@ -862,34 +862,34 @@ export default function ChallengesHeader() {
                     efforts.
                 </p>
                 <div className="flex items-center gap-6 lg:gap-16 mt-12 justify-between w-full flex-wrap">
-                    <div className="space-y-2">
-                        <p className="max-w-3xl text-lg text-zinc-400">Status</p>
+                    <div className="space-y-3">
+                        <p className="max-w-3xl text-lg text-zinc-300">Status</p>
                         <Badge form="round" variant="blue">In progress</Badge>
                     </div>
-                    <div className="space-y-2" title="To be updated">
-                        <p className="max-w-3xl text-lg text-zinc-400">Ending in</p>
+                    <div className="space-y-3" title="To be updated">
+                        <p className="max-w-3xl text-lg text-zinc-300">Ending in</p>
                         <Badge form="round" variant="lemon">TBU</Badge>
                     </div>
-                    <div className="space-y-2" title="Your rank">
-                        <p className="max-w-3xl text-lg text-zinc-400">Rank</p>
+                    <div className="space-y-3" title="Your rank">
+                        <p className="max-w-3xl text-lg text-zinc-300">Rank</p>
                         {/* <Badge form="round" variant="blood">100 000</Badge> */}
                         <div className="text-md text-zinc-100 flex items-center gap-2">
                             <CustomImageWithFallback src="/images/tier/gold.png" alt="" className="h-8 w-8 rounded-full bg-zinc-800" width={60} height={60} />
                             <span>2,450</span>
                         </div>
                     </div>
-                    <div className="space-y-2" title="Your points">
-                        <p className="max-w-3xl text-lg text-zinc-400">Points</p>
+                    <div className="space-y-3" title="Your points">
+                        <p className="max-w-3xl text-lg text-zinc-300">Points</p>
                         {/* <Badge form="round" variant="blood">100 000</Badge> */}
                         <p className="text-md text-zinc-100">1,000</p>
                     </div>
-                    <div className="space-y-2" title="Season 1 total points">
-                        <p className="max-w-3xl text-lg text-zinc-400">S1 points</p>
+                    <div className="space-y-3" title="Season 1 total points">
+                        <p className="max-w-3xl text-lg text-zinc-300">S1 points</p>
                         {/* <Badge form="round" variant="blood">100 000</Badge> */}
                         <p className="text-md text-zinc-100">100,000</p>
                     </div>
-                    <div className="space-y-2 min-w-[50%] md:min-w-[33%]">
-                        <p className="max-w-3xl text-lg text-zinc-400">Progress</p>
+                    <div className="space-y-3 min-w-[50%] md:min-w-[33%]">
+                        <p className="max-w-3xl text-lg text-zinc-300">Progress</p>
                         {/* <Badge form="round" variant="blood">100 000</Badge> */}
                         <ProgressBar
                             value={1}
@@ -902,12 +902,12 @@ export default function ChallengesHeader() {
                     </div>
                 </div>
                 <div className="mt-16">
-                    {path === '/challenges/list' && <Button href="/challenges/list" variant="primary">
+                    {path === '/challenges/list' && <Link href="/challenges/leaderboard"><Button variant="primary">
                         View leaderboard
-                    </Button>}
-                    {path === '/challenges/leaderboard' && <Button href="/challenges/list" variant="primary">
+                    </Button></Link>}
+                    {path === '/challenges/leaderboard' && <Link href="/challenges/list"><Button variant="primary">
                         View quests
-                    </Button>}
+                    </Button></Link>}
                 </div>
                 {/* <div className="pt-24">
                     <div className="mx-auto max-w-7xl">

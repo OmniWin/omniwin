@@ -1,6 +1,7 @@
 import { CheckIcon } from '@heroicons/react/20/solid'
 import { classNames } from '@/app/utils'
 import { Badge } from '@/components/ui/badge'
+import { LockClosedIcon } from '@heroicons/react/24/outline'
 
 const steps = [
   { name: 'Create account', description: 'Vitae sed mi luctus laoreet.', href: '#', status: 'complete', points: '100'},
@@ -36,17 +37,20 @@ export default function ChallengesList() {
                   <span className="ml-4 flex min-w-0 flex-col w-full">
                     <span className="mb-1 py-px pr-px text-sm font-medium text-zinc-100 flex justify-between w-full">
                         {step.name}
-                        {/* <span className="text-sm text-zinc-500">{step.points} points</span> */}
-                        <Badge variant="emerald">Claimed</Badge>
+                        {/* <span className="text-sm text-zinc-400">{step.points} points</span> */}
+                        <Badge className='inline-flex gap-1' variant="emerald">
+                          <CheckIcon className="h-4 w-4" aria-hidden="true" />
+                          Claimed
+                        </Badge>
                     </span>
-                    <span className="text-sm text-zinc-500">{step.description}</span>
+                    <span className="text-sm text-zinc-400">{step.description}</span>
                   </span>
                 </a>
               </>
             ) : step.status === 'current' ? (
               <>
                 {stepIdx !== steps.length - 1 ? (
-                  <div className="absolute left-4 top-4 -ml-px mt-0.5 h-full w-0.5 bg-zinc-500" aria-hidden="true" />
+                  <div className="absolute left-4 top-4 -ml-px mt-0.5 h-full w-0.5 bg-zinc-400" aria-hidden="true" />
                 ) : null}
                 <a href={step.href} className="group relative flex items-start" aria-current="step">
                   <span className="flex h-9 items-center" aria-hidden="true">
@@ -57,30 +61,33 @@ export default function ChallengesList() {
                   <span className="ml-4 flex min-w-0 flex-col w-full">
                     <span className="mb-1 py-px pr-px text-sm font-medium text-emerald-500 flex justify-between w-full">
                         {step.name}
-                        <span className="text-sm text-zinc-500">{step.points} points</span>
+                        <span className="text-sm text-zinc-400">{step.points} points</span>
                     </span>
-                    <span className="text-sm text-zinc-500">{step.description}</span>
+                    <span className="text-sm text-zinc-400">{step.description}</span>
                   </span>
                 </a>
               </>
             ) : (
               <>
                 {stepIdx !== steps.length - 1 ? (
-                  <div className="absolute left-4 top-4 -ml-px mt-0.5 h-full w-0.5 bg-zinc-500" aria-hidden="true" />
+                  <div className="absolute left-4 top-4 -ml-px mt-0.5 h-full w-0.5 bg-zinc-400" aria-hidden="true" />
                 ) : null}
                 <a href={step.href} className="group relative flex items-start">
                   <span className="flex h-9 items-center" aria-hidden="true">
-                    <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-zinc-500 bg-zinc-900 group-hover:border-gray-400">
-                      <span className="h-2.5 w-2.5 rounded-full bg-transparent group-hover:bg-zinc-500" />
+                    <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-zinc-400 bg-zinc-900 group-hover:border-gray-400">
+                      <span className="h-2.5 w-2.5 rounded-full bg-transparent group-hover:bg-zinc-400" />
                     </span>
                   </span>
                   <span className="ml-4 flex min-w-0 flex-col w-full">
-                    <span className="mb-1 py-px pr-px text-sm font-medium text-zinc-500 flex justify-between w-full">
+                    <span className="mb-1 py-px pr-px text-sm font-medium text-zinc-400 flex justify-between w-full">
                         {step.name}
-                        {/* <span className="text-sm text-zinc-500">{step.points} points</span> */}
-                        <Badge variant="blood" title="Finish the previous step to unlock">Locked</Badge>
+                        {/* <span className="text-sm text-zinc-400">{step.points} points</span> */}
+                        <Badge className='inline-flex gap-1' variant="blood" title="Finish the previous step to unlock">
+                          <LockClosedIcon className="h-4 w-4" aria-hidden="true" />
+                          Locked
+                        </Badge>
                     </span>
-                    <span className="text-sm text-zinc-500">{step.description}</span>
+                    <span className="text-sm text-zinc-400">{step.description}</span>
                   </span>
                 </a>
               </>
