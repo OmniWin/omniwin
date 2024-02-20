@@ -441,7 +441,7 @@ export const SidebarNavigation = () => {
                         </span>
                     </Link>
                 </div>
-                <div className={`group flex grow flex-col bg-zinc-950 pb-4 relative transition-all duration-300 ${sidebarOpenState.toggleSidebar ? "px-4 w-[64px] hover:!w-72 " : "pl-4 pr-4 lg:w-72"}`}>
+                <div className={`group flex grow flex-col bg-zinc-950 pb-4 relative transition-all duration-300 ${sidebarOpenState.toggleSidebar ? "px-4 w-[64px] hover:!w-72 hover:shadow-[rgba(0,0,15,0.5)_10px_5px_4px_0px]" : "pl-4 pr-4 lg:w-72"}`}>
                     <nav className="flex flex-1 flex-col sidebar relative">
                         {/* <div className="md:opacity-100 w-4 transition-opacity duration-300 absolute -right-6 top-1/2 transform -translate-y-1/2">
                             <button
@@ -460,8 +460,8 @@ export const SidebarNavigation = () => {
                                                 <Link
                                                     href={item.href}
                                                     className={classNames(
-                                                        item.current ? "text-jade-400" : "text-zinc-200 hover:bg-zinc-800 hover:text-white",
-                                                        "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-all duration-300"
+                                                        item.current ? "text-jade-400 bg-zinc-800/30" : "text-zinc-200 hover:bg-zinc-800 hover:text-white",
+                                                        "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-all duration-300 pl-3"
                                                         // sidebarToggleState.toggleSidebar ? "pl-3" : ""
                                                     )}
                                                 >
@@ -481,7 +481,7 @@ export const SidebarNavigation = () => {
                                                                 className={classNames(
                                                                     item.current ? "text-jade-400" : "text-zinc-200 hover:bg-zinc-800 hover:text-white",
                                                                     // sidebarToggleState.toggleSidebar ? "pl-3" : "",
-                                                                    "flex items-center w-full text-left rounded-md p-2 gap-x-3 text-sm leading-6 font-semibold"
+                                                                    "flex items-center w-full text-left rounded-md p-2 gap-x-3 text-sm leading-6 font-semibold pl-3"
                                                                 )}
                                                             >
                                                                 {/* <item.icon className="h-6 w-6 shrink-0" aria-hidden="true" /> */}
@@ -508,10 +508,11 @@ export const SidebarNavigation = () => {
                                                                                 as="a"
                                                                                 href={subItem.href}
                                                                                 className={classNames(
-                                                                                    subItem.current ? "text-jade-400" : "text-zinc-400/90 hover:bg-zinc-800 hover:text-white",
+                                                                                    // subItem.current ? "text-jade-400" : "text-zinc-400/90 hover:bg-zinc-800 hover:text-white",
+                                                                                    subItem.current ? "text-jade-400 bg-zinc-800/30" : "text-zinc-400/90 hover:bg-zinc-800 hover:text-white",
                                                                                     subItem.icon && "pl-2",
                                                                                     !sidebarToggleState.toggleSidebar && "!pl-10",
-                                                                                    "rounded-md py-2 pr-2 text-sm leading-6 flex items-center w-full group-hover:pl-10 transition-all duration-300 self-center mx-auto gap-x-3"
+                                                                                    "rounded-md py-2 pr-2 text-sm leading-6 flex items-center w-full group-hover:pl-10 transition-all duration-300 self-center mx-auto gap-x-3 pl-3"
                                                                                 )}
                                                                             >
                                                                                 {/* {subItem.icon && <subItem.icon className="h-6 w-6 shrink-0" aria-hidden="true" />} */}
@@ -538,7 +539,7 @@ export const SidebarNavigation = () => {
                                     <li>
                                         <button
                                             className={classNames(
-                                                "w-full group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-zinc-200 hover:bg-zinc-800 hover:text-white"
+                                                "w-full group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-zinc-200 hover:bg-zinc-800 hover:text-white pl-3"
                                                 // sidebarToggleState.toggleSidebar ? "pl-3" : ""
                                             )}
                                         >
