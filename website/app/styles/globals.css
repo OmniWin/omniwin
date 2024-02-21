@@ -98,4 +98,6 @@ body {
   /* --wui-color-inverse-100: #3bcc8a !important; */
   --wui-color-inverse-100: rgb(74 222 128 / 1) !important;
   --wui-gray-glass-010: #22c55e33 !important;
+
+  --wui-color-accent-080: #3bcc8b4d !important;
 }
