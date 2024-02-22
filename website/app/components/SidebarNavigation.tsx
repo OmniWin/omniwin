@@ -433,8 +433,10 @@ export const SidebarNavigation = () => {
                         <span
                             className={classNames(sidebarToggleState.toggleSidebar && "hidden")}
                             style={{
-                                "-webkit-text-stroke-width": "1px",
-                                "-webkit-text-stroke-color": "black",
+                                // "-webkit-text-stroke-width": "1px",
+                                // "-webkit-text-stroke-color": "black",
+                                WebkitTextStrokeWidth: "1px",
+                                WebkitTextStrokeColor: "black",
                             }}
                         >
                             OmniWin
