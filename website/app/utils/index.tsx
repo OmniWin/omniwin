@@ -193,3 +193,86 @@ export function downloadICS(eventDetails: EventDetails) {
     document.body.removeChild(link);
     URL.revokeObjectURL(url); // Clean up the URL object
 }
+
+export const tiers = [
+    {
+        name: "Tier 1",
+        description: "Tier 1 description",
+        image: "/images/tier/1.png",
+        gradientColor: "bg-gradient-to-r from-[#e52a5f38] to-transparent",
+        color: '#e52a5f',
+        lowOpacityColor: '#e52a5f1a',
+    },
+    {
+        name: "Tier 2",
+        description: "Tier 2 description",
+        image: "/images/tier/2.png",
+        gradientColor: "bg-gradient-to-r from-[#fba21342] to-transparent",
+        color: '#fba213',
+        lowOpacityColor: '#fba2131a',
+    },
+    {
+        name: "Tier 3",
+        description: "Tier 3 description",
+        image: "/images/tier/3.png",
+        gradientColor: "bg-gradient-to-r from-[#c41b1e38] to-transparent",
+        color: '#c41b1e',
+        lowOpacityColor: '#c41b1e1a',
+    },
+    {
+        name: "Tier 4",
+        description: "Tier 4 description",
+        image: "/images/tier/4.png",
+        gradientColor: "bg-gradient-to-r from-[#e536e541] to-transparent",
+        color: '#e536e5',
+        lowOpacityColor: '#e536e51a',
+    },
+    {
+        name: "Tier 5",
+        description: "Tier 5 description",
+        image: "/images/tier/5.png",
+        gradientColor: "bg-gradient-to-r from-[#01d8e33a] to-transparent",
+        color: '#01d8e3',
+        lowOpacityColor: '#01d8e31a',
+    },
+    {
+        name: "Tier 6",
+        description: "Tier 6 description",
+        image: "/images/tier/6.png",
+        gradientColor: "bg-gradient-to-r from-[#51a6323d] to-transparent",
+        color: '#51a632',
+        lowOpacityColor: '#51a6321a',
+    },
+    {
+        name: "Tier 7",
+        description: "Tier 7 description",
+        image: "/images/tier/7.png",
+        gradientColor: "bg-gradient-to-r from-[#5768e833] to-transparent",
+        color: '#5768e8',
+        lowOpacityColor: '#5768e81a',
+    },
+    {
+        name: "Tier 8",
+        description: "Tier 8 description",
+        image: "/images/tier/8.png",
+        gradientColor: "bg-gradient-to-r from-[#caa64b42] to-transparent",
+        color: '#caa64b',
+        lowOpacityColor: '#caa64b1a',
+    },
+    {
+        name: "Tier 9",
+        description: "Tier 9 description",
+        image: "/images/tier/9.png",
+        gradientColor: "bg-gradient-to-r from-[#8d8d8d4f] to-transparent",
+        color: '#8d8d8d',
+        lowOpacityColor: '#8d8d8d1a',
+    },
+    {
+        name: "Tier 10",
+        description: "Tier 10 description",
+        image: "/images/tier/10.png",
+        gradientColor: "bg-gradient-to-r from-[#f68b623b] to-transparent",
+        color: '#f68b62',
+        lowOpacityColor: '#f68b621a',
+    },
+];

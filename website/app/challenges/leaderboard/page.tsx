@@ -1,7 +1,7 @@
 import ChallengesHeader from "@/app/components/Challenges/Header";
 import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFallback";
 
-import { classNames, shortenAddress } from "@/app/utils";
+import { classNames, shortenAddress, tiers } from "@/app/utils";
 
 const participants = [
     {
@@ -78,31 +78,7 @@ const participants = [
     },
 ];
 
-const tier = [
-    "/images/tier/1.png",
-    "/images/tier/2.png",
-    "/images/tier/3.png",
-    "/images/tier/4.png",
-    "/images/tier/5.png",
-    "/images/tier/6.png",
-    "/images/tier/7.png",
-    "/images/tier/8.png",
-    "/images/tier/9.png",
-    "/images/tier/10.png",
-];
 
-const tierColors = [
-    "bg-gradient-to-r from-[#e52a5f38] to-transparent",
-    "bg-gradient-to-r from-[#fba21342] to-transparent",
-    "bg-gradient-to-r from-[#c41b1e38] to-transparent",
-    "bg-gradient-to-r from-[#e536e541] to-transparent",
-    "bg-gradient-to-r from-[#01d8e33a] to-transparent",
-    "bg-gradient-to-r from-[#51a6323d] to-transparent",
-    "bg-gradient-to-r from-[#5768e833] to-transparent",
-    "bg-gradient-to-r from-[#caa64b42] to-transparent",
-    "bg-gradient-to-r from-[#8d8d8d4f] to-transparent",
-    "bg-gradient-to-r from-[#f68b623b] to-transparent",
-];
 
 export default function Leaderboard() {
     return (
@@ -139,11 +115,11 @@ export default function Leaderboard() {
                         <tbody className="divide-y divide-white/5">
                             {participants.map((item, key) => (
                                 <tr key={item.recipient} className={classNames("hover:bg-zinc-800/60")}>
-                                    <td className={classNames("py-4 pl-4 pr-8 sm:pl-6 lg:pl-8 text-center", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(key) && tierColors[key])}>
+                                    <td className={classNames("py-4 pl-4 pr-8 sm:pl-6 lg:pl-8 text-center", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(key) && tiers[key].gradientColor)}>
                                         <div className="text-sm font-medium leading-6 text-white">
                                             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(key) ? (
                                                 <CustomImageWithFallback
-                                                    src={tier[key]}
+                                                    src={tiers[key].image}
                                                     alt=""
                                                     className="mx-auto object-cover inset-0 !w-auto !max-h-[36px]"
                                                     width={32}

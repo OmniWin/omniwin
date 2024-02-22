@@ -2,18 +2,19 @@
 import React, { useState } from "react";
 import Image, { ImageProps } from "next/image";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/solid";
-
+import { classNames } from "@/app/utils";
 // Define only the custom props here
 interface CustomProps {
     fallback?: string; // Define custom properties separately
     showMaximizeButton?: boolean; // Option to show maximize button
     glowEffect?: boolean; // Option to apply a glow effect
+    containerClass?: string; // Option to add a custom class to the container
 }
 
 // Use intersection type for your component props
 type CustomImageWithFallbackProps = CustomProps & ImageProps;
 
-const CustomImageWithFallback: React.FC<CustomImageWithFallbackProps> = ({ src, alt, fallback = "/not-found.webp", showMaximizeButton = false, glowEffect = false, ...props }) => {
+const CustomImageWithFallback: React.FC<CustomImageWithFallbackProps> = ({ src, alt, fallback = "/not-found.webp", showMaximizeButton = false, glowEffect = false, containerClass = '', ...props }) => {
     const [imgSrc, setImgSrc] = useState(src);
     const [isLoading, setIsLoading] = useState(true);
     const [isMaximized, setIsMaximized] = useState(false); // State to manage maximized image
@@ -46,7 +47,7 @@ const CustomImageWithFallback: React.FC<CustomImageWithFallbackProps> = ({ src, 
     };
 
     return (
-        <div className="relative h-full w-full">
+        <div className={classNames("relative h-full w-full", containerClass)}>
             {isLoading && loadingIndicator()}
 
             <Image {...props} src={imgSrc} alt={alt} onError={handleError} onLoadingComplete={() => setIsLoading(false)} />
