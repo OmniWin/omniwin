@@ -18,22 +18,11 @@ type ActivityItem = {
     date: string;
     dateTime: string;
 };
-const activityItems: ActivityItem[] = [
-    {
-        user: {
-            name: "Michael Foster",
-            imageUrl: "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-        },
-        tickets: 15,
-        date: "45 minutes ago",
-        dateTime: "2023-01-23T11:00",
-    },
-];
 
 export default function Participants({ lotId, initialParticipants }: { lotId: string, initialParticipants: Participants[] }) {
 
     const sortedParticipants = initialParticipants.sort((a, b) => b.total_tickets - a.total_tickets);
-    const limit = '10';
+    const limit = 10;
 
     const {
         fetchNextPage,
@@ -46,7 +35,7 @@ export default function Participants({ lotId, initialParticipants }: { lotId: st
     } = useInfiniteQuery({
         queryKey: ['participants', lotId],
         //@ts-ignore
-        queryFn: ({ pageParam = '0' }) => {
+        queryFn: ({ pageParam = 0 }) => {
             return fetchRaffleEntrants(lotId, limit, pageParam);
         },
         //@ts-ignore
@@ -58,7 +47,7 @@ export default function Participants({ lotId, initialParticipants }: { lotId: st
         initialData: () => ({
             pages: [{
                 items: sortedParticipants
-            }] as RaffleParticipantsResponse['data'][],
+            }] as { items: Participants[] }[],
             pageParams: [undefined],
         }),
         staleTime: Infinity,
@@ -83,33 +72,82 @@ export default function Participants({ lotId, initialParticipants }: { lotId: st
     const queryClient = useQueryClient();
     const handleEvent = (eventData: {
         nft_id: number;
-        participants: { bonus: number, recipient: string, tickets: number }[];
+        participants: Participants[];
+        // participants: { bonus: number, recipient: string, tickets: number }[];
         tickets_bought: number;
     }[]) => {
         for (let i = 0; i < eventData.length; i++) {
             const eventData_ = eventData[i];
 
             if (eventData_.nft_id === parseInt(lotId)) {
-                queryClient.setQueryData(['activity', lotId], (oldData: RaffleParticipantsResponse['data'] | undefined) => {
-                    const updatedItems = eventData_.participants.map(participant => ({
-                        recipient: participant.recipient,
-                        total_tickets: participant.tickets,
-                    }));
+                queryClient.setQueryData(['activity', lotId], (oldData: { pages: { items: Participants[] }[], pageParams: (string | undefined)[] } | undefined) => {
+
+                    // const updatedItems = eventData_.participants.map(participant => ({
+                    //     recipient: participant.recipient,
+                    //     total_tickets: participant.tickets,
+                    // }));
 
                     if (!oldData) {
+                        // If there's no old data, create the initial structure
                         return {
-                            items: updatedItems
+                            pages: [{
+                                items: eventData_.participants.map(participant => ({
+                                    recipient: participant.recipient,
+                                    total_tickets: participant.total_tickets,
+                                })).sort((a, b) => b.total_tickets - a.total_tickets)
+                            }],
+                            pageParams: [undefined] // Assuming your initial pageParam is undefined
                         };
                     }
 
-                    const unifiedItems = [
-                        ...updatedItems,
-                        ...oldData.items
-                    ].sort((a, b) => parseInt(b.total_tickets.toString()) - parseInt(a.total_tickets.toString()));
+                    // Flag to check if the participant was updated
+                    let participantUpdated = false;
+
+                    // Iterate through all pages to find and update the participant if exists
+                    const updatedPages = oldData.pages.map(page => {
+                        const updatedItems = page.items.map(item => {
+                            const foundParticipant = eventData_.participants.find(participant => participant.recipient === item.recipient);
+                            if (foundParticipant) {
+                                participantUpdated = true; // Mark as updated
+                                // Return the updated participant info
+                                return { ...item, total_tickets: foundParticipant.total_tickets };
+                            }
+                            // Return the item as is if not found
+                            return item;
+                        });
+
+                        return { ...page, items: updatedItems };
+                    });
+
+
+                    // Calculate total participants across all pages
+                    const totalParticipants = oldData ? oldData.pages.reduce((acc, page) => acc + page.items.length, 0) : 0;
+                    const maxCapacityUpToCurrentPage = oldData.pages.length * limit;
+
+                    // If the participant was not found and updated, add it to the page if page is not full => no more results in DB
+                    if (!participantUpdated && totalParticipants < maxCapacityUpToCurrentPage) {
+                        eventData_.participants.forEach(newParticipant => {
+                            // Add the new participant to the last page's items
+                            const lastPageIndex = updatedPages.length - 1;
+                            updatedPages[lastPageIndex].items.push({
+                                max_id_ticket: newParticipant.max_id_ticket,
+                                block: newParticipant.block,
+                                recipient: newParticipant.recipient,
+                                total_tickets: newParticipant.total_tickets,
+                                total_bonus: newParticipant.total_bonus,
+                                total_tokens_spent: newParticipant.total_tokens_spent,
+                                username: newParticipant.username,
+                            });
+                        });
+                    }
+
+                    // Sort the last page after adding new participants to maintain order
+                    updatedPages[updatedPages.length - 1].items.sort((a, b) => b.total_tickets - a.total_tickets);
 
                     return {
                         ...oldData,
-                        items: unifiedItems
+                        pages: updatedPages,
+                        // pageParams remains unchanged unless your logic for fetching next pages is affected by these updates
                     };
                 });
             }

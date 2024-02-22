@@ -76,7 +76,7 @@ export async function processTickets() {
     });
 
     //We first get all the tickets from the chain and insert them in our db
-    const timeFromBlock = 60 * 10 * 10 * 10; //10 minutes * 10 blocks per minute * 10 minutes
+    const timeFromBlock = 60 * 10; // 
     const numberOfBlocks = blocksByTime(config.network, timeFromBlock)
     eventQueue.enqueue("", () => insertBuyTickets(numberOfBlocks));
 }

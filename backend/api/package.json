@@ -21,6 +21,7 @@
     "bcryptjs": "^2.4.3",
     "fastify": "^4.25.2",
     "fastify-plugin": "^4.5.1",
+    "it-pushable": "^3.2.3",
     "siwe": "^2.1.4",
     "uuid": "^9.0.1"
   },

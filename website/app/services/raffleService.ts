@@ -24,8 +24,8 @@ export const fetchRaffleParticipants = async (id: string, limit: string, cursor:
     return resp.data;
 };
 
-export const fetchRaffleActivity = async (id: string, limit: string, cursor: string | undefined) => {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/v1/nfts/${id}/activity?limit=${limit}&cursor=${cursor}`;
+export const fetchRaffleActivity = async (id: string, limit: number, offset: number | undefined) => {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/v1/nfts/${id}/activity?limit=${limit}&offset=${offset}`;
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -36,7 +36,7 @@ export const fetchRaffleActivity = async (id: string, limit: string, cursor: str
     return resp.data;
 }
 
-export const fetchRaffleEntrants = async (id: string, limit: string, offset: string): Promise<RaffleParticipantsResponse['data']> => {
+export const fetchRaffleEntrants = async (id: string, limit: number, offset: number): Promise<RaffleParticipantsResponse['data']> => {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/v1/nfts/${id}/entrants?limit=${limit}&offset=${offset}`;
     const response = await fetch(url);
     if (!response.ok) {

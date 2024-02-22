@@ -162,19 +162,20 @@ export class NftController {
             const lotId = (req.params as any).id;
             const nftService = new NftService(req.server as FastifyInstance);
 
-            let { cursor, limit } = req.query as { cursor: string, limit: string };
+            let { offset, limit } = req.query as { offset: string, limit: string };
 
             const lotId_ = parseInt(lotId, 10);
             const limit_ = parseInt(limit, 10) || 10;
-            const cursor_ = cursor ? parseInt(cursor.toString()) : 0;
+            const offset_ = offset ? parseInt(offset.toString()) : 0;
 
-            const { activity, nextCursor } = await nftService.fetchNFTActivity(lotId_, limit_, cursor_);
+
+            const activity = await nftService.fetchNFTActivity(lotId_, limit_, offset_);
 
             return res.code(200).send({
                 success: true,
                 data: {
-                    items: activity,
-                    next_cursor: nextCursor
+                    items: activity.activity,
+                    pagination: activity.pagination
                 },
                 message: "Activity fetched successfully",
             });

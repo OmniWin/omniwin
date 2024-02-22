@@ -1,3 +1,5 @@
+export * from './eventData';
+
 export type SortOption = {
     id: string;
     name: string;
@@ -108,16 +110,19 @@ export type RaffleActivityResponse = {
     success: boolean;
     data: {
         items: RaffleActivity[];
-        nextCursor: string | null;
+        pagination: {
+            totalPages: number;
+            totalCount: number;
+        }
     };
     message: string;
 }
 
 export type RaffleActivity = {
-    id_activity: number;
+    block: number;
     recipient: string;
     total_tickets: number;
-    amount: string;
+    tickets: string;
     bonus: number;
     tokens_spent: string;
     created_at: string;

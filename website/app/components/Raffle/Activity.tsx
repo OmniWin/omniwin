@@ -8,8 +8,12 @@ import { fetchRaffleActivity } from '../../services/raffleService';
 import { useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import useEventSourceListener from '@/app/hooks/useSSE';
+//import eventData
+import { EventData } from '@/app/types/index';
 
 export default function Activity({ lotId, initialActivity }: { lotId: string, initialActivity: RaffleActivity[] }) {
+    const limit = 10;
+
     const {
         fetchNextPage,
         fetchPreviousPage,
@@ -20,11 +24,17 @@ export default function Activity({ lotId, initialActivity }: { lotId: string, in
         ...result
     } = useInfiniteQuery({
         queryKey: ['activity', lotId],
-        queryFn: ({ pageParam }) => fetchRaffleActivity(lotId, '10', pageParam),
+        queryFn: ({ pageParam }) => fetchRaffleActivity(lotId, limit, pageParam),
         //@ts-ignore
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
+        getNextPageParam: (_, allPages) => {
+            const totalItemsFetched = allPages.reduce((total, page) => total + page.items.length, 0);
+
+            return totalItemsFetched;
+        },
         initialData: () => ({
-            pages: [{ items: initialActivity, nextCursor: initialActivity[initialActivity.length - 1].id_activity.toString() || null }] as RaffleActivityResponse['data'][],
+            pages: [{
+                items: initialActivity,
+            }] as { items: RaffleActivity[] }[],
             pageParams: [undefined],
         }),
         staleTime: Infinity,
@@ -46,34 +56,56 @@ export default function Activity({ lotId, initialActivity }: { lotId: string, in
     }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
     const queryClient = useQueryClient();
-    const handleEvent = (eventData: {
-        nft_id: number;
-        participants: { bonus: number, recipient: string, tickets: number }[];
-        tickets_bought: number;
-    }[]) => {
+    const handleEvent = (eventData: EventData[]) => {
         for (let i = 0; i < eventData.length; i++) {
             const eventData_ = eventData[i];
 
-            if (eventData_.nft_id === parseInt(lotId)) {
-                queryClient.setQueryData(['activity', lotId], (oldData: RaffleParticipantsResponse['data'] | undefined) => {
-                    const updatedItems = eventData_.participants.map(participant => ({
-                        recipient: participant.recipient,
-                        amount: participant.tickets,
-                        created_at: new Date().toISOString(),
-                    }));
 
-                    if (!oldData) {
+            if (eventData_.nft_id === parseInt(lotId)) {
+                console.log("Activity event received", eventData_)
+                queryClient.setQueryData(['activity', lotId], (oldData: {
+                    pages: { items: RaffleActivity[], nextCursor: string | null }[],
+                    pageParams: (string | null | undefined)[],
+                } | undefined) => {
+                    console.log("oldData", oldData)
+                    if (!oldData || oldData.pages.length === 0) {
                         return {
-                            items: updatedItems
+                            pages: [{
+                                items: eventData_.participants.map(participant => ({
+                                    recipient: participant.recipient,
+                                    amount: participant.tickets,
+                                    created_at: new Date().toISOString(),
+                                })),
+                                nextCursor: null, // Initialize nextCursor as appropriate
+                            }],
+                            pageParams: [undefined], // Initial pageParams with the first entry as undefined
                         };
                     }
 
+                    // Prepend new items to the first page's items
+                    const firstPageUpdatedItems = [
+                        ...eventData_.participants.map(participant => ({
+                            block: participant.block,
+                            recipient: participant.recipient,
+                            tickets: participant.tickets,
+                            bonus: participant.bonus,
+                            total_bonus: participant.total_bonus,
+                            total_tickets: participant.total_tickets,
+                            tokens_spent: participant.total_tokens_spent,
+                            created_at: new Date().toISOString(),
+                            username: participant.username,
+                            transaction_hash: participant.transaction_hash
+                        })),
+                        ...oldData.pages[0].items
+                    ];
+
+
+                    const updatedFirstPage = { ...oldData.pages[0], items: firstPageUpdatedItems };
+                    const newPages = [updatedFirstPage, ...oldData.pages.slice(1)];
+
                     return {
                         ...oldData,
-                        items: [
-                            ...updatedItems,
-                            ...oldData.items
-                        ]
+                        pages: newPages,
                     };
                 });
             }
@@ -130,7 +162,7 @@ export default function Activity({ lotId, initialActivity }: { lotId: string, in
                                         <td className="hidden py-4 pl-0 pr-8 text-right text-sm leading-6 text-zinc-400 md:table-cell lg:pr-20">
                                             <div className="inline-flex items-center gap-2">
                                                 <TicketIcon className="h-5 w-5 text-zinc-400" aria-hidden="true" />
-                                                <span className="text-zinc-100">{participant.amount}</span>
+                                                <span className="text-zinc-100">{participant.tickets}</span>
                                             </div>
                                         </td>
                                         <td className="hidden py-4 pl-0 pr-4 text-right text-sm leading-6 text-zinc-400 sm:table-cell sm:pr-6 lg:pr-8">

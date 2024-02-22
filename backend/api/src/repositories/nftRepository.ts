@@ -267,11 +267,12 @@ export class NftRepository {
                             NftMetadata.collection_name, 
                             NftMetadata.image_local,
                             TicketSum.total_amount AS tickets_bought,
-                            TicketSum.bonus_tickets
+                            TicketSum.bonus_tickets,
+                            TicketSum.total_tokens_spent
                         FROM Nft
                         LEFT JOIN NftMetadata ON Nft.id_lot = NftMetadata.id_lot
                         LEFT JOIN (
-                            SELECT Tickets.id_lot, SUM(Tickets.amount) AS total_amount, SUM(Tickets.bonus) as bonus_tickets
+                            SELECT Tickets.id_lot, SUM(Tickets.amount) AS total_amount, SUM(Tickets.bonus) as bonus_tickets, SUM(tokens_spent) AS total_tokens_spent
                             FROM Tickets
                             WHERE Tickets.id_lot IN (${placeholders})
                             GROUP BY Tickets.id_lot
@@ -281,7 +282,37 @@ export class NftRepository {
 
         const queryParams = [...ids, ...ids]; // Duplicate the ids array for both IN clauses
 
-        const nfts = await prisma.$queryRawUnsafe(rawQuery, ...queryParams) as any;
+        const nfts: {
+            id_nft: number;
+            id_lot: number;
+            total_tickets: number;
+            ticket_price: number;
+            transactions: number;
+            end_timestamp: Date;
+            fee: number;
+            closed: boolean;
+            buyout: number;
+            asset_claimed: boolean;
+            tokens_claimed: boolean;
+            owner: string;
+            signer: string;
+            token: string;
+            token_id: string;
+            amount: number;
+            asset_type: string;
+            data: string;
+            network: string;
+            created_at: Date;
+            updated_at: Date;
+            name: string;
+            collection_name: string;
+            image_local: string;
+            tickets_bought: number;
+            bonus_tickets: number;
+            total_tokens_spent: number;
+        }[] = await prisma.$queryRawUnsafe(rawQuery, ...queryParams) as any;
+
+
 
         return nfts;
     }
@@ -300,19 +331,38 @@ export class NftRepository {
         return tickets;
     }
 
-    async fetchNFTActivity(lotId: number, limit: number, cursor: number) {
+    async fetchNFTActivity(lotId: number, limit: number, offset: number) {
         const { prisma } = this.fastify;
+
+        // Fetch activities with limit and offset
         const activities = await prisma.tickets.findMany({
-            take: limit + 1,
-            skip: 1, // Skip the cursor
-            cursor: cursor ? { id_ticket: cursor } : undefined,
-            orderBy: { block: 'desc' },
             where: {
-                id_lot: lotId
-            }
+                id_lot: lotId,
+            },
+            take: limit,
+            skip: offset, // Use skip for offset
+            orderBy: [
+                { block: 'desc' },
+                { total_tickets: 'desc' } // Ensure a secondary order to maintain uniqueness
+            ],
         });
 
-        return activities;
+        // Optionally, fetch the total count of records to calculate the total number of pages
+        const totalCount = await prisma.tickets.count({
+            where: {
+                id_lot: lotId,
+            },
+        });
+
+        const totalPages = Math.ceil(totalCount / limit);
+
+        return {
+            data: activities,
+            pagination: {
+                totalPages,
+                totalCount,
+            },
+        };
     }
 
     async fetchNFTEntrants(lotId: number, limit: number, offset: number) {
@@ -350,6 +400,62 @@ export class NftRepository {
             total_tokens_spent: number;
             username: string;
         }[];
+    }
+
+    async fetchNFTEntrantsByLots(lotId: number[]) {
+        const { prisma } = this.fastify;
+
+        if (lotId.length === 0) {
+            return {};
+        }
+
+
+        const placeholders = lotId.map(() => '?').join(', ');
+        const rawQuery = `
+                        SELECT 
+                            MAX(id_ticket) AS max_id_ticket,
+                            MAX(block) AS max_block,
+                            recipient, 
+                            SUM(amount) AS total_tickets, 
+                            SUM(bonus) as total_bonus,
+                            SUM(tokens_spent) AS total_tokens_spent,
+                            User.username,
+                            id_lot
+                        FROM 
+                            Tickets
+                        LEFT JOIN User ON User.address = Tickets.recipient    
+                        WHERE 
+                            id_lot IN (${placeholders}) 
+                        GROUP BY 
+                            recipient, id_lot
+                        ORDER BY 
+                            total_tickets DESC, max_block DESC;
+                        `;
+
+        const queryParams = [...lotId]
+        const entrants = await prisma.$queryRawUnsafe(rawQuery, ...queryParams) as any;
+        const response = {} as {
+            [id_lot: number]: {
+                id_lot: number;
+                max_id_ticket: number;
+                max_block: number;
+                recipient: string;
+                total_tickets: string;
+                total_bonus: string;
+                total_tokens_spent: number;
+                username: string;
+            }[];
+        }
+
+        for (let i = 0; i < entrants.length; i++) {
+            if (!response[entrants[i].id_lot]) {
+                response[entrants[i].id_lot] = [];
+            }
+            response[entrants[i].id_lot].push(entrants[i]);
+        }
+
+
+        return response;
     }
 
 

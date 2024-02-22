@@ -52,15 +52,13 @@ export class NftService {
     async fetchNFT(id: number, limit: number) {
         const fetchedNft = await this.nftRepository.fetchNFT(id);
 
-        // console.log('fetchedNft', fetchedNft)
-
         const USDC_decimals = 6;
 
         //@ts-ignore
         const processedNft = fetchedNft.nft?.map(item => ({
             full_price: (this.convertBigInts(Number(item.ticket_price)) / Math.pow(10, USDC_decimals)) * item.total_tickets,
             ticket_price: this.convertBigInts(Number(item.ticket_price) / Math.pow(10, USDC_decimals)),
-            tickets_bought: parseInt(item.tickets_bought.toString(), 10) || 0,
+            tickets_bought: parseInt(item.tickets_bought?.toString() || '0', 10) || 0,
             tickets_total: item.total_tickets,
             end_timestamp: item.end_timestamp,
             nft_name: item.name,
@@ -129,28 +127,23 @@ export class NftService {
         return { tickets: processedTickets, nextCursor };
     }
 
-    async fetchNFTActivity(lotId: number, limit: number, cursor: number) {
-        const fetchedActivity = await this.nftRepository.fetchNFTActivity(lotId, limit, cursor);
+    async fetchNFTActivity(lotId: number, limit: number, offset: number) {
+        const fetchedActivity = await this.nftRepository.fetchNFTActivity(lotId, limit, offset);
         const USDC_decimals = 6;
 
-        const processedActivity = fetchedActivity.map(activity => ({
-            id_activity: activity.id_ticket,
-            recipient: activity.recipient,
-            total_tickets: activity.total_tickets,
-            amount: this.convertBigInts(Number(activity.amount)),
-            bonus: activity.bonus,
-            tokens_spent: this.convertBigInts(Number(activity.tokens_spent) / Math.pow(10, USDC_decimals)),
-            transaction_hash: activity.transaction_hash,
-            created_at: activity.created_at,
+        const processedActivity = fetchedActivity.data.map(ticket => ({
+            // id_ticket: ticket.id_ticket,
+            block: ticket.block,
+            recipient: ticket.recipient,
+            total_tickets: ticket.total_tickets,
+            tickets: this.convertBigInts(Number(ticket.amount)),
+            bonus: ticket.bonus,
+            tokens_spent: this.convertBigInts(Number(ticket.tokens_spent) / Math.pow(10, USDC_decimals)),
+            transaction_hash: ticket.transaction_hash,
+            created_at: ticket.created_at,
         }));
 
-        let nextCursor: string | null = null;
-        if (processedActivity.length > limit) {
-            nextCursor = processedActivity[limit - 1].id_activity.toString();
-            processedActivity.pop(); // Remove the extra item
-        }
-
-        return { activity: processedActivity, nextCursor };
+        return { activity: processedActivity, pagination: fetchedActivity.pagination };
     }
 
     async fetchNFTEntrants(lotId: number, limit: number, offset: number) {
@@ -207,26 +200,70 @@ export class NftService {
             return { events: [], created_at: null };
         }
 
-        const lotIds = newBuyTickets.map(ticket => ticket.id_lot);
-        const lots = await this.nftRepository.fetchNFTByIds(lotIds);
+        let lotIds = newBuyTickets.map(ticket => ticket.id_lot);
+        const nfts = await this.nftRepository.fetchNFTByIds(lotIds);
+        const participants = await this.nftRepository.fetchNFTEntrantsByLots(lotIds);
 
-        const processedTickets = newBuyTickets.map(ticket => ({
-            id_lot: ticket.id_lot,
-            tickets: this.convertBigInts(Number(ticket.amount)),
-            bonus: ticket.bonus,
-            recipient: ticket.recipient,
-        }));
+        // console.log("nfts", nfts)
+        // console.log("participants", participants)
+        //find participant by recipient
+
+        const processedTickets = newBuyTickets?.map(ticket => {
+            const participant = participants[ticket.id_lot]?.find(participant => participant.recipient === ticket.recipient && participant.id_lot === ticket.id_lot);
+
+            return {
+                max_id_ticket: participant?.max_id_ticket || 0,
+                max_block: participant?.max_block || 0,
+                recipient: ticket.recipient,
+                total_tickets: participant?.total_tickets || 0,
+                total_bonus: participant?.total_bonus || 0,
+                total_tokens_spent: participant?.total_tokens_spent || 0,
+                username: participant?.username || '',
+                id_lot: ticket.id_lot,
+                tickets: this.convertBigInts(Number(ticket.amount)),
+                bonus: ticket.bonus,
+                block: ticket.block,
+                transaction_hash: ticket.transaction_hash,
+                created_at: ticket.created_at,
+            }
+        })
+
+        // console.log("processedTickets", processedTickets)
 
         //@ts-ignore
-        const processedNft = lots?.map(item => ({
+        const processedNft = nfts?.map(item => ({
             tickets_bought: item.tickets_bought || 0,
             nft_id: item.id_lot,
+            total_tickets: item.tickets_bought, // total amount of tickets bought
+            total_bonus: item.bonus_tickets, // total amount of bonus tickets,
+            total_tokens_spent: item.total_tokens_spent, // total amount of tokens spent
             participants: processedTickets.filter(ticket => ticket.id_lot === item.id_lot).map(ticket => ({
-                recipient: ticket.recipient,
-                tickets: ticket.tickets,
-                bonus: ticket.bonus,
+                block: ticket.block,
+                recipient: ticket.recipient, // address of the recipient
+                total_tickets: ticket.total_tickets,
+                tickets: ticket.tickets, // amount of tickets bought per transaction
+                bonus: ticket.bonus, // amount of bonus tickets per transaction
+                max_id_ticket: ticket.max_id_ticket, //sending it just to preserve the structure of the object
+                max_block: ticket.max_block, //sending it just to preserve the structure of the object
+                total_bonus: ticket.total_bonus,
+                total_tokens_spent: ticket.total_tokens_spent,
+                username: ticket.username,
+                transaction_hash: ticket.transaction_hash,
+                created_at: ticket.created_at,
             })),
         }));
+
+        /**
+          
+            max_id_ticket: number;
+            max_block: number;
+            recipient: string;
+            total_tickets: string;
+            total_bonus: string;
+            total_tokens_spent: number;
+            username: string;
+        
+         */
 
         return { events: processedNft, created_at: newBuyTickets[0].created_at };
     }
