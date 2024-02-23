@@ -10,8 +10,11 @@
 - ```./create_aliases.sh```
 - ```source $HOME/.zshrc``` (Unix based system)
 - ```source $HOME/.bashrc``` (Linux based system)
-### 3. Run 'dc-start' to spin up the project
-### 4. Run in your terminal: 
+### 3. In your terminal, create local env config
+- ```cp .env.omniwin .env```
+- ```cp backend/api/.env.omniwin backend/api/.env```
+### 4. Run 'dc-start' to spin up the project
+### 5. Run in your terminal: 
    - ```echo "127.0.0.1    omniwin.local" | sudo tee -a /etc/hosts```
 
 ## Custom aliases
