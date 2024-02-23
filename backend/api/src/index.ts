@@ -27,7 +27,7 @@ const fastify = Fastify({
 })
 
 const corsOptions = {
-    origin: ['http://localhost:3000', 'http://localhost:4356', 'http://localhost'],
+    origin: ['http://omniwin.local', 'http://localhost:3000', 'http://localhost:4356', 'http://localhost'],
     methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
     credentials: true
 };
@@ -53,7 +53,7 @@ fastify.setValidatorCompiler(({ schema, method, url, httpPart }) => {
 
 const start = async () => {
     try {
-        const port = parseInt(process.env.PORT || "8978")
+        const port = parseInt(process.env.BACKEND_APP_DOCKER_PORT || "8978")
         fastify.listen({ port: port, host: '0.0.0.0' }, function (err, address) {
             if (err) {
                 fastify.log.error(err)
