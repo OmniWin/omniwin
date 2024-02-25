@@ -15,6 +15,7 @@
 - ```cp backend/api/.env.omniwin backend/api/.env```
 - ```cp website/.env.omniwin website/.env```
 ### 4. Run 'dc-start' to spin up the project
+- ```dc-start```
 ### 5. Run in your terminal: 
    - ```echo "127.0.0.1    omniwin.local" | sudo tee -a /etc/hosts```
 

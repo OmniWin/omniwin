@@ -8,8 +8,8 @@ datasource db {
 }
 
 model Nft {
-  id_nft         Int         @id @default(autoincrement())
-  id_lot         Int         @unique
+  id             Int         @id @default(autoincrement())
+  lot_id         Int         @unique
   total_tickets  Int         @default(0)
   bonus_tickets  Int         @default(0)
   tickets_bought Int         @default(0)
@@ -38,9 +38,9 @@ model Nft {
 }
 
 model NftMetadata {
-  id_nftMetadata  Int               @id @default(autoincrement())
-  id_nft          Int               @unique
-  id_lot          Int
+  id              Int               @id @default(autoincrement())
+  nft_id          Int               @unique
+  lot_id          Int
   name            String?
   description     String?           @db.VarChar(2000)
   json            Json?
@@ -51,12 +51,12 @@ model NftMetadata {
   updated_at      DateTime          @default(now()) @updatedAt
   collection_name String?
 
-  @@index([id_nft], map: "id_nft")
+  @@index([nft_id], map: "nft_id")
 }
 
 model Tickets {
-  id_ticket        Int         @id @default(autoincrement())
-  id_lot           Int
+  id               Int         @id @default(autoincrement())
+  lot_id           Int
   unique_id        String      @unique
   recipient        String
   total_tickets    Int
@@ -73,26 +73,125 @@ model Tickets {
 }
 
 model User {
-  id_user    String    @id @default(uuid())
-  address    String    @unique
-  created_at DateTime  @default(now())
-  updated_at DateTime  @default(now()) @updatedAt
-  email      String?   @unique
-  username   String?   @unique
-  issued_at  DateTime?
-  chainId    Int
+  id                  String    @id
+  address             String    @unique
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @default(now()) @updatedAt
+  email               String?   @unique
+  username            String?   @unique
+  issued_at           DateTime?
+  chainId             Int
+  Season_Leaderboard  Season_Leaderboard[]
+  User_Quests         User_Quests[]
+  User_Quest_Steps    User_Quest_Steps[]
+
+  @@index([username])
+  @@index([email])
 }
 
 model Favorites {
-  id_favorite Int      @id @default(autoincrement())
-  id_lot      Int
-  id_user     String
+  id          Int      @id @default(autoincrement())
+  lot_id      Int
+  user_id     String
   created_at  DateTime @default(now())
   updated_at  DateTime @default(now()) @updatedAt
 
-  @@unique([id_lot, id_user], map: "id_lot_id_user")
-  @@index([id_lot], map: "id_lot")
-  @@index([id_user], map: "id_user")
+  @@unique([lot_id, user_id], map: "lot_id_user_id")
+  @@index([lot_id], map: "lot_id")
+  @@index([user_id], map: "user_id")
+}
+
+model Season {
+  id                  Int         @id @default(autoincrement())
+  name                String
+  sub_title           String?
+  description         String?      @db.Text
+  start_date          DateTime?
+  end_date            DateTime?
+  xp_limit            Int
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @default(now()) @updatedAt
+  Quest               Quest[]
+  Season_Leaderboard  Season_Leaderboard[]
+
+  @@index([name])
+}
+
+model Season_Leaderboard {
+  id               Int      @id @default(autoincrement())
+  season_id        Int      
+  user_id          String
+  xp_points        Int
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @default(now()) @updatedAt
+  Season           Season   @relation(fields: [season_id], references: [id])
+  User             User     @relation(fields: [user_id], references: [id])
+
+  @@unique([season_id, user_id], map: "season_id_user_id")
+  @@index([season_id])
+  @@index([user_id])
+}
+
+model Quest {
+  quest_id         Int                 @id @default(autoincrement())
+  season_id        Int
+  name             String
+  description      String?              @db.Text
+  xp_reward        Int
+  Season           Season               @relation(fields: [season_id], references: [id])
+  Step             Step[]
+  created_at       DateTime             @default(now())
+  updated_at       DateTime             @default(now()) @updatedAt
+  User_Quests      User_Quests[]
+  User_Quest_Steps User_Quest_Steps[]
+
+  @@index([season_id])
+}
+
+model Step {
+  step_id          Int         @id @default(autoincrement())
+  quest_id         Int
+  description      String?     @db.Text
+  xp_points        Int
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @default(now()) @updatedAt
+  Quest            Quest       @relation(fields: [quest_id], references: [quest_id])
+  User_Quest_Steps User_Quest_Steps[]
+
+  @@index([quest_id])
+}
+
+model User_Quests {
+  user_id          String
+  quest_id         Int
+  status           Int
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @default(now()) @updatedAt
+  User             User        @relation(fields: [user_id], references: [id])
+  Quest            Quest       @relation(fields: [quest_id], references: [quest_id])
+
+  @@id([user_id, quest_id])
+  @@index([user_id])
+  @@index([quest_id])
+  @@unique([user_id, quest_id], map: "user_id_quest_id")
+}
+
+model User_Quest_Steps {
+  user_id          String
+  quest_id         Int
+  step_id          Int
+  status           Int
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @default(now()) @updatedAt    
+  User             User        @relation(fields: [user_id], references: [id])
+  Quest            Quest       @relation(fields: [quest_id], references: [quest_id])
+  Step             Step        @relation(fields: [step_id], references: [step_id])
+
+  @@id([user_id, quest_id])
+  @@index([user_id])
+  @@index([quest_id])
+  @@index([step_id])
+  @@unique([user_id, quest_id, step_id], map: "user_id_quest_id_step_id")
 }
 
 enum NFTMetadataStatus {

@@ -11,4 +11,4 @@ COPY backend/api/. .
 RUN npm install
 
 # Run npm dev, as we would via the command line 
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]
