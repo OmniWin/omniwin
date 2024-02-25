@@ -13,10 +13,10 @@ RUN apk add --update --no-cache python3 build-base gcc && ln -sf /usr/bin/python
 RUN npm install -g pnpm
 
 # Install dependencies in /app
-RUN npm install
+RUN pnpm install
 
 # Ensure port 3000 is accessible to our system
 EXPOSE 3000
 
 # Run npm dev, as we would via the command line 
-CMD ["npm", "run", "dev"]
+CMD ["pnpm", "dev"]
