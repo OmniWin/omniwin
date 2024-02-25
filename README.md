@@ -17,7 +17,12 @@
 ### 4. Run 'dc-start' to spin up the project
 - ```dc-start```
 ### 5. Run in your terminal: 
-   - ```echo "127.0.0.1    omniwin.local" | sudo tee -a /etc/hosts```
+- ```echo "127.0.0.1    omniwin.local" | sudo tee -a /etc/hosts```
+### 6. Seed your environment with data: 
+- ```docker cp mysql-db/01-omniwin-seed.sql mysql-db:/```
+- ```docker exec -it mysql-db sh``` or ```bash```
+- ```mysql -u root -p omniwin < 01-omniwin-seed.sql```
+* password: ```root```
 
 ## Custom aliases
 - dc = docker-compose shortcut
