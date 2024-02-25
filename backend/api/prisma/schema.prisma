@@ -8,8 +8,8 @@ datasource db {
 }
 
 model Nft {
-  id             Int         @id @default(autoincrement())
-  lot_id         Int         @unique
+  id_nft         Int         @id @default(autoincrement())
+  id_lot         Int         @unique
   total_tickets  Int         @default(0)
   bonus_tickets  Int         @default(0)
   tickets_bought Int         @default(0)
@@ -38,9 +38,9 @@ model Nft {
 }
 
 model NftMetadata {
-  id              Int               @id @default(autoincrement())
-  nft_id          Int               @unique
-  lot_id          Int
+  id_nftMetadata  Int               @id @default(autoincrement())
+  id_nft          Int               @unique
+  id_lot          Int
   name            String?
   description     String?           @db.VarChar(2000)
   json            Json?
@@ -51,12 +51,12 @@ model NftMetadata {
   updated_at      DateTime          @default(now()) @updatedAt
   collection_name String?
 
-  @@index([nft_id], map: "nft_id")
+  @@index([id_nft], map: "id_nft")
 }
 
 model Tickets {
-  id               Int         @id @default(autoincrement())
-  lot_id           Int
+  id_ticket        Int         @id @default(autoincrement())
+  id_lot           Int
   unique_id        String      @unique
   recipient        String
   total_tickets    Int
@@ -73,7 +73,7 @@ model Tickets {
 }
 
 model User {
-  id                  String    @id
+  id_user             String    @id
   address             String    @unique
   created_at          DateTime  @default(now())
   updated_at          DateTime  @default(now()) @updatedAt
@@ -90,15 +90,15 @@ model User {
 }
 
 model Favorites {
-  id          Int      @id @default(autoincrement())
-  lot_id      Int
-  user_id     String
+  id_favorite Int      @id @default(autoincrement())
+  id_lot      Int
+  id_user     String
   created_at  DateTime @default(now())
   updated_at  DateTime @default(now()) @updatedAt
 
-  @@unique([lot_id, user_id], map: "lot_id_user_id")
-  @@index([lot_id], map: "lot_id")
-  @@index([user_id], map: "user_id")
+  @@unique([id_lot, id_user], map: "id_lot_id_user")
+  @@index([id_lot], map: "id_lot")
+  @@index([id_user], map: "id_user")
 }
 
 model Season {
@@ -118,14 +118,14 @@ model Season {
 }
 
 model Season_Leaderboard {
-  id               Int      @id @default(autoincrement())
+  id               Int         @id @default(autoincrement())
   season_id        Int      
   user_id          String
   xp_points        Int
   created_at       DateTime    @default(now())
   updated_at       DateTime    @default(now()) @updatedAt
-  Season           Season   @relation(fields: [season_id], references: [id])
-  User             User     @relation(fields: [user_id], references: [id])
+  Season           Season      @relation(fields: [season_id], references: [id])
+  User             User        @relation(fields: [user_id], references: [id_user])
 
   @@unique([season_id, user_id], map: "season_id_user_id")
   @@index([season_id])
@@ -167,7 +167,7 @@ model User_Quests {
   status           Int
   created_at       DateTime    @default(now())
   updated_at       DateTime    @default(now()) @updatedAt
-  User             User        @relation(fields: [user_id], references: [id])
+  User             User        @relation(fields: [user_id], references: [id_user])
   Quest            Quest       @relation(fields: [quest_id], references: [quest_id])
 
   @@id([user_id, quest_id])
@@ -183,7 +183,7 @@ model User_Quest_Steps {
   status           Int
   created_at       DateTime    @default(now())
   updated_at       DateTime    @default(now()) @updatedAt    
-  User             User        @relation(fields: [user_id], references: [id])
+  User             User        @relation(fields: [user_id], references: [id_user])
   Quest            Quest       @relation(fields: [quest_id], references: [quest_id])
   Step             Step        @relation(fields: [step_id], references: [step_id])
 
