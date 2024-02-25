@@ -6,6 +6,7 @@ export class UserService {
     constructor(private fastify: FastifyInstance) {
         this.userRepository = new UserRepository(this.fastify);
     }
+    
 
     async findOrCreateUser(data: any) {
         let user = await this.userRepository.findUser(data.address);

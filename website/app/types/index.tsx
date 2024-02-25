@@ -137,6 +137,29 @@ export type RaffleParticipantsResponse = {
     message: string;
 }
 
+export type Season = {
+    id: number;
+    name: string;
+    sub_title: string;
+    description: string;
+    start_date: string;
+    end_date: Date;
+    xp_limit: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export type FetchSeasonRequestBody = {
+    end_date: Date;
+};
+
+export type SeasonResponse = {
+    success: boolean;
+    data: {
+        item: Season;
+    };
+    message: string;
+}
 
 export interface Ticket {
     id_ticket: number;

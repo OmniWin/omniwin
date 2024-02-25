@@ -6,6 +6,7 @@ export class UserRepository {
     constructor(fastify: FastifyInstance) {
         this.fastify = fastify;
     }
+    
 
     async findUser(address: string) {
         const { prisma } = this.fastify;

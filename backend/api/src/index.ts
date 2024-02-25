@@ -1,5 +1,6 @@
 import Fastify from 'fastify'
 import userRoutes from './routes/nft'
+import challengesRoutes from './routes/challenges'
 import authRoutes from './routes/auth'
 import sseRoutes from './routes/sse'
 import dbPlugin from './db/dbConnector'
@@ -44,6 +45,7 @@ fastify.register(dbPlugin)
 
 
 fastify.register(userRoutes, { prefix: '/v1' })
+fastify.register(challengesRoutes, { prefix: '/v1' })
 fastify.register(authRoutes, { prefix: '/v1' })
 fastify.register(sseRoutes, { prefix: '/v1' })
 
