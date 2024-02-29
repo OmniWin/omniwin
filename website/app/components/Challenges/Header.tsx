@@ -1,6 +1,7 @@
 "use client";
 
 // import { classNames } from "@/app/utils";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -19,6 +20,7 @@ import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFall
 
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { FetchSeasonRequestBody, Season } from "@/app/types";
 
 // const tabs = [
 //     { name: "Challenges", href: "/challenges/list" },
@@ -27,6 +29,34 @@ import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 
 export default function ChallengesHeader() {
     const path = usePathname();
+
+    const fetchSeason = (): void => {
+        const setSeason = useState<Season>();
+        const [isLoading, setIsLoading] = useState(false);
+        const endDate = new Date();
+
+        setIsLoading(true);
+
+        const requestBody: FetchSeasonRequestBody = {
+            end_date: endDate
+        };
+
+        console.log("process.env.NEXT_PUBLIC_API_URL: ", process.env.NEXT_PUBLIC_API_URL)
+
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/season`, {
+            method: "GET"
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                setSeason((prevList: Season[]) => [...prevList, ...data.data.item]); // Append new items
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                setIsLoading(false);
+            });
+    };
 
     return (
         // <div className="relative pb-36 -mt-3 md:-mt-12 -mx-3 md:-mx-12 pt-12 bg-gradient-to-r from-zinc-500/10 to-zinc-400/10">
