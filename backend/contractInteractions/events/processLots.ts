@@ -20,6 +20,7 @@ type lotEventCustom = {
 export async function processLots() {
     const createLotEvent = config.contract.getEvent("CreateLot");
 
+    logger.info("Listening for CreateLot event");
     config.contract.on(createLotEvent, async (ID, asset, signer, owner, totalTickets, ticketPrice, endTimestamp, event) => {
         // Accessing the asset struct
         const token = asset.token;
@@ -44,6 +45,14 @@ export async function processLots() {
 
         logger.info("CreateLot event fired", { dataToInsert });
         await mysqlInstance.createLot(dataToInsert);
+
+        //TODO: get nft metadata
+
     });
 
 }
+
+processLots().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});
