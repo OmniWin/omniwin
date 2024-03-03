@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBase.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -29,7 +29,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /// So the setWinner method performs a binary search on that sorted array to get the upper bound.
 /// If the random number generated is 150, the winner is player5. If the random number is 20, winner is player2
 
-contract ERC20Lean is AccessControl, ReentrancyGuard, VRFConsumerBase {
+contract Omniwin is AccessControl, ReentrancyGuard, VRFConsumerBase {
     ////////// CHAINLINK VRF v1 /////////////////
     bytes32 internal immutable keyHash; // chainlink
     uint256 internal immutable fee; // fee paid in LINK to chainlink. 0.1 in Rinkeby, 2 in mainnet
