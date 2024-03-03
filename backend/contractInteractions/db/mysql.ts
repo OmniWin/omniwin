@@ -1,10 +1,10 @@
 import mysql, { PoolOptions } from 'mysql2/promise'
 
 const access: PoolOptions = {
-    user: 'root',
-    password: '327TFg8qGjnrBi',
-    database: 'omniwin',
-    host: 'localhost',
+    user: process.env.MYSQLDB_USER,
+    password: process.env.MYSQLDB_PASSWORD,
+    database: process.env.MYSQLDB_DATABASE,
+    host: process.env.MYSQLDB_HOST,
     port: 3306,
     waitForConnections: true,
     connectionLimit: 10,
