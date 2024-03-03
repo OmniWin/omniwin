@@ -1,22 +1,22 @@
+// Import ethers from Hardhat package
 import { ethers } from "hardhat";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+  // Get the ContractFactory for your contract
+  const ContractFactory = await ethers.getContractFactory("Omniwin");
 
-  const lockedAmount = ethers.parseEther("0.001");
+  // Define the constructor parameters
+  const vrfCoordinator = "0xYourVrfCoordinatorAddress";
+  const linkToken = "0xYourLinkTokenAddress";
+  const keyHash = "0xYourKeyHash";
+  const mainnetFee = true; // or false, depending on your needs
 
-  const lock = await ethers.deployContract("Lock", [unlockTime], {
-    value: lockedAmount,
-  });
+  // Deploy the contract with the constructor parameters
+  const contract = await ContractFactory.deploy(vrfCoordinator, linkToken, keyHash, mainnetFee);
 
-  await lock.waitForDeployment();
+  await contract.waitForDeployment();
 
-  console.log(
-    `Lock with ${ethers.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
-  );
+  console.log("Contract deployed to:", contract.target);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
