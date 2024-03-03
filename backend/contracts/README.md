@@ -11,3 +11,35 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat run scripts/deploy.ts
 ```
+
+# Good to know
+
+## Added a simple task in hardhat.config.ts (accounts)
+
+```shell
+hh accounts
+```
+
+# Setup environment variables (set, get, list, delete)
+
+```shell
+npx hardhat vars set INFURA_API_KEY
+```
+
+# Shorthand companion
+
+```shell
+hh
+```
+
+# Compile contracts
+
+```shell
+hh compile
+```
+
+# Deploy contracts
+
+```shell
+hh deploy
+```
