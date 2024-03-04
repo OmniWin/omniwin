@@ -120,7 +120,6 @@ describe("Omniwin", function () {
     it("Should create a new raffle with ERC20 as prize", async function () {
         const { omniwin, nft, erc20, owner, otherAccount } = await loadFixture(deployContract);
 
-        const desiredFundsInWeis = ethers.parseEther("10");
         const minimumFundsInWeis = ethers.parseEther("1");
         const entryType = 0; // Assuming 0 represents a specific entry type, adjust based on your enum
         const assetType = 0; // ERC20 token, adjust based on enum order
@@ -159,7 +158,6 @@ describe("Omniwin", function () {
 
         // Call createRaffle with the defined parameters
         const tx = await omniwin.connect(otherAccount).createRaffle(
-            desiredFundsInWeis,
             prizeAddress,
             prizeAmount,
             minimumFundsInWeis,
@@ -173,11 +171,10 @@ describe("Omniwin", function () {
         await expect(tx).to.emit(omniwin, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
     });
 
-    it("Should fail if amount raised is below minimum amount and deadline has passed", async function () {
+    it("Should claim full refund for all bought tickets", async function () {
         const { omniwin, nft, erc20, owner, otherAccount } = await loadFixture(deployContract);
 
         const raffleId = 0;
-        const desiredFundsInWeis = ethers.parseEther("10");
         const minimumFundsInWeis = ethers.parseEther("100");
         const entryType = 0; // Assuming 0 represents a specific entry type, adjust based on your enum
         const assetType = 0; // ERC20 token, adjust based on enum order
@@ -195,20 +192,21 @@ describe("Omniwin", function () {
         // Define prices for entries into the raffle
         const prices = [
             {
-                id: 0,
                 numEntries: 1,
                 price: ethers.parseEther("0.01"),
             },
             {
-                id: 1,
                 numEntries: 5,
                 price: ethers.parseEther("0.045"), // Slight discount for buying more
+            },
+            {
+                numEntries: 250,
+                price: ethers.parseEther("1"), // Slight discount for buying more
             },
         ];
 
         // Call createRaffle with the defined parameters
         const tx = await omniwin.connect(otherAccount).createRaffle(
-            desiredFundsInWeis,
             prizeAddress,
             prizeAmount,
             minimumFundsInWeis,
@@ -218,21 +216,54 @@ describe("Omniwin", function () {
             deadlineDuration
         );
 
-        //buy some tickets
-        await omniwin.connect(otherAccount).buyEntry(raffleId, 1, { value: prices[1].price });
+        const initialBalance = await ethers.provider.getBalance(otherAccount.address);
+        console.log("initialBalance:", ethers.formatEther(initialBalance));
+        // Buy entry type 1 (single entry)
+        const buyTx1 = await omniwin.connect(otherAccount).buyEntry(raffleId, 0, { value: prices[0].price });
+        const buyTxReceipt1 = await buyTx1.wait();
+
+        // Buy entry type 2 (multiple entries)
+        const buyTx2 = await omniwin.connect(otherAccount).buyEntry(raffleId, 2, { value: prices[2].price });
+        const buyTxReceipt2 = await buyTx2.wait();
+
+        // Calculate the gas cost for both transactions
+        const gasUsed1 = buyTxReceipt1?.gasUsed ?? BigInt(0);
+        const gasUsed2 = buyTxReceipt2?.gasUsed ?? BigInt(0);
+        const txBuy1 = await ethers.provider.getTransaction(buyTx1.hash);
+        const txBuy2 = await ethers.provider.getTransaction(buyTx2.hash);
+        const gasPrice1 = txBuy1?.gasPrice ?? BigInt(0);
+        const gasPrice2 = txBuy2?.gasPrice ?? BigInt(0);
+        const totalGasCost = gasUsed1 * gasPrice1 + gasUsed2 * gasPrice2;
+
+        console.log("Total gas cost (ETH):", ethers.formatEther(totalGasCost));
+
 
         //check bought tickets
-        const entryIndex = 1;
-        const tickets = await omniwin.entriesList(raffleId, entryIndex);
+        const tickets = await omniwin.getRafflesEntryInfo(raffleId);
         console.log("Tickets:", tickets);
-
-
-        await expect(tx).to.emit(omniwin, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
 
         // Wait for the deadline to pass
         await time.increase(deadlineDuration + 1);
 
+
+
+        //check eth balance of otherAccount
+        const balanceAfterTicketBuy = await ethers.provider.getBalance(otherAccount.address);
+        console.log("Balance after ticket buy:", ethers.formatEther(balanceAfterTicketBuy));
+
+        await expect(tx).to.emit(omniwin, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+
+        const totalTicketCost = prices[0].price + prices[2].price;
+
+        const expectedBalanceAfterRefund = balanceAfterTicketBuy + totalTicketCost - totalGasCost;
+
         // claim refund
-        await expect(await omniwin.connect(otherAccount).claimRefund(raffleId)).to.be.revertedWith("No refund available");
+        await omniwin.connect(otherAccount).claimRefund(raffleId)
+
+        const balanceAfterRefund = await ethers.provider.getBalance(otherAccount.address);
+        console.log("Balance after refund:", ethers.formatEther(balanceAfterRefund));
+
+        const thresholdForGasCostOfRefund = ethers.parseEther("0.0009");
+        expect(balanceAfterRefund).to.be.closeTo(expectedBalanceAfterRefund, thresholdForGasCostOfRefund);
     });
 });
