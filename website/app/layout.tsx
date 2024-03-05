@@ -27,7 +27,7 @@ import { cookieToInitialState } from 'wagmi'
 import { config } from '@/config'
 import { Web3Modal } from '@/context'
 
-
+import { Toaster } from "@/components/ui/toaster"
 
 
 export const metadata: Metadata = {
@@ -52,6 +52,7 @@ export default function RootLayout(props: React.PropsWithChildren) {
                             <MainLayout>
                                 {props.children}
                             </MainLayout>
+                            <Toaster />
                         </body>
                     </html>
                 </ThemeContextProvider>
