@@ -2,7 +2,7 @@ import Link from "next/link";
 // import { HeartIcon, TicketIcon, CheckBadgeIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
 
-import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFallback";
+import CustomImageWithFallback from "@/app/components/CustomImageWithFallback";
 
 import { RaffleCard } from "@/app/types";
 import { classNames, formatCountdown, shortenAddress, formatMoney } from "@/app/utils";

@@ -80,7 +80,6 @@ body {
 
 }
 
-
 /* W3 Button */
 :root {
   --wui-border-radius-m: 0.375rem !important;
@@ -100,4 +99,8 @@ body {
   --wui-gray-glass-010: #22c55e33 !important;
 
   --wui-color-accent-080: #3bcc8b4d !important;
+}
+
+:focus-visible {
+  outline: none;
 }

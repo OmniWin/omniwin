@@ -170,7 +170,7 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                                                 {({ active }: { active: boolean }) => (
                                                     <button
                                                         onClick={() => handleSortOptionClick(option)}
-                                                        className={classNames(option.current ? "font-medium text-zinc-100" : "text-zinc-500", active ? "bg-zinc-800" : "", "block px-4 py-2 text-sm")}
+                                                        className={classNames(option.current ? "font-medium text-zinc-100" : "text-zinc-500", active ? "bg-zinc-800" : "", "block px-4 py-2 text-sm hover:bg-zinc-700/80 w-full text-left")}
                                                         type="button"
                                                     >
                                                         {option.name}
@@ -214,7 +214,7 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                                                     <Popover.Panel className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-zinc-800 p-4 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
                                                         <div className="space-y-4">
                                                             {section.options.map((option, optionIdx) => (
-                                                                <div className="flex items-center" key={option.label}>
+                                                                <div className="flex items-center cursor-pointer" key={option.label}>
                                                                     <input
                                                                         id={`filter-${section.id}-${optionIdx}`}
                                                                         name={`${section.id}[]`}
@@ -222,9 +222,9 @@ export default function Filters({ filters, setFilters, sortOptions, setSortOptio
                                                                         type="checkbox"
                                                                         defaultChecked={option.checked}
                                                                         onChange={(e) => handleFilterChange(section.id, option.value, e.target.checked)}
-                                                                        className="h-4 w-4 rounded border-zinc-700/80 text-jade-600 focus:ring-jade-500"
+                                                                        className="h-4 w-4 rounded border-zinc-700/80 text-jade-600 focus:ring-jade-500 cursor-pointer"
                                                                     />
-                                                                    <label htmlFor={`filter-${section.id}-${optionIdx}`} className="ml-3 whitespace-nowrap pr-6 text-sm font-medium text-zinc-100">
+                                                                    <label htmlFor={`filter-${section.id}-${optionIdx}`} className="ml-3 whitespace-nowrap pr-6 text-sm font-medium text-zinc-100 cursor-pointer">
                                                                         {option.label}
                                                                     </label>
                                                                 </div>

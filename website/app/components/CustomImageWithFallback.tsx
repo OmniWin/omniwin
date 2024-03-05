@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState } from "react";
 import Image, { ImageProps } from "next/image";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/solid";
@@ -50,7 +51,7 @@ const CustomImageWithFallback: React.FC<CustomImageWithFallbackProps> = ({ src, 
         <div className={classNames("relative h-full w-full", containerClass)}>
             {isLoading && loadingIndicator()}
 
-            <Image {...props} src={imgSrc} alt={alt} onError={handleError} onLoadingComplete={() => setIsLoading(false)} />
+            <Image {...props} src={imgSrc} alt={alt} onError={handleError} onLoad={() => setIsLoading(false)} />
 
             {/* With maximize icon to view it full screen */}
             {showMaximizeButton && (

@@ -65,12 +65,12 @@ const initialNavigation = [
         icon: UserIcon,
         current: false,
         children: [
-            { name: "Profile", href: "#", current: false, icon: InformationCircleIcon },
-            { name: "Inventory", href: "#", current: false, icon: RectangleStackIcon },
-            { name: "Tickets", href: "#", current: false, icon: TicketIcon },
-            { name: "Favorites", href: "#", current: false, icon: HeartIcon },
-            { name: "Settings", href: "#", current: false, icon: Cog6ToothIcon },
-            { name: "Support", href: "#", current: false, icon: QuestionMarkCircleIcon },
+            // { name: "Profile", href: "/profile", current: false, icon: InformationCircleIcon },
+            { name: "Inventory", href: "/profile/inventory", current: false, icon: RectangleStackIcon },
+            { name: "Tickets", href: "/profile/tickets", current: false, icon: TicketIcon },
+            { name: "Favorites", href: "/profile/favorites", current: false, icon: HeartIcon },
+            { name: "Settings", href: "/profile/settings", current: false, icon: Cog6ToothIcon },
+            // { name: "Support", href: "#", current: false, icon: QuestionMarkCircleIcon },
         ],
     },
 ];
@@ -262,6 +262,25 @@ export const SidebarNavigation = () => {
     const sidebarOpenState = useSelector(selectSidebarOpenState);
     const sidebarToggleState = useSelector(selectSidebarToggleState);
 
+    const groupedSidebarIconsByNames: { [key: string]: { children: { [key: string]: JSX.Element }, icon: JSX.Element } } = navigationIcons.reduce((acc: { [key: string]: { children: { [key: string]: JSX.Element }, icon: JSX.Element } }, item) => {
+        if (item.children) {
+            const children = item.children.reduce((acc: { [key: string]: JSX.Element }, child) => {
+                acc[child.name] = child.icon;
+                return acc;
+            }, {})
+            acc[item.name] = {
+                children,
+                icon: item.icon
+            };
+        } else {
+            acc[item.name] = {
+                children: {},
+                icon: item.icon
+            };
+        }
+        return acc;
+    }, {});
+
     useEffect(() => {
         const storedIsSidebarOpen = JSON.parse(localStorage.getItem("toggleSidebar") || "false");
         dispatch(sidebarSlice.actions.setSidebarOpenState(storedIsSidebarOpen));
@@ -278,7 +297,7 @@ export const SidebarNavigation = () => {
                 children: navItem?.children?.map((child: NavigationItemChildren) => ({
                     ...child,
                     current: child.href === path,
-                })),
+                })) || null,
             }))
         );
     }, [path]);
@@ -303,6 +322,14 @@ export const SidebarNavigation = () => {
             };
         }
     }, [sidebarToggleState.toggleSidebar]); // Empty dependency array
+
+    const stopClosing = (key: number, childKey: number, event: React.MouseEvent<HTMLAnchorElement>) => {
+        // if clicked link is in the same active parent then don't close the disclosure
+        if (navigation[key].children && navigation[key]?.children?.[childKey].current) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
 
     return (
         <>
@@ -469,7 +496,7 @@ export const SidebarNavigation = () => {
                                                     )}
                                                 >
                                                     {/* <item.icon className="h-6 w-6 shrink-0" aria-hidden="true" /> */}
-                                                    {navigationIcons[navKey].icon}
+                                                    {groupedSidebarIconsByNames[item.name].icon}
 
                                                     {/* {sidebarToggleState.toggleSidebar ? "" : item.name} */}
                                                     <span className={classNames(sidebarToggleState.toggleSidebar && "w-0 opacity-0 group-hover:w-auto group-hover:opacity-100", "transition-all duration-300 ease-out")}>
@@ -477,7 +504,7 @@ export const SidebarNavigation = () => {
                                                     </span>
                                                 </Link>
                                             ) : (
-                                                <Disclosure as="div" defaultOpen={item.children.some((child) => child.current)} key={item.children.some((child) => child.current)}>
+                                                <Disclosure as="div" defaultOpen={item.children.some((child) => child.current)} key={'collapse'+item.children.some((child) => child.current)}>
                                                     {({ open }) => (
                                                         <>
                                                             <Disclosure.Button
@@ -488,7 +515,7 @@ export const SidebarNavigation = () => {
                                                                 )}
                                                             >
                                                                 {/* <item.icon className="h-6 w-6 shrink-0" aria-hidden="true" /> */}
-                                                                {navigationIcons[navKey].icon}
+                                                                {groupedSidebarIconsByNames[item.name].icon}
                                                                 {/* {sidebarToggleState.toggleSidebar ? "" : item.name} */}
                                                                 <span className={classNames(sidebarToggleState.toggleSidebar && "w-0 opacity-0 group-hover:w-auto group-hover:opacity-100", "transition-all duration-300 ease-out")}>
                                                                     {item.name}
@@ -510,6 +537,7 @@ export const SidebarNavigation = () => {
                                                                             <Disclosure.Button
                                                                                 as="a"
                                                                                 href={subItem.href}
+                                                                                onClick={(e: any) => stopClosing(navKey, childrenKey, e)}
                                                                                 className={classNames(
                                                                                     // subItem.current ? "text-jade-400" : "text-zinc-400/90 hover:bg-zinc-800 hover:text-white",
                                                                                     subItem.current ? "text-jade-400 bg-zinc-800/70" : "text-zinc-400/90 hover:bg-zinc-800 hover:text-white",
@@ -519,7 +547,7 @@ export const SidebarNavigation = () => {
                                                                                 )}
                                                                             >
                                                                                 {/* {subItem.icon && <subItem.icon className="h-6 w-6 shrink-0" aria-hidden="true" />} */}
-                                                                                {navigationIcons?.[navKey]?.children !== undefined && navigationIcons[navKey].children[childrenKey].icon}
+                                                                                {groupedSidebarIconsByNames[item.name].children[subItem.name]}
 
                                                                                 <span
                                                                                     className={classNames(
@@ -584,7 +612,7 @@ export const SidebarNavigation = () => {
                                     )}
                                 >
                                     {/* <QuestionMarkCircleIcon className="h-6 w-6 shrink-0" aria-hidden="true" /> */}
-                                    {navigationIcons[3].children[5].icon}
+                                    {navigationIcons && navigationIcons[3] && navigationIcons[3].children && navigationIcons[3].children[5].icon}
                                     <span className={classNames(sidebarToggleState.toggleSidebar && "w-0 opacity-0 group-hover:w-auto group-hover:opacity-100")}>{"Support"}</span>
                                 </a>
                             </li>

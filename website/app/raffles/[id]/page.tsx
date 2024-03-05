@@ -27,7 +27,7 @@
 // import Tabs from "@/app/components/Raffle/Tabs";
 import Activity from "@/app/components/Raffle/Activity";
 import Participants from "@/app/components/Raffle/Participants";
-import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFallback";
+import CustomImageWithFallback from "@/app/components/CustomImageWithFallback";
 
 import Link from "next/link";
 import Countdown from "react-countdown";
