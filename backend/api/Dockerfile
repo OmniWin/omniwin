@@ -11,5 +11,12 @@ RUN npm install
 
 COPY backend/api/. .
 
-# Run npm dev, as we would via the command line 
+# Copy the entrypoint script
+COPY backend/api/docker-entrypoint.sh .
+RUN chmod +x docker-entrypoint.sh
+
+# Set the entrypoint script to run on container start
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+# Run npm dev, as we would via the command line
 CMD ["npm", "run", "dev"]
