@@ -127,6 +127,13 @@ const config: Config = {
         144: '36rem',
         ...defaultTheme.minHeight,
       },
+      height: {
+        110: '27rem',
+        112: '28rem',
+        128: '32rem',
+        144: '36rem',
+        ...defaultTheme.height,
+      },
       maxWidth: {
         '8xl': '90rem',
         '9xl': '100rem',

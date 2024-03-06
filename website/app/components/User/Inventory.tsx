@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 
 // Components
-import Filters from "../Filters";
+import Filters from "@/app/components/Filters";
 import RaffleMetaWin from "../Raffle/RaffleMetaWin";
 import RaffleEse from "../Raffle/RaffleEse";
 import RaffleDefault from "../Raffle/RaffleDefault";
@@ -15,202 +15,7 @@ import { classNames } from "@/app/utils";
 // Types
 import { Filter, SortOption, FetchRafflesRequestBody, RaffleCard, FilterOption } from "@/app/types";
 
-// const raffleList = [
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "10,000",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/1.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 33279,
-//         title: "Doodles",
-//         price: "12,200",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/2.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 10276,
-//         title: "BoredApeYachtClub",
-//         price: "50,000",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/3.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1,000,000",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/4.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 33279,
-//         title: "Doodles",
-//         price: "15,000",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/5.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 10276,
-//         title: "BoredApeYachtClub",
-//         price: "50K",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/6.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1000",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/7.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1000",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/8.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1000",
-//         currency: "USDC",
-//         image: "https://ipfs.raribleuserdata.com/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5/penguin/2674.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 33279,
-//         title: "Doodles",
-//         price: "12.22K",
-//         currency: "USDC",
-//         image: "https://metadata.degods.com/g/1792-dead.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 10276,
-//         title: "BoredApeYachtClub",
-//         price: "50K",
-//         currency: "USDC",
-//         image: "https://ipfs.raribleuserdata.com/ipfs/QmUUnTTWCrnfkVCv2gU8Mpdzeu2PR867kdjWeZBCoKCUVZ",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1000",
-//         currency: "USDC",
-//         image: "https://ipfs.raribleuserdata.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/2029.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 33279,
-//         title: "Doodles",
-//         price: "12.22K",
-//         currency: "USDC",
-//         image: "https://ipfs.raribleuserdata.com/ipfs/QmSxtE6WeLDVNsSnmBtADoRDWqdHMEKRSG1MXBhkiRw1jY",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 10276,
-//         title: "BoredApeYachtClub",
-//         price: "50K",
-//         currency: "USDC",
-//         image: "https://ipfs.raribleuserdata.com/ipfs/QmdfqpbAhx9BQrZqY1UR3RpuGUmPe2jkXMVXC9drCBjQZG",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1000",
-//         currency: "USDC",
-//         image: "https://ipfs.raribleuserdata.com/ipfs/Qmb7rsvrzTfHhB9aJxygWhR1mSkpsTcWuqNZD1zPgP9V1D",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1000",
-//         currency: "USDC",
-//         image: "https://metadata.degods.com/g/1570-dead.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-// ];
-
-export default function RaffleList() {
+export default function UserInventory() {
     // Local states
     const [raffleList, setRaffleList] = useState<RaffleCard[]>([]);
     const [nextCursor, setNextCursor] = useState(0);
@@ -322,14 +127,16 @@ export default function RaffleList() {
 
     return (
         <>
-            <div className="pt-16 pb-8">
+            {/* <div className="pt-16 pb-8">
                 <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Explore Raffles</h1>
                 <p className="mt-4 max-w-xl text-sm text-zinc-400">Dive into a world of unique chances and hidden gems. Find your next big win or the perfect addition to your collection — start exploring today!</p>
-            </div>
+            </div> */}
             {/* <div className="sticky -top-[80px] bg-zinc-900 z-[30] sm:mx-0"> */}
-            <div className="sticky -top-[50px] bg-zinc-900 z-[30] sm:mx-0 pt-8 pb-4">
-                <Filters filters={filters} setFilters={setFilters} sortOptions={sortOptions} setSortOptions={setSortOptions} />
-                <CardSettings showStyle={true} showDisplay={false} />
+            <div className="sticky top-[45px] bg-zinc-900 z-[30] -mx-3 md:-mx-12 mt-8">
+                <div className="mx-auto max-w-5xl 2xl:max-w-7xl 3xl:max-w-8xl px-4 sm:px-6 lg:px-8">
+                    <Filters filters={filters} setFilters={setFilters} sortOptions={sortOptions} setSortOptions={setSortOptions} />
+                    <CardSettings showStyle={true} showDisplay={false} />
+                </div>
             </div>
             <div
                 className={classNames(

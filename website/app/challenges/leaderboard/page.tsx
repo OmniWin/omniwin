@@ -1,5 +1,5 @@
 import ChallengesHeader from "@/app/components/Challenges/Header";
-import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFallback";
+import CustomImageWithFallback from "@/app/components/CustomImageWithFallback";
 
 import { classNames, shortenAddress, tiers } from "@/app/utils";
 

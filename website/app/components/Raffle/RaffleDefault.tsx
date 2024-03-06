@@ -1,4 +1,4 @@
-import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFallback";
+import CustomImageWithFallback from "@/app/components/CustomImageWithFallback";
 
 import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
 import { TicketIcon, ClockIcon } from "@heroicons/react/24/outline";

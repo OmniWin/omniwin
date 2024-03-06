@@ -73,7 +73,7 @@ model Tickets {
 }
 
 model User {
-  id_user             String    @id
+  id_user             Int       @id @default(autoincrement())
   address             String    @unique
   created_at          DateTime  @default(now())
   updated_at          DateTime  @default(now()) @updatedAt
