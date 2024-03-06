@@ -341,7 +341,7 @@ contract Omniwin is AccessControl, ReentrancyGuard, VRFConsumerBase {
                 prizeNumber: _prizeNumber,
                 prizeAddress: _prizeAddress,
                 winner: address(0),
-                seller: address(0),
+                seller: msg.sender,
                 randomNumber: 0,
                 assetType: _assetType,
                 deadline: block.timestamp + _deadlineDuration

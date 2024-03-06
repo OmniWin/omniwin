@@ -336,6 +336,14 @@ describe("Omniwin", function () {
         expect(await nft.ownerOf(tokenId)).to.equal(owner.address);
         await nft.transferFrom(owner.address, otherAccount.address, tokenId);
 
+        //check nft balance of otherAccount
+        const balanceAfterNftTransfer = await nft.balanceOf(otherAccount.address);
+        expect(balanceAfterNftTransfer).to.equal(1);
+
+        // Check ownership of the NFT with tokenId
+        const ownerOfTokenId = await nft.ownerOf(tokenId);
+        expect(ownerOfTokenId).to.equal(otherAccount.address);
+
         // Step 2: `otherAccount` approves `omniwin` contract to spend its tokens
         await nft.connect(otherAccount).approve(omniwin.target, tokenId);
 
@@ -365,6 +373,13 @@ describe("Omniwin", function () {
             assetType,
             deadlineDuration
         );
+
+        // Check ownership of the NFT with tokenId
+        const ownerOfTokenId2 = await nft.ownerOf(tokenId);
+        expect(ownerOfTokenId2).to.equal(omniwin.target);
+
+        const nftBalanceAfterRaffleCreation = await nft.balanceOf(otherAccount.address);
+        expect(nftBalanceAfterRaffleCreation).to.equal(0);
 
         const initialBalance = await ethers.provider.getBalance(otherAccount.address);
         console.log("initialBalance:", ethers.formatEther(initialBalance));
@@ -405,7 +420,7 @@ describe("Omniwin", function () {
 
         const expectedBalanceAfterRefund = balanceAfterTicketBuy + totalTicketCost - totalGasCost;
 
-        // claim refund
+        // claim refund for all tickets
         await omniwin.connect(otherAccount).claimRefund(raffleId)
 
         const balanceAfterRefund = await ethers.provider.getBalance(otherAccount.address);
@@ -413,6 +428,18 @@ describe("Omniwin", function () {
 
         const thresholdForGasCostOfRefund = ethers.parseEther("0.0009");
         expect(balanceAfterRefund).to.be.closeTo(expectedBalanceAfterRefund, thresholdForGasCostOfRefund);
+
+
+        //reclaim nft
+        await omniwin.connect(otherAccount).reclaimAssets(raffleId)
+
+        // Check NFT balance after reclaiming
+        const finalNftBalance = await nft.balanceOf(otherAccount.address);
+        expect(finalNftBalance).to.equal(1);
+
+        // Check ownership of the NFT with tokenId
+        const ownerOfTokenId3 = await nft.ownerOf(tokenId);
+        expect(ownerOfTokenId3).to.equal(otherAccount.address);
 
     });
 });
