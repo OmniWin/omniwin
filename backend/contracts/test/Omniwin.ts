@@ -21,6 +21,13 @@ describe("Omniwin", function () {
         return erc20;
     }
 
+    async function deployNft1155Contract() {
+        const nft1155 = await ethers.deployContract("OmniwinNFT1155");
+        await nft1155.waitForDeployment();
+
+        return nft1155;
+    }
+
     // We define a fixture to reuse the same setup in every test.
     // We use loadFixture to run this setup once, snapshot that state,
     // and reset Hardhat Network to that snapshot in every test.
@@ -36,6 +43,9 @@ describe("Omniwin", function () {
         const erc20 = await deployERC20Contract();
         console.log("ERC20 deployed to:", erc20.target);
 
+        const nft1155 = await deployNft1155Contract();
+        console.log("NFT1155 deployed to:", nft1155.target);
+
 
         //Sepolia
         const vrfCoordinator = "0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625";
@@ -48,7 +58,7 @@ describe("Omniwin", function () {
         await omniwin.waitForDeployment();
 
         console.log("Omniwin deployed to:", omniwin.target, "with owner:", owner.address);
-        return { omniwin, nft, erc20, owner, otherAccount };
+        return { omniwin, nft, nft1155, erc20, owner, otherAccount };
     }
 
     it("Should assign the DEFAULT_ADMIN_ROLE to the owner", async function () {
@@ -320,7 +330,7 @@ describe("Omniwin", function () {
         await expect(tx).to.emit(omniwin, "RaffleStarted").withArgs(raffleId, prizeAddress, tokenId, assetType);
     })
 
-    it("Should claim full refund for all bought tickets", async function () {
+    it("Should claim full refund for all bought tickets and nft reclaim", async function () {
         const { omniwin, nft, erc20, owner, otherAccount } = await loadFixture(deployContract);
 
         const raffleId = 0;
@@ -442,4 +452,5 @@ describe("Omniwin", function () {
         expect(ownerOfTokenId3).to.equal(otherAccount.address);
 
     });
+
 });
