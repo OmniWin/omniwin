@@ -167,7 +167,7 @@ contract Omniwin is AccessControl, ReentrancyGuard, VRFConsumerBase {
     RaffleStruct[] public raffles;
 
     struct EntryInfoStruct {
-        STATUS status; // status of the raffle. Can be created, accepted, ended, etc
+        STATUS status; // status of the raffle.
         ENTRY_TYPE entryType;
         uint48 entriesLength; // to easy frontend, the length of the entries array is saved here
         uint128 amountRaised; // funds raised so far in wei
@@ -191,7 +191,6 @@ contract Omniwin is AccessControl, ReentrancyGuard, VRFConsumerBase {
 
     // All the different status a rafVRFCoordinatorfle can have
     enum STATUS {
-        CREATED, // the operator creates the raffle
         ACCEPTED, // the seller stakes the nft for the raffle
         CANCELLED, // the operator cancels the raffle and transfer the remaining funds after 30 days passes
         CLOSING_REQUESTED, // the operator sets a winner
@@ -753,10 +752,23 @@ contract Omniwin is AccessControl, ReentrancyGuard, VRFConsumerBase {
 
         // only if the raffle is in accepted status the NFT is staked and could have entries sold
         if (entryInfo.status == STATUS.ACCEPTED) {
-            // transfer nft to the owner
-            IERC20 _asset = IERC20(raffle.prizeAddress);
-            _asset.transfer(raffle.seller, raffle.prizeNumber);
+            if (raffle.assetType == ASSET_TYPE.ERC721) {
+                IERC721(raffle.prizeAddress).transferFrom(
+                    address(this),
+                    raffle.seller,
+                    raffle.prizeNumber
+                );
+            } else if (raffle.assetType == ASSET_TYPE.ERC20) {
+                IERC20 _asset = IERC20(raffle.prizeAddress);
+                _asset.transfer(raffle.seller, raffle.prizeNumber);
+            } else if (raffle.assetType == ASSET_TYPE.ETH) {
+                (bool sent, ) = payable(raffle.seller).call{
+                    value: raffle.prizeNumber
+                }("");
+                require(sent, "Failed to send ETH to seller");
+            }
         }
+
         entryInfo.status = STATUS.CANCEL_REQUESTED;
         raffle.cancellingDate = uint48(block.timestamp);
 
