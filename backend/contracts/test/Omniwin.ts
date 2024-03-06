@@ -22,6 +22,13 @@ describe("Omniwin", function () {
         return erc20;
     }
 
+    async function deployUSDCContract() {
+        const usdc = await ethers.deployContract("USDC");
+        await usdc.waitForDeployment();
+
+        return usdc;
+    }
+
 
     // We define a fixture to reuse the same setup in every test.
     // We use loadFixture to run this setup once, snapshot that state,
@@ -40,6 +47,17 @@ describe("Omniwin", function () {
         console.log("ERC20 deployed to:", erc20.target);
         expect(erc20).to.exist;
 
+        // Deploy USDC contract
+        const usdc = await deployUSDCContract();
+        console.log("USDC deployed to:", usdc.target);
+        expect(usdc).to.exist;
+
+        //mint some USDC
+        const mintAmount = 1000000000;
+        await usdc.mint(owner.address, mintAmount);
+        const usdcBalance = await usdc.balanceOf(owner.address);
+        expect(usdcBalance).to.equal(mintAmount);
+
         //Sepolia
         const vrfCoordinator = "0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625";
         const keyHash = "0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c";
@@ -50,8 +68,13 @@ describe("Omniwin", function () {
         const omniwin = await ethers.deployContract("Omniwin", [vrfCoordinator, linkContract, keyHash, mainnet]);
         await omniwin.waitForDeployment();
 
+        await omniwin.setUSDCTokenAddress(usdc.target);
+        //check if usdc address is set
+        const usdcAddress = await omniwin.usdcContractAddress();
+        expect(usdcAddress).to.equal(usdc.target);
+
         console.log("Omniwin deployed to:", omniwin.target, "with owner:", owner.address);
-        return { omniwin, nft, erc20, owner, otherAccount };
+        return { omniwin, nft, erc20, usdc, owner, otherAccount };
     }
 
     it("Should assign the DEFAULT_ADMIN_ROLE to the owner", async function () {
@@ -77,48 +100,6 @@ describe("Omniwin", function () {
         await erc20.transfer(otherAccount.address, amount);
         expect(await erc20.balanceOf(otherAccount.address)).to.equal(amount);
     })
-
-    // it("Should create a new raffle with NFT as prize", async function () {
-    //     const { omniwin, nft, erc20, owner, otherAccount } = await loadFixture(deployContract);
-    //     const amount = 100;
-    //     const desiredFundsInWeis = ethers.parseEther("10");
-    //     const minimumFundsInWeis = ethers.parseEther("1");
-    //     const commissionInBasicPoints = 500; // 5% for simplicity
-    //     const entryType = 0; // Assuming 0 represents a specific entry type, adjust based on your enum
-    //     const prizeAddress = nft.target; // NFT contract address - this is the contracts address
-    //     const prizeNumber = 1; // NFT tokenId
-
-    //     // Mint an NFT for the prize and transfer some ERC20 tokens as potential prize or for setup
-    //     await nft.mintCollectionNFT(owner.address, prizeNumber);
-    //     // Define prices for entries into the raffle
-    //     const prices = [
-    //         {
-    //             id: 0,
-    //             numEntries: 1,
-    //             price: ethers.parseEther("0.01"),
-    //         },
-    //         {
-    //             id: 1,
-    //             numEntries: 5,
-    //             price: ethers.parseEther("0.045"), // Slight discount for buying more
-    //         },
-    //     ];
-
-    //     // Call createRaffle with the defined parameters
-    //     const tx = await omniwin.createRaffle(
-    //         desiredFundsInWeis,
-    //         prizeAddress,
-    //         prizeNumber,
-    //         minimumFundsInWeis,
-    //         prices,
-    //         commissionInBasicPoints,
-    //         entryType
-    //     );
-    //     const receipt = await tx.wait();
-
-    //     const raffleId = 0;
-    //     await expect(receipt).to.emit(omniwin, "RaffleCreated").withArgs(raffleId, prizeAddress, prizeNumber);
-    // });
 
     it("Should create a new raffle with ERC20 as prize", async function () {
         const { omniwin, nft, erc20, owner, otherAccount } = await loadFixture(deployContract);
@@ -175,7 +156,7 @@ describe("Omniwin", function () {
     });
 
     it("Should claim full refund for all bought tickets", async function () {
-        const { omniwin, nft, erc20, owner, otherAccount } = await loadFixture(deployContract);
+        const { omniwin, nft, erc20, owner, usdc, otherAccount } = await loadFixture(deployContract);
 
         const raffleId = 0;
         const minimumFundsInWeis = ethers.parseEther("100");
@@ -196,18 +177,17 @@ describe("Omniwin", function () {
         const prices = [
             {
                 numEntries: 1,
-                price: ethers.parseEther("0.01"),
+                price: ethers.parseUnits("10", 6), // Convert $10 to smallest unit as BigInt
             },
             {
                 numEntries: 5,
-                price: ethers.parseEther("0.045"), // Slight discount for buying more
+                price: ethers.parseUnits("100", 6), // Convert $100 to smallest unit as BigInt
             },
             {
                 numEntries: 250,
-                price: ethers.parseEther("1"), // Slight discount for buying more
+                price: ethers.parseUnits("1000", 6), // Convert $1000 to smallest unit as BigInt
             },
         ];
-
         // Call createRaffle with the defined parameters
         const tx = await omniwin.connect(otherAccount).createRaffle(
             prizeAddress,
@@ -219,27 +199,24 @@ describe("Omniwin", function () {
             deadlineDuration
         );
 
-        const initialBalance = await ethers.provider.getBalance(otherAccount.address);
-        expect(initialBalance).to.be.gt(0);
+        //mint some USDC
+        const mintAmount = ethers.parseUnits("2000", 6);
+        await usdc.mint(otherAccount, mintAmount);
+
+        const initialBalance = await usdc.connect(otherAccount).balanceOf(otherAccount.address);
+        expect(initialBalance).to.be.equal(mintAmount);
+
+        //give allowance to omniwin
+        await usdc.connect(otherAccount).approve(omniwin.target, mintAmount);
+        expect(await usdc.allowance(otherAccount.address, omniwin.target)).to.be.equal(mintAmount);
 
         // Buy entry type 1 (single entry)
-        const buyTx1 = await omniwin.connect(otherAccount).buyEntry(raffleId, 0, { value: prices[0].price });
-        const buyTxReceipt1 = await buyTx1.wait();
+        const buyTx1 = await omniwin.connect(otherAccount).buyEntry(raffleId, 0, prices[0].price);
+        await buyTx1.wait();
 
         // Buy entry type 2 (multiple entries)
-        const buyTx2 = await omniwin.connect(otherAccount).buyEntry(raffleId, 2, { value: prices[2].price });
-        const buyTxReceipt2 = await buyTx2.wait();
-
-        // Calculate the gas cost for both transactions
-        const gasUsed1 = buyTxReceipt1?.gasUsed ?? BigInt(0);
-        const gasUsed2 = buyTxReceipt2?.gasUsed ?? BigInt(0);
-        const txBuy1 = await ethers.provider.getTransaction(buyTx1.hash);
-        const txBuy2 = await ethers.provider.getTransaction(buyTx2.hash);
-        const gasPrice1 = txBuy1?.gasPrice ?? BigInt(0);
-        const gasPrice2 = txBuy2?.gasPrice ?? BigInt(0);
-        const totalGasCost = gasUsed1 * gasPrice1 + gasUsed2 * gasPrice2;
-
-        console.log("Total gas cost (ETH):", ethers.formatEther(totalGasCost));
+        const buyTx2 = await omniwin.connect(otherAccount).buyEntry(raffleId, 2, prices[2].price);
+        await buyTx2.wait();
 
 
         //check bought tickets
@@ -249,22 +226,21 @@ describe("Omniwin", function () {
         // Wait for the deadline to pass
         await time.increase(deadlineDuration + 1);
 
-        //check eth balance of otherAccount
-        const balanceAfterTicketBuy = await ethers.provider.getBalance(otherAccount.address);
-        expect(balanceAfterTicketBuy).to.be.lt(initialBalance);
+        //check usdc balance of otherAccount
+        const balanceAfterTicketBuy = await usdc.connect(otherAccount).balanceOf(otherAccount.address);
+        expect(balanceAfterTicketBuy).to.be.equal(initialBalance - prices[0].price - prices[2].price);
 
         await expect(tx).to.emit(omniwin, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
 
         const totalTicketCost = prices[0].price + prices[2].price;
 
-        const expectedBalanceAfterRefund = balanceAfterTicketBuy + totalTicketCost - totalGasCost;
+        const expectedBalanceAfterRefund = balanceAfterTicketBuy + totalTicketCost;
 
-        // claim refund
+        // // claim refund
         await omniwin.connect(otherAccount).claimRefund(raffleId)
-        const balanceAfterRefund = await ethers.provider.getBalance(otherAccount.address);
+        const balanceAfterRefund = await usdc.connect(otherAccount).balanceOf(otherAccount.address);
 
-        const thresholdForGasCostOfRefund = ethers.parseEther("0.0009");
-        expect(balanceAfterRefund).to.be.closeTo(expectedBalanceAfterRefund, thresholdForGasCostOfRefund);
+        expect(balanceAfterRefund).to.be.equal(expectedBalanceAfterRefund);
     });
 
 
@@ -296,12 +272,12 @@ describe("Omniwin", function () {
             {
                 id: 0,
                 numEntries: 1,
-                price: ethers.parseEther("0.01"),
+                price: ethers.parseUnits("10", 6),
             },
             {
                 id: 1,
                 numEntries: 5,
-                price: ethers.parseEther("0.045"), // Slight discount for buying more
+                price: ethers.parseUnits("100", 6), // Slight discount for buying more
             },
         ];
 
@@ -321,7 +297,7 @@ describe("Omniwin", function () {
     })
 
     it("Should claim full refund for all bought tickets and nft reclaim", async function () {
-        const { omniwin, nft, erc20, owner, otherAccount } = await loadFixture(deployContract);
+        const { omniwin, nft, erc20, usdc, owner, otherAccount } = await loadFixture(deployContract);
 
         const raffleId = 0;
         const minimumFundsInWeis = ethers.parseEther("100");
@@ -344,22 +320,22 @@ describe("Omniwin", function () {
         const ownerOfTokenId = await nft.ownerOf(tokenId);
         expect(ownerOfTokenId).to.equal(otherAccount.address);
 
-        // Step 2: `otherAccount` approves `omniwin` contract to spend its tokens
+        // Step 2: `otherAccount` approves `omniwin` contract to spend its nft
         await nft.connect(otherAccount).approve(omniwin.target, tokenId);
 
         // Define prices for entries into the raffle
         const prices = [
             {
                 numEntries: 1,
-                price: ethers.parseEther("0.01"),
+                price: ethers.parseUnits("10", 6),
             },
             {
                 numEntries: 5,
-                price: ethers.parseEther("0.045"), // Slight discount for buying more
+                price: ethers.parseUnits("100", 6), // Slight discount for buying more
             },
             {
                 numEntries: 250,
-                price: ethers.parseEther("1"), // Slight discount for buying more
+                price: ethers.parseUnits("1000", 6), // Slight discount for buying more
             },
         ];
 
@@ -381,28 +357,22 @@ describe("Omniwin", function () {
         const nftBalanceAfterRaffleCreation = await nft.balanceOf(otherAccount.address);
         expect(nftBalanceAfterRaffleCreation).to.equal(0);
 
-        const initialBalance = await ethers.provider.getBalance(otherAccount.address);
-        expect(initialBalance).to.be.gt(0);
+        //mint some USDC
+        const mintAmount = ethers.parseUnits("2000", 6);
+        await usdc.mint(otherAccount, mintAmount);
 
-        // Buy entry type 1 (single entry)
-        const buyTx1 = await omniwin.connect(otherAccount).buyEntry(raffleId, 0, { value: prices[0].price });
-        const buyTxReceipt1 = await buyTx1.wait();
+        const initialBalance = await usdc.connect(otherAccount).balanceOf(otherAccount.address);
+        expect(initialBalance).to.be.equal(mintAmount);
 
-        // Buy entry type 2 (
-        const buyTx2 = await omniwin.connect(otherAccount).buyEntry(raffleId, 2, { value: prices[2].price });
-        const buyTxReceipt2 = await buyTx2.wait();
+        //give allowance to omniwin
+        await usdc.connect(otherAccount).approve(omniwin.target, mintAmount);
+        expect(await usdc.allowance(otherAccount.address, omniwin.target)).to.be.equal(mintAmount);
 
-        // Calculate the gas cost for both transactions
-        const gasUsed1 = buyTxReceipt1?.gasUsed ?? BigInt(0);
-        const gasUsed2 = buyTxReceipt2?.gasUsed ?? BigInt(0);
-        const txBuy1 = await ethers.provider.getTransaction(buyTx1.hash);
-        const txBuy2 = await ethers.provider.getTransaction(buyTx2.hash);
+        // Buy entry type 1
+        await omniwin.connect(otherAccount).buyEntry(raffleId, 0, prices[0].price);
 
-        const gasPrice1 = txBuy1?.gasPrice ?? BigInt(0);
-        const gasPrice2 = txBuy2?.gasPrice ?? BigInt(0);
-        const totalGasCost = gasUsed1 * gasPrice1 + gasUsed2 * gasPrice2;
-
-        console.log("Total gas cost (ETH):", ethers.formatEther(totalGasCost));
+        // Buy entry type 2
+        await omniwin.connect(otherAccount).buyEntry(raffleId, 2, prices[2].price);
 
         //check bought tickets
         const tickets = await omniwin.getRafflesEntryInfo(raffleId);
@@ -411,25 +381,21 @@ describe("Omniwin", function () {
         // Wait for the deadline to pass
         await time.increase(deadlineDuration + 1);
 
-        //check eth balance of otherAccount
-        const balanceAfterTicketBuy = await ethers.provider.getBalance(otherAccount.address);
-        expect(balanceAfterTicketBuy).to.be.lt(initialBalance);
+        //check usdc balance of otherAccount
+        const balanceAfterTicketBuy = await usdc.connect(otherAccount).balanceOf(otherAccount.address);
+        expect(balanceAfterTicketBuy).to.be.equal(initialBalance - prices[0].price - prices[2].price);
 
         await expect(tx).to.emit(omniwin, "RaffleStarted").withArgs(raffleId, prizeAddress, tokenId, assetType);
 
         const totalTicketCost = prices[0].price + prices[2].price;
 
-        const expectedBalanceAfterRefund = balanceAfterTicketBuy + totalTicketCost - totalGasCost;
+        const expectedBalanceAfterRefund = balanceAfterTicketBuy + totalTicketCost;
 
         // claim refund for all tickets
         await omniwin.connect(otherAccount).claimRefund(raffleId)
 
-        const balanceAfterRefund = await ethers.provider.getBalance(otherAccount.address);
-        // console.log("Balance after refund:", ethers.formatEther(balanceAfterRefund));
-
-        const thresholdForGasCostOfRefund = ethers.parseEther("0.0009");
-        expect(balanceAfterRefund).to.be.closeTo(expectedBalanceAfterRefund, thresholdForGasCostOfRefund);
-
+        const balanceAfterRefund = await usdc.connect(otherAccount).balanceOf(otherAccount.address);
+        expect(balanceAfterRefund).to.be.equal(expectedBalanceAfterRefund);
 
         //reclaim nft
         await omniwin.connect(otherAccount).reclaimAssets(raffleId)

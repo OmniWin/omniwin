@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@chainlink/contracts": "^0.8.0",
+    "@hyperlane-xyz/sdk": "^3.7.0",
     "@openzeppelin/contracts": "4.9.5"
   }
 }
