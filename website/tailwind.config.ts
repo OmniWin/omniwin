@@ -28,6 +28,8 @@ const config: Config = {
         inherit: 'inherit',
       },
       colors: {
+        discord: '#5562ea',
+        telegram: '#27a3e2',
         jade: {
           '50': '#edfcf4',
           '100': '#d3f8e2',

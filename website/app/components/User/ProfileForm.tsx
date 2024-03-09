@@ -24,22 +24,23 @@ const ProfileForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label htmlFor="nickname" className="block text-sm font-medium leading-6 text-zinc-100 mb-2">Nickname</label>
-        <Input id="nickname" type="text" {...register('nickname')} className=""/>
+        {/* <label htmlFor="nickname" className="block text-sm font-medium leading-6 text-zinc-100 mb-2">Nickname</label> */}
+        <Input variant="insetLabel" size='lg' label='Nickname' id="nickname" type="text" {...register('nickname')} className="" autoComplete='off' />
         {errors.nickname && <p className="mt-2 text-sm text-red-600">{errors.nickname.message}</p>}
       </div>
       <div>
-        <label htmlFor="username" className="block text-sm font-medium leading-6 text-zinc-100 mb-2">Username</label>
-        <Input id="username" type="text" {...register('username')} className=""/>
+        {/* <label htmlFor="username" className="block text-sm font-medium leading-6 text-zinc-100 mb-2">Username</label> */}
+        <Input variant="insetLabel" size='lg' label="Username" id="username" type="text" {...register('username')} className="" autoComplete='off' />
         {errors.username && <p className="mt-2 text-sm text-red-600">{errors.username.message}</p>}
       </div>
       <div>
-        <label htmlFor="publicDescription" className="block text-sm font-medium leading-6 text-zinc-100 mb-2">Public Description</label>
-        <Textarea id="publicDescription" {...register('publicDescription')} className=""></Textarea>
+        {/* <label htmlFor="publicDescription" className="block text-sm font-medium leading-6 text-zinc-100 mb-2">Public Description</label> */}
+        {/* <Textarea id="publicDescription" {...register('publicDescription')} className=""></Textarea> */}
+        <Textarea variant="insetLabel" size='lg' label='Public Description' id="publicDescription" {...register('publicDescription')} className=""></Textarea>
         {errors.publicDescription && <p className="mt-2 text-sm text-red-600">{errors.publicDescription.message}</p>}
       </div>
-      <Button type="submit" className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-        Submit
+      <Button type="submit" variant='primary'>
+        Save Changes
       </Button>
     </form>
   );

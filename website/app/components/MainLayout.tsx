@@ -6,7 +6,7 @@ import { TopNavigation } from "./TopNavigation";
 import { MobileNavigation } from "./MobileNavigation";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTwitter, faDiscord, faTelegram, faInstagram } from '@fortawesome/free-brands-svg-icons'
+import { faXTwitter, faDiscord, faTelegram, faInstagram } from '@fortawesome/free-brands-svg-icons'
 
 /* Core */
 import { useSelector } from "@/lib/redux";
@@ -50,7 +50,7 @@ export default function MainLayout(props: React.PropsWithChildren) {
                         {/* Socials */}
                         <div className="flex items-center justify-center gap-4 ml-5">
                             <Link href="https://twitter.com/omniwin" className="hover:text-white transition-all duration-300">
-                                <FontAwesomeIcon icon={faTwitter} className="h-4 w-4" />
+                                <FontAwesomeIcon icon={faXTwitter} className="h-4 w-4" />
                             </Link>
                             <Link href="https://discord.gg/omniwin" className="hover:text-white transition-all duration-300">
                                 <FontAwesomeIcon icon={faDiscord} className="h-4 w-4" />
