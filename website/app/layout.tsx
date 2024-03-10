@@ -19,45 +19,40 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 /**walletConnect */
-import type { Metadata } from 'next'
-import { headers } from 'next/headers'
+import type { Metadata } from "next";
+import { headers } from "next/headers";
 
-import { cookieToInitialState } from 'wagmi'
+import { cookieToInitialState } from "wagmi";
 
-import { config } from '@/config'
-import { Web3Modal } from '@/context'
+import { config } from "@/config";
+import { Web3Modal } from "@/context";
 
-import { Toaster } from "@/components/ui/toaster"
-
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-    title: 'Omniwin',
-    description: 'Your one stop shop for all things crypto',
-}
+    title: "Omniwin",
+    description: "Your one stop shop for all things crypto",
+};
 
 export default function RootLayout(props: React.PropsWithChildren) {
-
     // const sidebarToggleState = useSelector(selectSidebarToggleState);
-    const initialState = cookieToInitialState(config, headers().get('cookie'))
+    const initialState = cookieToInitialState(config, headers().get("cookie"));
 
     return (
         <Providers>
-            <Web3Modal initialState={initialState}>
-                <ThemeContextProvider>
-                    <html lang="en" className="dark">
-                        <head>
-                            <link rel="preload" href="/fonts/Himagsikan-MoXB.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
-                        </head>
-                        <body className={inter.className}>
-                            <MainLayout>
-                                {props.children}
-                            </MainLayout>
+            <ThemeContextProvider>
+                <html lang="en" className="dark">
+                    <head>
+                        <link rel="preload" href="/fonts/Himagsikan-MoXB.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
+                    </head>
+                    <body className={inter.className}>
+                        <Web3Modal initialState={initialState}>
+                            <MainLayout>{props.children}</MainLayout>
                             <Toaster />
-                        </body>
-                    </html>
-                </ThemeContextProvider>
-            </Web3Modal>
+                        </Web3Modal>
+                    </body>
+                </html>
+            </ThemeContextProvider>
         </Providers>
     );
 }
-

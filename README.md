@@ -43,7 +43,7 @@
 ```
 docker-compose stop frontend-app
 docker-compose rm -f frontend-app
-docker-compose up --build -d <service-name>
+docker-compose up --build -d frontend-app
 ```
 
 ## Custom aliases

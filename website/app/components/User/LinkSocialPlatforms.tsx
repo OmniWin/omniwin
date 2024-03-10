@@ -1,3 +1,5 @@
+"use client";
+
 // LinkSocialPlatforms.tsx
 import React from "react";
 // import { Input } from '@/components/ui/input'; // Adjust the import path as necessary
@@ -7,6 +9,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXTwitter, faDiscord, faTelegram } from "@fortawesome/free-brands-svg-icons";
 import { faEnvelope } from "@fortawesome/free-regular-svg-icons";
 
+import { syncSocialPlatforms } from "@/app/services/userSettingsService";
+
+import TelegramLoginButton, { TelegramUser } from 'telegram-login-button'
+
 const platforms = [
     { id: "twitter", label: "Twitter", icon: faXTwitter, color: "text-black", iconType: "fontawesome" },
     { id: "discord", label: "Discord", icon: faDiscord, color: "text-discord", iconType: "fontawesome" },
@@ -15,10 +21,10 @@ const platforms = [
 ];
 
 const LinkSocialPlatforms: React.FC = () => {
-    const handleSync = (platformId: string) => {
+    const handleSync = async (platformId: string, user?: TelegramUser) => {
         // Placeholder for actual sync logic
-        console.log(`Syncing ${platformId}`);
-        alert(`Sync requested for ${platformId}. Replace this alert with actual sync logic.`);
+        syncSocialPlatforms(platformId, user).then((res) => console.log(`Synced ${platformId}`, res));
+        console.log(`Synced ${platformId}`);
     };
 
     return (
@@ -26,7 +32,7 @@ const LinkSocialPlatforms: React.FC = () => {
             {platforms.map((platform) => (
                 <div
                     key={platform.id}
-                    className="space-x-3 flex items-center px-3 py-2 h-full rounded-xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300"
+                    className="space-x-3 flex items-center px-3 py-2 h-full rounded-xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
                 >
                     <div className="w-8 h-8 bg-zinc-800 flex items-center justify-center rounded-md">
                         {platform.iconType === "fontawesome" && <FontAwesomeIcon icon={platform.icon} className={`h-6 w-6 ${platform.color}`} />}
@@ -54,8 +60,15 @@ const LinkSocialPlatforms: React.FC = () => {
                         )}
                     </div>
                     <span className="flex-1 text-zinc-200">Not synced</span>
-                    <Button onClick={() => handleSync(platform.id)} variant="outline">
-                        Sync
+                    <Button onClick={() => platform.id === 'telegram' ? '' : handleSync(platform.id)} variant="secondary" className="relative">
+                        <span>
+                            {platform.id === 'telegram' && <TelegramLoginButton
+                                // className="opacity-0 absolute left-0 top-0 w-full h-full"
+                                botName={process.env.NEXT_PUBLIC_BOT_USERNAME || ''}
+                                dataOnauth={(user: TelegramUser) => handleSync('telegram', user)}
+                            />}
+                            Sync
+                        </span>
                     </Button>
                 </div>
             ))}

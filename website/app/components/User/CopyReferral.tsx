@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,7 +16,7 @@ const CopyReferral: React.FC<CopyReferralProps> = ({ referralCode }) => {
     }
 
     return (
-        <div className="space-x-3 flex items-center px-3 py-2 h-full rounded-xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300">
+        <div className="space-x-3 flex items-center px-3 py-2 h-full rounded-xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 w-full">
             <div className="h-8 bg-zinc-800 flex items-center justify-center rounded-md p-1">
                 <svg className={`h-6 w-6`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
                     <path
@@ -33,13 +35,13 @@ const CopyReferral: React.FC<CopyReferralProps> = ({ referralCode }) => {
                 type="text"
                 value={referralCode}
                 readOnly
-                className="!bg-transparent !border-0 !outline-none !ring-0 !ring-offset-0 uppercase text-xl"
+                className="!bg-transparent !border-0 !outline-none !ring-0 !ring-offset-0 uppercase text-xl flex-1"
             />
             <Button onClick={() => share('default', {
                 title: 'OmniWin Referral Code',
                 text: `Use my referral code ${referralCode} to join OmniWin and earn rewards!`,
                 url: 'https://omniwin.com',
-            })} variant="outline">
+            })} variant="secondary">
                 Share
             </Button>
         </div>

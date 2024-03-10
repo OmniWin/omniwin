@@ -39,7 +39,7 @@ export const validateMessage = async ({ message, signature }: any) => {
             body: JSON.stringify({ message, signature }),
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
         });
 
         if (!response.ok) {
@@ -70,3 +70,22 @@ export const signOut = async () => {
         throw error; // Rethrow the error if you want to handle it outside
     }
 }
+
+// export const fetchUserData = async () => {
+//     try {
+//         const response = await fetch(`${domain}/v1/auth/status`, {
+//             method: 'GET',
+//             credentials: 'include', // Important to include credentials for cookies
+//         });
+
+//         if (!response.ok) {
+//             throw new Error('Failed to fetch user data');
+//         }
+
+//         const userData = await response.json();
+//         return userData; // Contains authentication status and user data
+//     } catch (error) {
+//         console.error('Error fetching user data:', error);
+//         return null; // Handle error or return null
+//     }
+// };

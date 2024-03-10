@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import userRoutes from './routes/nft'
 import authRoutes from './routes/auth'
 import sseRoutes from './routes/sse'
+import socialRoutes from './routes/social'
 import dbPlugin from './db/dbConnector'
 import { HttpError } from './errors/httpError';
 import Ajv from 'ajv'
@@ -46,6 +47,7 @@ fastify.register(dbPlugin)
 fastify.register(userRoutes, { prefix: '/v1' })
 fastify.register(authRoutes, { prefix: '/v1' })
 fastify.register(sseRoutes, { prefix: '/v1' })
+fastify.register(socialRoutes, { prefix: '/v1' })
 
 fastify.setValidatorCompiler(({ schema, method, url, httpPart }) => {
     return ajv.compile(schema)

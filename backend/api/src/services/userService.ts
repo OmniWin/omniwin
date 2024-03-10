@@ -8,11 +8,15 @@ export class UserService {
     }
 
     async findOrCreateUser(data: any) {
-        let user = await this.userRepository.findUser(data.address);
+        let user = await this.userRepository.findByAddress(data.address);
         if (!user) {
             user = await this.userRepository.createUser(data);
         }
         return user;
+    }
+
+    async fetchUserSettings(address: string) {
+        return await this.userRepository.findByAddress(address);
     }
 
 }

@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 
 import UserTabs from "@/app/components/User/Tabs";
 import UserHeader from "@/app/components/User/Header";
@@ -6,7 +6,23 @@ import LinkSocialPlatforms from "@/app/components/User/LinkSocialPlatforms";
 import CopyReferral from "@/app/components/User/CopyReferral";
 import ProfileForm from "@/app/components/User/ProfileForm";
 
-export default function SettingsPage() {
+import { fetchUserSettingsData } from "@/app/services/userSettingsService";
+
+// interface UserData {
+//     address: string;
+//     username: string;
+//     email: string;
+//     description: string;
+//     twitter: string;
+//     telegram: string;
+//     discord: string;
+// }
+
+export default async function SettingsPage() {
+    const userData = await fetchUserSettingsData();
+
+    console.log("SettingsPage", userData);
+
     return (
         <>
             <UserHeader />

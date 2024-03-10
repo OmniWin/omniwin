@@ -17,8 +17,12 @@ import { Search } from "./Search";
 
 import { useDispatch, sidebarSlice } from "@/lib/redux";
 
-import { useState } from "react";
-import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { useState, useEffect } from "react";
+// import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { useAccount } from "wagmi";
+
+import { useSelector, useDispatch, userSettingsSlice } from "@/lib/redux";
+import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
 
 const userNavigation = [
     { name: "Your profile", href: "#" },
@@ -28,7 +32,15 @@ const userNavigation = [
 export const TopNavigation = () => {
     // const pathname = usePathname();
     // const dispatch = useDispatch();
+    const account = useAccount();
+    const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
+
+    // useEffect(() => {
+    //     if (account && account.status === "connected") {
+    //         // dispatch(userSettingsSlice.actions.setUser(account));
+    //     }
+    // }, [account]);
 
     return (
         <>

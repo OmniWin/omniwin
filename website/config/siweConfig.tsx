@@ -30,7 +30,7 @@ export const siweConfig = createSIWEConfig({
       throw new Error('Failed to get session!')
     }
 
-    const { address, chainId } = session
+    const { address, chainId } = session.data
 
     return { address, chainId }
   },
@@ -48,11 +48,12 @@ export const siweConfig = createSIWEConfig({
   signOut: async () => {
     try {
       // Sign out by calling the relevant endpoint on your back-end
+      console.log('Signing out called from siweConfig.')
       await signOut()
 
       return true
     } catch (error) {
       return false
     }
-  }
+  },
 })

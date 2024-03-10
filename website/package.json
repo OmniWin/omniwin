@@ -39,6 +39,7 @@
     "siwe": "^2.1.4",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
+    "telegram-login-button": "^0.1.0",
     "viem": "^2.6.1",
     "wagmi": "^2.5.4",
     "zod": "^3.22.4"
