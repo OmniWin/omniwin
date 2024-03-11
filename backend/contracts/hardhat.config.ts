@@ -27,6 +27,12 @@ const config: HardhatUserConfig = {
       accounts: [`${secrets.mumbaiPrivateKey}`]
     },
   },
+  etherscan: {
+    apiKey: {
+      polygonMumbai: "IZK72MFIWHUZRNFKKEHETSJKZCWYN7T7R1", 
+      sepolia: "NJEHWWQ1EJ17X4PH2C7H9IESSVNBXTSCIV"
+    },
+  },
 };
 
 export default config;
