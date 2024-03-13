@@ -1,0 +1,22 @@
+# Node.js specific
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store
+
+# Build output
+build
+.next
+
+# Git and version control
+.git
+.gitignore
+
+
+# Editor directories and files
+.idea
+.vscode
+*.swp
+*.swo
+*.sublime-workspace

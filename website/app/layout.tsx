@@ -1,11 +1,13 @@
 // "use client";
 /* Components */
 import { Providers } from "@/lib/providers";
+import { getServerSession } from "next-auth";
 // import { Nav } from "./components/Nav
 // import { SidebarNavigation } from "./components/SidebarNavigation";
 // import { TopNavigation } from "./components/TopNavigation";
 import MainLayout from "./components/MainLayout";
 import { ThemeContextProvider } from "./contexts/ThemeContextProvider";
+import SessionProvider from "./components/SessionProvider";
 
 /* Core */
 // import { useSelector } from "@/lib/redux";
@@ -22,9 +24,9 @@ const inter = Inter({ subsets: ["latin"] });
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
-import { cookieToInitialState } from "wagmi";
+// import { cookieToInitialState } from "wagmi";
 
-import { config } from "@/config";
+// import { config } from "@/config";
 import { Web3Modal } from "@/context";
 
 import { Toaster } from "@/components/ui/toaster";
@@ -34,9 +36,11 @@ export const metadata: Metadata = {
     description: "Your one stop shop for all things crypto",
 };
 
-export default function RootLayout(props: React.PropsWithChildren) {
+export default async function RootLayout(props: React.PropsWithChildren) {
     // const sidebarToggleState = useSelector(selectSidebarToggleState);
-    const initialState = cookieToInitialState(config, headers().get("cookie"));
+    const session = await getServerSession();
+    console.log("session 123213", session);
+    // const initialState = cookieToInitialState(config, headers().get("cookie"));
 
     return (
         <Providers>
@@ -46,10 +50,13 @@ export default function RootLayout(props: React.PropsWithChildren) {
                         <link rel="preload" href="/fonts/Himagsikan-MoXB.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
                     </head>
                     <body className={inter.className}>
-                        <Web3Modal initialState={initialState}>
-                            <MainLayout>{props.children}</MainLayout>
-                            <Toaster />
-                        </Web3Modal>
+                        <SessionProvider session={session} refetchInterval={0}>
+                            <Web3Modal>
+                                {/* <MainLayout>{pageProps.children}</MainLayout> */}
+                                <MainLayout>{props.children}</MainLayout>
+                                <Toaster />
+                            </Web3Modal>
+                        </SessionProvider>
                     </body>
                 </html>
             </ThemeContextProvider>

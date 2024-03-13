@@ -12,6 +12,7 @@ import type { FastifyCookieOptions } from '@fastify/cookie'
 import cookie from '@fastify/cookie'
 import jwtAuthMiddleware from './plugins/auth';
 import fastifyWebsocket from '@fastify/websocket'
+// import Session from 'express-session';
 
 dotenv.config()
 
@@ -38,6 +39,13 @@ fastify.register(cookie, {
 } as FastifyCookieOptions)
 
 fastify.register(fastifyWebsocket);
+// fastify.register(Session({
+//     name: 'siwe-quickstart',
+//     secret: "siwe-quickstart-secret",
+//     resave: true,
+//     saveUninitialized: true,
+//     cookie: { secure: false, sameSite: true }
+// }));
 
 fastify.register(cors, corsOptions)
 fastify.register(jwtAuthMiddleware)

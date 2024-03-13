@@ -74,8 +74,8 @@ services:
 
   frontend-app:
     container_name: frontend-app
-    depends_on:
-      - backend-app
+    # depends_on:
+      # - backend-app
     build:
       context: .
       dockerfile: website/Dockerfile
