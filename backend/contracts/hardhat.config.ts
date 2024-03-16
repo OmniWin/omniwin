@@ -26,11 +26,16 @@ const config: HardhatUserConfig = {
       url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [`${secrets.mumbaiPrivateKey}`]
     },
+    bscTestnet: {
+      url: `https://data-seed-prebsc-1-s1.binance.org:8545`,
+      accounts: [`${secrets.bscTestnetPrivateKey}`]
+    },
   },
   etherscan: {
     apiKey: {
       polygonMumbai: "IZK72MFIWHUZRNFKKEHETSJKZCWYN7T7R1", 
-      sepolia: "NJEHWWQ1EJ17X4PH2C7H9IESSVNBXTSCIV"
+      sepolia: "NJEHWWQ1EJ17X4PH2C7H9IESSVNBXTSCIV",
+      bscTestnet: "Y6AHHKSJP9611YHC1NN3SXCU9B2RV9I4CI"
     },
   },
 };

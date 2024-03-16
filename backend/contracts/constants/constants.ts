@@ -58,7 +58,9 @@ export const routerConfig = {
     ethereumSepolia: {
         address: `0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59`,
         chainSelector: `16015286601757825753`,
-        feeTokens: [LINK_ADDRESSES[`ethereumSepolia`], `0x097D90c9d3E0B50Ca60e1ae45F6A81010f9FB534`]
+        feeTokens: [LINK_ADDRESSES[`ethereumSepolia`], `0x097D90c9d3E0B50Ca60e1ae45F6A81010f9FB534`],
+        vrfCoordinator:`0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625`,
+        keyHash:`0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c`
     },
     optimismGoerli: {
         address: `0xcc5a0B910D9E9504A7561934bed294c51285a78D`,
@@ -83,7 +85,9 @@ export const routerConfig = {
     bnbChainTestnet: {
         address: `0xE1053aE1857476f36A3C62580FF9b016E8EE8F6f`,
         chainSelector: `13264668187771770619`,
-        feeTokens: [LINK_ADDRESSES[`bnbChainTestnet`], `0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd`]
+        feeTokens: [LINK_ADDRESSES[`bnbChainTestnet`], `0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd`],
+        vrfCoordinator:`0x6A2AAd07396B36Fe02a22b33cf443582f682c82f`,
+        keyHash:`0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314`
     },
     baseGoerli: {
         address: `0x80AF2F44ed0469018922c9F483dc5A909862fdc2`,
