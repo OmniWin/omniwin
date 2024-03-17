@@ -5,47 +5,57 @@ interface UserSettingsState {
   userSettings: {
     style: number; // 1 = mw, 2 = es, 3 = def
     display: string;
-    jwt: string;
-    user: object;
   };
+  user: object;
+  isWalletConnectorModalOpen: boolean;
+  isWalletStatusModalOpen: boolean;
+  usedReferralCode: string;
 }
 
 const initialState: UserSettingsState = {
   userSettings: {
     style: 1,
     display: 'grid',
-    jwt: '',
-    user: {},
   },
+  user: {},
+  isWalletConnectorModalOpen: false,
+  isWalletStatusModalOpen: false,
+  usedReferralCode: '',
 };
-
-
 
 export const userSettingsSlice = createSlice({
   name: 'userSettings',
-  initialState,
+  initialState: JSON.parse(localStorage.getItem('userSettings') ?? '') || initialState,
   reducers: {
     setCardStyle: (state, action: PayloadAction<number>) => {
       state.userSettings.style = action.payload;
-      localStorage.setItem('userSettings', JSON.stringify(state.userSettings));
+      localStorage.setItem('userSettings', JSON.stringify(state));
     },
     setCardDisplay: (state, action: PayloadAction<string>) => {
       state.userSettings.display = action.payload;
-      localStorage.setItem('userSettings', JSON.stringify(state.userSettings));
-    },
-    setJwt: (state, action: PayloadAction<string>) => {
-      state.userSettings.jwt = action.payload;
-      localStorage.setItem('userSettings', JSON.stringify(state.userSettings));
+      localStorage.setItem('userSettings', JSON.stringify(state));
     },
     setUser: (state, action: PayloadAction<object>) => {
-      state.userSettings.user = action.payload;
-      localStorage.setItem('userSettings', JSON.stringify(state.userSettings));
+      state.user = action.payload;
+      localStorage.setItem('userSettings', JSON.stringify(state));
+    },
+    setWalletConnectorModalOpen: (state, action: PayloadAction<boolean>) => {
+      state.isWalletConnectorModalOpen = action.payload;
+      localStorage.setItem('userSettings', JSON.stringify(state));
+    },
+    setUsedReferralCode: (state, action: PayloadAction<string>) => {
+      state.usedReferralCode = action.payload;
+      localStorage.setItem('userSettings', JSON.stringify(state));
+    },
+    setWalletStatusModalOpen: (state, action: PayloadAction<boolean>) => {
+      state.isWalletStatusModalOpen = action.payload;
+      localStorage.setItem('userSettings', JSON.stringify(state));
     }
   },
 });
 
 export const {
-  setCardStyle, setCardDisplay, setJwt, setUser
+  setCardStyle, setCardDisplay, setUser, setWalletConnectorModalOpen, setUsedReferralCode, setWalletStatusModalOpen
 } = userSettingsSlice.actions;
 
 export default userSettingsSlice.reducer;

@@ -1,22 +1,30 @@
-# Node.js specific
-node_modules
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-store
-
-# Build output
-build
-.next
-
-# Git and version control
+# General
 .git
 .gitignore
-
-
-# Editor directories and files
-.idea
+.dockerignore
+node_modules
+npm-debug.log
+yarn-error.log
+.next
+out
 .vscode
-*.swp
-*.swo
-*.sublime-workspace
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Specific to Next.js
+.next/cache
+out/
+
+# Dependency directories
+node_modules/
+
+# Build output
+dist/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store

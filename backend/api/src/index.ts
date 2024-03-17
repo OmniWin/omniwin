@@ -1,6 +1,7 @@
 import Fastify from 'fastify'
-import userRoutes from './routes/nft'
-import authRoutes from './routes/auth'
+import userRoutes from './routes/user'
+import nftRoutes from './routes/nft'
+import referralRoutes from './routes/referral'
 import sseRoutes from './routes/sse'
 import socialRoutes from './routes/social'
 import dbPlugin from './db/dbConnector'
@@ -34,7 +35,7 @@ const corsOptions = {
     credentials: true
 };
 fastify.register(cookie, {
-    secret: "my-dadasdadasd", // for cookies signature
+    secret: process.env.NEXTAUTH_SECRET, // for cookies signature
     parseOptions: {}     // options for parsing cookies
 } as FastifyCookieOptions)
 
@@ -53,9 +54,10 @@ fastify.register(dbPlugin)
 
 
 fastify.register(userRoutes, { prefix: '/v1' })
-fastify.register(authRoutes, { prefix: '/v1' })
+fastify.register(nftRoutes, { prefix: '/v1' })
 fastify.register(sseRoutes, { prefix: '/v1' })
 fastify.register(socialRoutes, { prefix: '/v1' })
+fastify.register(referralRoutes, { prefix: '/v1' })
 
 fastify.setValidatorCompiler(({ schema, method, url, httpPart }) => {
     return ajv.compile(schema)

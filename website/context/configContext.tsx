@@ -30,7 +30,7 @@ createWeb3Modal({
     siweConfig,
     wagmiConfig,
     projectId,
-    enableAnalytics: true // Optional - defaults to your Cloud configuration
+    enableAnalytics: true,
 })
 
 export function Web3Modal({

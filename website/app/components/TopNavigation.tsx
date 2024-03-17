@@ -14,6 +14,7 @@ import { Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon, MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { Search } from "./Search";
+import WalletConnect from "./Wallet/WalletConnect";
 
 import { useDispatch, sidebarSlice } from "@/lib/redux";
 
@@ -24,12 +25,17 @@ import { useAccount } from "wagmi";
 import { useSelector, useDispatch, userSettingsSlice } from "@/lib/redux";
 import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
 
-const userNavigation = [
-    { name: "Your profile", href: "#" },
-    { name: "Sign out", href: "#" },
-];
+// const userNavigation = [
+//     { name: "Your profile", href: "#" },
+//     { name: "Sign out", href: "#" },
+// ];
+import { useSession, signIn, signOut } from "next-auth/react"
+import { Button } from "@/components/ui/button";
 
 export const TopNavigation = () => {
+    const { data: session } = useSession()
+    // console.log('lululululu', session)
+
     // const pathname = usePathname();
     // const dispatch = useDispatch();
     const account = useAccount();
@@ -70,7 +76,7 @@ export const TopNavigation = () => {
                         <button
                             onClick={() => setOpen(true)}
                             type="button"
-                            className="min-w-72 ml-1 my-3 hidden w-auto lg:flex items-center text-sm leading-6 text-zinc-400 rounded-md ring-1 ring-zinc-900/10 shadow-sm py-1.5 pl-2 pr-3 ring-zinc-700 bg-zinc-900 highlight-white/5 hover:bg-zinc-800"
+                            className="min-w-72 my-3 hidden w-auto lg:flex items-center text-sm leading-6 text-zinc-400 rounded-md ring-1 ring-zinc-900/10 shadow-sm py-1.5 pl-2 pr-3 ring-zinc-700 bg-zinc-900 highlight-white/5 hover:bg-zinc-800"
                         >
                             <svg width="24" height="24" fill="none" aria-hidden="true" className="mr-3 flex-none">
                                 <path d="m19 19-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
@@ -92,8 +98,9 @@ export const TopNavigation = () => {
                         {/* Separator */}
                         {/* <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-zinc-950/10" aria-hidden="true" /> */}
 
-                        {/* Profile dropdown */}
+                        <WalletConnect />
                         <w3m-button />
+                        {/* Profile dropdown */}
                         {/* <Menu as="div" className="relative">
                             <Menu.Button className="-m-1.5 flex items-center p-1.5">
                                 <span className="sr-only">Open user menu</span>

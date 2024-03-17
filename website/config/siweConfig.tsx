@@ -4,17 +4,18 @@ import { getCsrfToken, signIn, signOut, getSession } from 'next-auth/react'
 import type { SIWECreateMessageArgs, SIWESession, SIWEVerifyMessageArgs } from '@web3modal/core'
 
 const siweConfig = createSIWEConfig({
-  createMessage: ({ nonce, address, chainId }: SIWECreateMessageArgs) =>
-    new SiweMessage({
+  createMessage: ({ nonce, address, chainId }: SIWECreateMessageArgs) => {
+    console.log('nonce', nonce, 'address', address, 'chainId', chainId)
+    return new SiweMessage({
       version: '1',
       domain: window.location.host,
       uri: window.location.origin,
       address,
       chainId,
       nonce,
-      // Human-readable ASCII assertion that the user will sign, and it must not contain `\n`.
-      statement: 'Sign in With Ethereum.'
-    }).prepareMessage(),
+      statement: 'Sign in OmniWin dApp.'
+    }).prepareMessage()
+  },
   getNonce: async () => {
     const nonce = await getCsrfToken()
     if (!nonce) {

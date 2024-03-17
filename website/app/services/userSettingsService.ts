@@ -1,11 +1,4 @@
-
-const getDomain = () => {
-    if (typeof window === 'undefined') {
-        return process.env.NEXT_PUBLIC_SSR_API_URL;
-    }
-
-    return process.env.NEXT_PUBLIC_API_URL;
-}
+const getDomain = () => process.env[typeof window === 'undefined' ? 'NEXT_PUBLIC_SSR_API_URL' : 'NEXT_PUBLIC_API_URL'];
 
 export const syncSocialPlatforms = async (platform: string, data: any) => {
     try {
@@ -32,11 +25,11 @@ export const syncSocialPlatforms = async (platform: string, data: any) => {
 
 export const fetchUserSettingsData = async () => {
     try {
-        const response = await fetch(`${getDomain()}/v1/user/settings`, {
+        const url = `${getDomain()}/v1/user/settings`;
+        const response = await fetch(url, {
             credentials: "include",
         });
 
-        console.log('response muie', response);
         if (!response.ok) {
             return null;
         }

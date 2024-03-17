@@ -15,14 +15,12 @@ import React, { useRef } from "react";
 import Link from "next/link";
 
 import { useState } from "react";
-import AccessFormByInvitationDialog from "./User/AccessFormByInvitation";
 
 
 
 export default function MainLayout(props: React.PropsWithChildren) {
     const sidebarToggleState = useSelector(selectSidebarToggleState);
     const mainRef = useRef(null); // Reference to the main tag
-    const [openAccessFormDialog, setOpenAccessFormDialog] = useState(true);
 
     return (
         <>
@@ -70,7 +68,6 @@ export default function MainLayout(props: React.PropsWithChildren) {
                 </main>
                 <MobileNavigation mainRef={mainRef} />
             </div>
-            <AccessFormByInvitationDialog isOpen={openAccessFormDialog} onClose={() => setOpenAccessFormDialog(false)} />
         </>
     );
 }

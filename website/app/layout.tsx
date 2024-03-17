@@ -22,7 +22,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 /**walletConnect */
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+// import { headers } from "next/headers";
 
 // import { cookieToInitialState } from "wagmi";
 
@@ -37,10 +37,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout(props: React.PropsWithChildren) {
-    // const sidebarToggleState = useSelector(selectSidebarToggleState);
     const session = await getServerSession();
-    console.log("session 123213", session);
-    // const initialState = cookieToInitialState(config, headers().get("cookie"));
 
     return (
         <Providers>
