@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "hardhat/console.sol";
 
 contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
     address immutable router;
@@ -335,14 +336,10 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
     }
 
     function _ccipReceive(
-        Client.Any2EVMMessage memory any2EvmMessage
-    )
-        internal
-        override
-        onlyAllowlisted(
-            any2EvmMessage.sourceChainSelector,
-            abi.decode(any2EvmMessage.sender, (address))
-        )
+        Client.Any2EVMMessage memory any2EvmMessage // onlyAllowlisted(
+        //     any2EvmMessage.sourceChainSelector,
+    ) internal override //     abi.decode(any2EvmMessage.sender, (address))
+    // )
     {
         uint8 messageType = abi.decode(any2EvmMessage.data, (uint8));
 

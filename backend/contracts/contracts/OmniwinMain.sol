@@ -216,13 +216,7 @@ contract Omniwin is
 
     mapping(uint256 => mapping(address => bool)) public hasClaimedRefund;
 
-    // Map that contains the number of entries each user has bought, to prevent abuse, and the claiming info
-    /*   struct ClaimStruct {
-        uint128 numEntriesPerUser;
-        uint128 amountSpentInWeis;
-        bool claimed;
-    }*/
-    //mapping(bytes32 => uint48) public claimsData;
+    mapping(uint64 => address) public chainSelectorToReceiver;
 
     // All the different status a rafVRFCoordinatorfle can have
     enum STATUS {
@@ -345,7 +339,13 @@ contract Omniwin is
         transferPrizesAndFunds(raffleInfo.id, normalizedRandomNumber);
     }
 
-    //////////////////////////////////////////////
+    function setChainSelectorReceiver(
+        uint64 _chainSelector,
+        address _receiver
+    ) external {
+        require(_receiver != address(0), "Invalid receiver address");
+        chainSelectorToReceiver[_chainSelector] = _receiver;
+    }
 
     /// @param _desiredFundsInWeis the amount the seller would like to get from the raffle
     /// @param _collateralAddress The address of the NFT of the raffle
@@ -415,7 +415,9 @@ contract Omniwin is
                 .CREATE_RAFFLE_FROM_MAINCHAIN;
 
             Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
-                receiver: abi.encode(_chainSelectors[i]),
+                receiver: abi.encode(
+                    chainSelectorToReceiver[_chainSelectors[i]]
+                ),
                 data: abi.encode(
                     messageType,
                     _prices,
@@ -423,7 +425,10 @@ contract Omniwin is
                     raffleId
                 ),
                 tokenAmounts: new Client.EVMTokenAmount[](0),
-                extraArgs: "",
+                extraArgs: Client._argsToBytes(
+                    // Additional arguments, setting gas limit
+                    Client.EVMExtraArgsV1({gasLimit: 300_000})
+                ),
                 feeToken: link
             });
 

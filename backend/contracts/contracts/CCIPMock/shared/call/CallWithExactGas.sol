@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "hardhat/console.sol";
+
 /// @notice This library contains various callWithExactGas functions. All of them are
 /// safe from gas bomb attacks.
 /// @dev There is code duplication in this library. This is done to not leave the assembly
@@ -85,6 +87,11 @@ library CallWithExactGas {
         uint16 gasForCallExactCheck,
         uint16 maxReturnBytes
     ) internal returns (bool success, bytes memory retData, uint256 gasUsed) {
+        // console.log("Calling target:", target);
+        // console.log("Payload size:", payload.length);
+        // console.log("Gas limit:", gasLimit);
+        // console.log("Gas for call exact check:", gasForCallExactCheck);
+        // console.log("Max return bytes:", maxReturnBytes);
         // allocate retData memory ahead of time
         retData = new bytes(maxReturnBytes);
 
@@ -140,6 +147,11 @@ library CallWithExactGas {
             // copy the bytes from retData[0:_toCopy]
             returndatacopy(add(retData, 0x20), 0x0, toCopy)
         }
+
+        // console.log("Call success:", success);
+        // console.log("Gas used:", gasUsed);
+        // console.log("Return data size:", retData.length);
+
         return (success, retData, gasUsed);
     }
 

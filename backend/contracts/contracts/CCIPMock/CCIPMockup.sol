@@ -13,6 +13,8 @@ import {SafeERC20} from "./vendor/SafeERC20.sol";
 import {IERC20} from "./vendor//IERC20.sol";
 import {ERC165Checker} from "./vendor//ERC165Checker.sol";
 
+import "hardhat/console.sol";
+
 contract MockCCIPRouter is IRouter, IRouterClient {
     using SafeERC20 for IERC20;
     using ERC165Checker for address;
@@ -71,6 +73,11 @@ contract MockCCIPRouter is IRouter, IRouterClient {
 
         // Event to assist testing, does not exist on real deployments
         emit MsgExecuted(success, retData, gasUsed);
+
+        console.log(
+            "Message executed with success:",
+            message.sourceChainSelector
+        );
 
         // Real router event
         emit MessageExecuted(
