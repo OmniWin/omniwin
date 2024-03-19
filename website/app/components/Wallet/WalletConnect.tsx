@@ -2,13 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { useAccount, useConnect, useSignMessage, useDisconnect, useBalance, useNetwork } from "wagmi";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 // import { SiweMessage } from "siwe";
 import siweConfig from "@/config/siweConfig";
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
 
 import { shortenAddress, copyToClipboard } from "@/app/utils";
-import { checkIfUserExists } from "@/app/services/authService";
+import { checkIfUserExists, createAccount } from "@/app/services/authService";
 
 import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -22,7 +22,6 @@ import AccessFormByInvitation from "../User/AccessFormByInvitation";
 // Rudex ModalOpen state
 import { useSelector, useDispatch, userSettingsSlice } from "@/lib/redux";
 import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
-import { disconnect } from "process";
 
 const WalletConnect = () => {
     const { toast } = useToast();
@@ -38,9 +37,29 @@ const WalletConnect = () => {
     const { connect, connectors } = useConnect();
     // const { disconnect } = useDisconnect();
     const { data: session } = useSession();
-    const { signMessage, isLoading, isSuccess } = useSignMessage({
+    const { signMessage, isLoading, error, status, isError } = useSignMessage({
         onSuccess: async (signature, variables) => {
-            await siweConfig.verifyMessage({ message: variables.message, signature });
+            const success = await siweConfig.verifyMessage({ message: variables.message, signature });
+            console.log("success", success);
+            if (success) {
+                const user = await createAccount({ address: address, chainId: chain?.id, usedReferralCode: userSettingsState.usedReferralCode });
+
+                if (user) {
+                    dispatch(userSettingsSlice.actions.setUser(user));
+                    toast({
+                        title: "Success",
+                        description: "You have successfully signed in",
+                        variant: "success",
+                    });
+                } else {
+                    toast({
+                        title: "Error",
+                        description: "An error occurred while signing in",
+                        variant: "error",
+                    });
+                    await disconnect()
+                }
+            }
         },
     });
     const { address, connector } = useAccount();
@@ -49,9 +68,7 @@ const WalletConnect = () => {
     const supportedChains = ["Ethereum", "Binance Smart Chain", "Polygon", "Goerli", "Polygon Mumbai"];
 
     useEffect(() => {
-        if (session) {
-            dispatch(userSettingsSlice.actions.setUser(session));
-        } else {
+        if (!session) {
             dispatch(userSettingsSlice.actions.setUser({}));
         }
     }, [session]);
@@ -87,6 +104,17 @@ const WalletConnect = () => {
         }
     }, [address]);
 
+    // If sign is denied, show error toast
+    useEffect(() => {
+        if (status === "error" && isError) {
+            toast({
+                title: "Error",
+                description: "An error occurred while signing the message",
+                variant: "error",
+            });
+        }
+    }, [isError, status]);
+
     // Define the connectors you want to use by their names or IDs
     const allowedConnectors = ["MetaMask", "Coinbase Wallet", "WalletConnect", "Rabby"];
 
@@ -111,7 +139,7 @@ const WalletConnect = () => {
 
     const disconnect = async () => {
         dispatch(userSettingsSlice.actions.setUser({}))
-        dispatch(userSettingsSlice.actions.setUsedReferralCode(''))
+        // dispatch(userSettingsSlice.actions.setUsedReferralCode(''))
         dispatch(userSettingsSlice.actions.setWalletStatusModalOpen(false))
         await siweConfig.signOut();
     }
@@ -135,7 +163,7 @@ const WalletConnect = () => {
                             {connector?.name === "Coinbase Wallet" && <CoinbaseWalletIcon className="w-5 h-5" />}
                             {connector?.name === "WalletConnect" && <WalletConnectIcon className="w-6 h-6 -m-.5" />}
                         </span>
-                        <span>{shortenAddress(address)}</span>
+                        <span>{userSettingsState?.user?.username ?? shortenAddress(address)}</span>
                     </span>
                 </button>
 
@@ -222,7 +250,11 @@ const WalletConnect = () => {
             <Dialog open={userSettingsState.isWalletConnectorModalOpen} onOpenChange={(open) => dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(open))}>
                 <DialogContent className="sm:max-w-[425px] lg:max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle className="text-white">Connect Wallet</DialogTitle>
+                        <DialogTitle className="text-white">
+                            {!address && 'Connect Wallet'}
+                            {address && !userSettingsState.usedReferralCode && !userExists && "Access by invitation"}
+                            {/* {connector && isLoading && userSettingsState.usedReferralCode && ""} */}
+                        </DialogTitle>
                         {/* <DialogDescription>Choose your wallet.</DialogDescription> */}
                     </DialogHeader>
                     {address && !userSettingsState.usedReferralCode && !userExists && <AccessFormByInvitation />}
@@ -282,7 +314,7 @@ const WalletConnect = () => {
                         </div>
                     )}
                     {/* Loading metamask sign */}
-                    {connector && isLoading && userSettingsState.usedReferralCode && (
+                    {connector && isLoading && (userSettingsState.usedReferralCode || userExists) && (
                         <div className="flex flex-col items-center justify-center space-y-10">
                             <div className="flex items-center gap-x-2">
                                 <svg aria-hidden="true" className="inline w-8 h-8 text-zinc-400 animate-spin fill-jade-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">

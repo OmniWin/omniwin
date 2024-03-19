@@ -30,8 +30,6 @@ export default function SettingsPage() {
             <UserHeader />
             <UserTabs />
 
-            <WalletConnect />
-
             <div className=" -mx-3 md:-mx-12">
                 <div className="mx-auto max-w-5xl 2xl:max-w-7xl 3xl:max-w-8xl px-4 sm:px-6 lg:px-8 mt-8">
                     <div className="flex gap-8 xl:gap-40">

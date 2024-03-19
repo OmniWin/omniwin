@@ -1,22 +1,23 @@
 const domain = process.env.NEXT_PUBLIC_API_URL;
 
-export const createAccount = async () => {
+export const createAccount = async (body: any) => {
     try {
         const response = await fetch(`${domain}/v1/user`, {
             method: 'POST',
-            // body: JSON.stringify({ message, signature }),
+            body: JSON.stringify(body),
             headers: {
                 'Content-Type': 'application/json'
             },
         });
 
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            // throw new Error('Network response was not ok');
+            return false;
         }
 
-        const isValid = await response.json();
+        const user = await response.json();
 
-        return isValid;
+        return user;
     } catch (error) {
         console.error('Error validating message:', error);
         throw error; // Rethrow the error if you want to handle it outside

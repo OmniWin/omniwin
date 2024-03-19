@@ -82,7 +82,7 @@ model User {
   description         String?   @db.Text
   issued_at           DateTime?
   chainId             Int
-  avatar              String?
+  avatar              String?   @default("")
   telegram            Json?     @default("{}")
   twitter             Json?     @default("{}")
   discord             Json?     @default("{}")

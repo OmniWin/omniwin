@@ -23,9 +23,12 @@ const initialState: UserSettingsState = {
   usedReferralCode: '',
 };
 
+const localStorageState = localStorage ? JSON.parse(localStorage.getItem('userSettings') ?? '{}') : {};
+const state = Object.assign({}, initialState, localStorageState)
+
 export const userSettingsSlice = createSlice({
   name: 'userSettings',
-  initialState: JSON.parse(localStorage.getItem('userSettings') ?? '') || initialState,
+  initialState: state,
   reducers: {
     setCardStyle: (state, action: PayloadAction<number>) => {
       state.userSettings.style = action.payload;

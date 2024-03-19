@@ -18,7 +18,7 @@ export class ReferralService {
     let unique = false;
 
     while (!unique) {
-      referralCode = `OMNI-${uuidv4().split('-').join('').substring(0, 16).toUpperCase()}`;
+      referralCode = `OMNI-${uuidv4().replace(/-/g, '').substring(0, 12).match(/.{1,4}/g)?.join('-').toUpperCase()}`;
       const user = await this.userService.getUserByReferralCode(referralCode);
       if (!user) {
         unique = true;

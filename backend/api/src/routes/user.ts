@@ -8,7 +8,7 @@ async function routes(fastify: FastifyInstance, options: any) {
 
     // Create user if not exists
     fastify.post('/user', {
-        onRequest: [fastify.authenticate],
+        onRequest: [],
     }, UserController.create)
 
     // Check if user exists

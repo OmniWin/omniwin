@@ -25,20 +25,39 @@ export class UserController {
 
     public static async create(req: FastifyRequest, res: FastifyReply) {
         try {
-            const { address, chainId } = req?.user as any;
+            const { address, chainId, usedReferralCode } = req?.body as any;
             const referralService = await new ReferralService(req.server as FastifyInstance);
             const userService = await new UserService(req.server as FastifyInstance);
+
+            // Check if user exists
+            const exists = await userService.exists(address);
+            if (exists) {
+                // throw new HttpError(req.server, "USER_EXISTS");
+                const { issued_at, updated_at, created_at, ...userWithoutTimestamps } = exists;
+                return res.code(200).send(userWithoutTimestamps);
+            }
+
+            // Validate usedReferralCode
+            if (usedReferralCode) {
+                const referral = await referralService.validateCode(usedReferralCode);
+                if (!referral) {
+                    throw new HttpError(req.server, "INVALID_REFERRAL_CODE");
+                }
+            } else {
+                throw new HttpError(req.server, "INVALID_REFERRAL_CODE");
+            }
+
             const referralCode = await referralService.generateReferralCode();
             const data = {
-                ...req.body ?? {},
                 chainId: chainId,
                 address: address,
                 referral_code: referralCode,
             };
             const user = await userService.createUser(data);
-            await referralService.createReferral({ referred_user_id: user.id_user, referral_code: user.referral_code });
+            await referralService.createReferral({ referred_user_id: user.id_user, referral_code: usedReferralCode });
 
-            return res.code(200).send(user);
+            const { issued_at, updated_at, created_at, ...userWithoutTimestamps } = user;
+            return res.code(200).send(userWithoutTimestamps);
         } catch (error: any) {
             console.log(error);
             throw new HttpError(req.server, error.message);

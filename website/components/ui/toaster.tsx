@@ -12,10 +12,11 @@ export function Toaster() {
             {toasts.map(function ({ id, title, description, variant, action, ...props }) {
                 return (
                     <Toast key={id} {...props} variant={variant}>
-                        <div className="flex">
+                        {variant && ['error', 'success'].includes(variant) &&
+                            <div className="flex">
                             {variant === "error" && <ExclamationCircleIcon className="h-6 w-6 text-blood-500" />}
                             {variant === "success" && <CheckCircleIcon className="h-6 w-6 text-emerald-500" />}
-                        </div>
+                        </div>}
                         <div className="grid gap-1">
                             {title && <ToastTitle>{title}</ToastTitle>}
                             {description && <ToastDescription>{description}</ToastDescription>}
