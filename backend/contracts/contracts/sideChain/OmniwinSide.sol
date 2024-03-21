@@ -23,6 +23,8 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
 
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR");
 
+    bytes32 public tempMessageId;
+
     enum PayFeesIn {
         Native,
         LINK
@@ -229,11 +231,11 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
     function CreateRaffleCCIP(
         address _prizeAddress,
         uint256 _prizeNumber,
-        ASSET_TYPE _assetType,
         uint128 _minimumFundsInWei,
         PriceStructure[] calldata _prices,
+        ASSET_TYPE _assetType,
         uint256 _deadlineDuration,
-        uint256[] calldata chainIds
+        uint64[] calldata chainIds
     ) external {
         require(
             _deadlineDuration <= maxDeadlineDuration,
@@ -254,6 +256,41 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
             _assetType
         );
 
+        //TODO: bring back here _sendMessageCreateRaffleSideChain, and replace testMessageId with messageId
+        bytes32 testMessageId = 0x894cccafe7a46ef3ce0297f766eb759c3aa439ab77472626d2ba98088308cee4;
+
+        tempRaffles[testMessageId] = RaffleStructTemp({
+            prizeNumber: _prizeNumber,
+            prizeAddress: _prizeAddress,
+            winner: address(0),
+            seller: msg.sender,
+            assetType: _assetType,
+            deadline: block.timestamp + _deadlineDuration,
+            msgStatus: MessageStatus.SENT,
+            timestamp: uint48(block.timestamp)
+        });
+        console.log("testMessageId");
+        console.logBytes32(testMessageId);
+        console.log("tempRaffles[testMessageId]");
+        tempMessageId = testMessageId;
+
+        // console.log("messageId-initial");
+        // bytes memory messageId_ = abi.encode(messageId);
+        // console.logBytes(messageId_);
+        // console.log("messageId-end");
+
+        for (uint256 i = 0; i < _prices.length; ++i) {
+            tempPricesList[testMessageId].push(_prices[i]);
+        }
+
+        emit CreateRaffleCCIPEvent(
+            testMessageId,
+            mainChainSelector,
+            mainChainRaffleAddress,
+            _prizeAddress,
+            _prizeNumber
+        );
+
         bytes32 messageId = _sendMessageCreateRaffleSideChain(
             _minimumFundsInWei,
             _prices,
@@ -262,28 +299,9 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
             chainIds
         );
 
-        tempRaffles[messageId] = RaffleStructTemp({
-            prizeNumber: _prizeNumber,
-            prizeAddress: _prizeAddress,
-            winner: address(0),
-            seller: msg.sender,
-            assetType: _assetType,
-            deadline: _deadlineDuration,
-            msgStatus: MessageStatus.SENT,
-            timestamp: uint48(block.timestamp)
-        });
-
-        for (uint256 i = 0; i < _prices.length; ++i) {
-            tempPricesList[messageId].push(_prices[i]);
-        }
-
-        emit CreateRaffleCCIPEvent(
-            messageId,
-            mainChainSelector,
-            mainChainRaffleAddress,
-            _prizeAddress,
-            _prizeNumber
-        );
+        console.log("messageId");
+        console.logBytes32(messageId);
+        console.log("tempMessageId");
     }
 
     function _sendMessageCreateRaffleSideChain(
@@ -291,7 +309,7 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
         PriceStructure[] calldata _prices,
         uint256 _deadlineDuration,
         address sender,
-        uint256[] calldata chainIds
+        uint64[] calldata chainIds
     ) internal returns (bytes32 messageId) {
         MESSAGE_TYPE messageType = MESSAGE_TYPE.CREATE_RAFFLE_FROM_SIDECHAIN;
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
@@ -305,19 +323,18 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
                 chainIds
             ),
             tokenAmounts: new Client.EVMTokenAmount[](0),
-            extraArgs: "",
+            extraArgs: Client._argsToBytes(
+                // Additional arguments, setting gas limit
+                //TODO: //set gas limit using a function. This method needs more gas than the default
+                //or maybe set is as a parameter, because if one of the chains is ethereum it will need more gas
+                Client.EVMExtraArgsV1({gasLimit: 1_000_000})
+            ),
             feeToken: link
         });
 
-        uint256 fee = IRouterClient(i_router).getFee(
-            mainChainSelector,
-            message
-        );
-        LinkTokenInterface(link).approve(i_router, fee);
-        messageId = IRouterClient(i_router).ccipSend(
-            mainChainSelector,
-            message
-        );
+        uint256 fee = IRouterClient(router).getFee(mainChainSelector, message);
+        LinkTokenInterface(link).approve(router, fee);
+        messageId = IRouterClient(router).ccipSend(mainChainSelector, message);
         return messageId;
     }
 
@@ -535,19 +552,12 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
             feeToken: link
         });
 
-        uint256 fee = IRouterClient(i_router).getFee(
-            mainChainSelector,
-            message
-        );
+        uint256 fee = IRouterClient(router).getFee(mainChainSelector, message);
 
         bytes32 messageId;
 
-        LinkTokenInterface(link).approve(i_router, fee);
-        messageId = IRouterClient(i_router).ccipSend(
-            mainChainSelector,
-            message
-        );
-
+        LinkTokenInterface(link).approve(router, fee);
+        messageId = IRouterClient(router).ccipSend(mainChainSelector, message);
         //hold for refund
         entries[messageId] = MessageCCIPStatus({
             status: MessageStatus.SENT,

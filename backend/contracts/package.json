@@ -9,11 +9,14 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/hardhat-upgrades": "^3.0.5",
     "@types/chai": "^4.3.12",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.24",
     "chai": "^4.4.1",
+    "ethers": "^6.11.1",
     "hardhat": "^2.22.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"

@@ -3,6 +3,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import { vars } from "hardhat/config";
 import "./tasks";
 import "@nomicfoundation/hardhat-ethers";
+import "@openzeppelin/hardhat-upgrades";
 import secrets from "./secrets.json";
 
 const INFURA_API_KEY = vars.get("INFURA_API_KEY");

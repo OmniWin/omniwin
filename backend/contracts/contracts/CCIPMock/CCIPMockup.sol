@@ -74,11 +74,6 @@ contract MockCCIPRouter is IRouter, IRouterClient {
         // Event to assist testing, does not exist on real deployments
         emit MsgExecuted(success, retData, gasUsed);
 
-        console.log(
-            "Message executed with success:",
-            message.sourceChainSelector
-        );
-
         // Real router event
         emit MessageExecuted(
             message.messageId,
