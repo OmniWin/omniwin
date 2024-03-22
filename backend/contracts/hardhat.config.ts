@@ -5,6 +5,9 @@ import "./tasks";
 import "@nomicfoundation/hardhat-ethers";
 import "@openzeppelin/hardhat-upgrades";
 import secrets from "./secrets.json";
+import "hardhat-contract-sizer";
+import "hardhat-insight";
+
 
 const INFURA_API_KEY = vars.get("INFURA_API_KEY");
 
@@ -14,7 +17,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 3000,
+        runs: 2000,
       },
     },
   },
