@@ -1,10 +1,12 @@
-const domain = process.env.NEXT_PUBLIC_API_URL;
+// const domain = process.env.NEXT_PUBLIC_API_URL;
+const domain = 'http://omniwin.local/b';
 
 export const createAccount = async (body: any) => {
     try {
         const response = await fetch(`${domain}/v1/user`, {
             method: 'POST',
             body: JSON.stringify(body),
+            credentials: "include",
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -15,9 +17,9 @@ export const createAccount = async (body: any) => {
             return false;
         }
 
-        const user = await response.json();
+        const jsonData = await response.json();
 
-        return user;
+        return jsonData.data;
     } catch (error) {
         console.error('Error validating message:', error);
         throw error; // Rethrow the error if you want to handle it outside
@@ -38,9 +40,9 @@ export const checkIfUserExists = async (address: string) => {
             throw new Error('Network response was not ok');
         }
 
-        const exists = await response.json();
+        const jsonData = await response.json();
 
-        return exists;
+        return jsonData.data.exists;
     } catch (error) {
         console.error('Error validating message:', error);
         throw error; // Rethrow the error if you want to handle it outside
@@ -62,9 +64,9 @@ export const validateReferralCode = async (referralCode: string) => {
             return false;
         }
 
-        const isValid = await response.json();
+        const jsonData = await response.json();
 
-        return isValid;
+        return jsonData.data;
     } catch (error) {
         console.error('Error validating message:', error);
         throw error; // Rethrow the error if you want to handle it outside

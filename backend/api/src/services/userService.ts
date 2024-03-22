@@ -40,4 +40,8 @@ export class UserService {
         return await this.userRepository.exists(address);
     }
 
+    async updateUser(address: string, data: any) {
+        return await this.userRepository.updateUser(address, data);
+    }
+
 }

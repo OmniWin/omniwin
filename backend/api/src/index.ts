@@ -8,6 +8,7 @@ import dbPlugin from './db/dbConnector'
 import { HttpError } from './errors/httpError';
 import Ajv from 'ajv'
 import dotenv from 'dotenv'
+import fastifyMultipart from '@fastify/multipart';
 import cors from '@fastify/cors'
 import type { FastifyCookieOptions } from '@fastify/cookie'
 import cookie from '@fastify/cookie'
@@ -32,7 +33,7 @@ const fastify = Fastify({
 const corsOptions = {
     origin: ['http://omniwin.local', 'http://localhost:3000', 'http://localhost:4356', 'http://localhost'],
     methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
-    credentials: true
+    credentials: true,
 };
 fastify.register(cookie, {
     secret: process.env.NEXTAUTH_SECRET, // for cookies signature
@@ -49,9 +50,20 @@ fastify.register(fastifyWebsocket);
 // }));
 
 fastify.register(cors, corsOptions)
+fastify.register(fastifyMultipart, {
+    limits: {
+        fieldNameSize: 100, // Max field name size in bytes
+        fieldSize: 10000,     // Max field value size in bytes
+        fields: 10,         // Max number of non-file fields
+        fileSize: 2 * 1024 * 1024, // 2MB,  // For multipart forms, the max file size in bytes
+        // fileSize: 1000000,  // For multipart forms, the max file size in bytes
+        files: 1,           // Max number of file fields
+        headerPairs: 2000,  // Max number of header key=>value pairs
+        parts: 1000         // For multipart forms, the max number of parts (fields + files)
+    }
+});
 fastify.register(jwtAuthMiddleware)
 fastify.register(dbPlugin)
-
 
 fastify.register(userRoutes, { prefix: '/v1' })
 fastify.register(nftRoutes, { prefix: '/v1' })
@@ -97,4 +109,4 @@ fastify.setErrorHandler((error, request, reply) => {
     }
 });
 
-start() 
+start()

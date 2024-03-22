@@ -23,7 +23,7 @@ const initialState: UserSettingsState = {
   usedReferralCode: '',
 };
 
-const localStorageState = localStorage ? JSON.parse(localStorage.getItem('userSettings') ?? '{}') : {};
+const localStorageState = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('userSettings') ?? '{}') : {};
 const state = Object.assign({}, initialState, localStorageState)
 
 export const userSettingsSlice = createSlice({

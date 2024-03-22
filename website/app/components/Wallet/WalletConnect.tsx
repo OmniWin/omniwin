@@ -163,7 +163,9 @@ const WalletConnect = () => {
                             {connector?.name === "Coinbase Wallet" && <CoinbaseWalletIcon className="w-5 h-5" />}
                             {connector?.name === "WalletConnect" && <WalletConnectIcon className="w-6 h-6 -m-.5" />}
                         </span>
-                        <span>{userSettingsState?.user?.username ?? shortenAddress(address)}</span>
+                        {/* <span>{userSettingsState?.user?.username ?? shortenAddress(address)}</span> */}
+                        <span>{userSettingsState?.user?.username ? "" : shortenAddress(address)}</span>
+                        <span>{userSettingsState?.user?.username?.length > 8 ? shortenAddress(userSettingsState?.user?.username) : userSettingsState?.user?.username}</span>
                     </span>
                 </button>
 

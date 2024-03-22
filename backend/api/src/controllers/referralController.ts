@@ -22,7 +22,11 @@ export class ReferralController {
                 throw new HttpError(req.server, "REFERRAL_CODE_NOT_FOUND");
             }
 
-            return res.code(200).send(code);
+            return res.code(200).send({
+                success: true,
+                data: code,
+                message: "Referral code is valid",
+            });
         } catch (error: any) {
             console.log(error);
             throw new HttpError(req.server, error.message);

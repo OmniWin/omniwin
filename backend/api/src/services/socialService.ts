@@ -11,8 +11,12 @@ export class SocialService {
         return await this.userRepository.find(id);
     }
 
-    async syncSocialPlatforms(platform: any, data: any) {
-        return await this.userRepository.syncSocialPlatforms(platform, data);
+    async findBy(field: string, value: any) {
+        return await this.userRepository.findBy(field, value);
+    }
+
+    async syncSocialPlatforms(platform: any, data: any, address: string) {
+        return await this.userRepository.syncSocialPlatforms(platform, data, address);
     }
 
 }

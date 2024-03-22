@@ -7,31 +7,30 @@ export class SocialController {
 
     public static async sync(req: FastifyRequest, res: FastifyReply) {
         try {
-            const decodedToken = await req.jwtDecode() as any;
+            const { address } = req.user as any;
 
-            const session = {
-                address: decodedToken.payload.address,
-                chainId: decodedToken.payload.chainId,
-                userId: decodedToken.payload.userId,
-                username: decodedToken.payload.username,
-                email: decodedToken.payload.email,
-            };
+            if (!address) {
+                throw new HttpError(req.server, "INVALID_ADDRESS");
+            }
 
             const userService = await new SocialService(req.server as FastifyInstance);
-            const user = userService.find(session.userId);
+            const user = userService.findBy('address', address);
 
             if (!user) {
                 throw new HttpError(req.server, "USER_NOT_FOUND");
             }
 
-            const { platform, data } = req.body as { platform: string, data: any };
+            const { platform, data } = req.body as any;
 
-            userService.syncSocialPlatforms(user, {
-                platform: platform,
-                data: data
+            console.log(platform, data)
+
+            await userService.syncSocialPlatforms(platform, data, address);
+
+            return res.code(200).send({
+                success: true,
+                data: data,
+                message: "Social platforms synced successfully",
             });
-
-            return res.code(200).send(true);
         } catch (error: any) {
             console.log(error);
             throw new HttpError(req.server, error.message);

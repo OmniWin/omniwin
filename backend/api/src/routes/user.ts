@@ -11,6 +11,12 @@ async function routes(fastify: FastifyInstance, options: any) {
         onRequest: [],
     }, UserController.create)
 
+    // Update user settings
+    fastify.put('/user', {
+        // onRequest: [fastify.authenticate],
+        onRequest: [fastify.authenticate],
+    }, UserController.update)
+
     // Check if user exists
     fastify.post('/user/exists', UserController.exists)
 }

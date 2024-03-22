@@ -79,7 +79,7 @@ model User {
   updated_at          DateTime  @default(now()) @updatedAt
   email               String?   @unique
   username            String?   @unique
-  description         String?   @db.Text
+  description         String?   @db.VarChar(600)
   issued_at           DateTime?
   chainId             Int
   avatar              String?   @default("")

@@ -44,7 +44,7 @@ export default function SettingsPage() {
                             </div>
                             <div className="space-y-4">
                                 <h2 className="text-xl font-bold tracking-tight text-zinc-100">Referral</h2>
-                                <CopyReferral referralCode="test123312" />
+                                <CopyReferral />
                             </div>
                         </div>
                     </div>
