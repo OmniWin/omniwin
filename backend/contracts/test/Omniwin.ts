@@ -9,6 +9,7 @@ import { ethers, upgrades } from "hardhat";
 import exp from "constants";
 import {routerConfig} from "../constants/constants"
 import { Uint64 } from "@hyperlane-xyz/sdk/dist/cw-types/Cw20Base.types";
+import { AddressLike } from "ethers";
 enum ASSET_TYPE {
     ERC20,
     ERC721,
@@ -162,7 +163,14 @@ describe("Omniwin", function () {
         const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
 
         //he have a mapping in main contract (chainSelector => contractAddress). We map each chainSelector(id we get from chainlink docs) to our deployed contracts for each chain
-        const chainSelectors = [routerConfig.bnbChainTestnet.chainSelector]; //create raffle on BNBTestnet also
+        const chainSelectors = [
+            {
+                "ccnsReceiverAddress": routerConfig.bnbChainTestnet.chainSelector, //CrossChainNameServiceRegister address
+                "chainSelector": routerConfig.bnbChainTestnet.chainSelector,
+                "gasLimit": 300_000,
+                "strict": false
+            }
+        ];
 
         // Step 1: Transfer tokens to `otherAccount` to be used as the prize
         const amount = 10000;
@@ -235,7 +243,7 @@ describe("Omniwin", function () {
             const prizeAddress = erc20.target; // Token contract
             const prizeAmount = 1000; // Number of tokens to be used as the prize
             const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
-            const chainSelectors:Uint64[] = []; //create raffle on BNBTestnet also
+            const chainSelectors:any[] = []; //create raffle on BNBTestnet also
 
             // Step 1: Transfer tokens to `otherAccount` to be used as the prize
             const amount = 10000;
@@ -304,7 +312,7 @@ describe("Omniwin", function () {
             const prizeAddress = nft.target; // Token contract
             const tokenId = 1; // tokenId of the NFT
             const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
-            const chainSelectors:Uint64[] = []; 
+            const chainSelectors:any[] = []; 
 
             // Step 1: Mint ERC721 token and transfer to `otherAccount` to be used as the prize
             await nft.mintCollectionNFT(owner.address, tokenId);
@@ -360,7 +368,7 @@ describe("Omniwin", function () {
             const prizeAddress = ethers.ZeroAddress; // ETH address
             const prizeAmount = ethers.parseEther("1"); // Amount of ETH to be used as the prize
             const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
-            const chainSelectors:Uint64[] = []; 
+            const chainSelectors:any[] = []; 
 
             // Define prices for entries into the raffle
             const prices = [
@@ -410,7 +418,14 @@ describe("Omniwin", function () {
             const prizeAddress = erc20.target; // Token contract
             const prizeAmount = 1000; // Number of tokens to be used as the prize
             const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
-            const chainSelectors = [routerConfig.bnbChainTestnet.chainSelector]; //create raffle on BNBTestnet also
+            const chainSelectors = [
+                {
+                    "ccnsReceiverAddress": routerConfig.bnbChainTestnet.chainSelector, //CrossChainNameServiceRegister address
+                    "chainSelector": routerConfig.bnbChainTestnet.chainSelector,
+                    "gasLimit": 300_000,
+                    "strict": false
+                }
+            ]
 
             // Step 1: Transfer tokens to `otherAccount` to be used as the prize
             const amount = 100 * 10 ** 6;

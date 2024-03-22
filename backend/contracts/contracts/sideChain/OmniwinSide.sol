@@ -148,6 +148,12 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
         uint48 priceStructureId; // id of the price structure
     }
 
+    struct SChains {
+        address ccnsReceiverAddress;
+        uint256 gasLimit;
+        bool strict;
+    }
+
     mapping(uint64 => bool) public allowlistedDestinationChains;
     mapping(uint64 => bool) public allowlistedSourceChains;
     mapping(address => bool) public allowlistedSenders;
@@ -354,8 +360,8 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
 
     function _ccipReceive(
         Client.Any2EVMMessage memory any2EvmMessage // onlyAllowlisted(
-        //     any2EvmMessage.sourceChainSelector,
-    ) internal override //     abi.decode(any2EvmMessage.sender, (address))
+        //     abi.decode(any2EvmMessage.sender, (address))
+    ) internal override //     any2EvmMessage.sourceChainSelector,
     // )
     {
         uint8 messageType = abi.decode(any2EvmMessage.data, (uint8));

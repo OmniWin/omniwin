@@ -97,7 +97,10 @@ contract Omniwin is
 
     event CreateRaffleToSidechain(
         uint256 indexed raffleId,
-        uint64 indexed chainId,
+        address indexed receiver,
+        uint64 indexed chainSelector,
+        uint256 gasLimit,
+        bool strict,
         bytes32 messageId
     );
     // Event sent when the owner of the nft stakes it for the raffle
@@ -221,6 +224,13 @@ contract Omniwin is
         STATUS status; // status of the raffle.
         uint48 entriesLength; // to easy frontend, the length of the entries array is saved here
         uint256 amountRaised; // funds raised so far in wei
+    }
+
+    struct SChains {
+        address ccnsReceiverAddress;
+        uint256 gasLimit;
+        bool strict;
+        uint64 chainSelector;
     }
 
     error EntryNotAllowed(string errorType);
@@ -360,7 +370,7 @@ contract Omniwin is
         ASSET_TYPE _assetType,
         uint256 _deadlineDuration,
         address seller,
-        uint64[] memory _chainSelectors
+        SChains[] memory _chainSelectors
     ) internal returns (uint256) {
         require(
             _deadlineDuration <= maxDeadlineDuration,
@@ -409,13 +419,12 @@ contract Omniwin is
         });
 
         for (uint256 i = 0; i < _chainSelectors.length; i++) {
+            SChains memory currentChain = _chainSelectors[i];
             MESSAGE_TYPE messageType = MESSAGE_TYPE
                 .CREATE_RAFFLE_FROM_MAINCHAIN;
 
             Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
-                receiver: abi.encode(
-                    chainSelectorToReceiver[_chainSelectors[i]]
-                ),
+                receiver: abi.encode(currentChain.ccnsReceiverAddress),
                 data: abi.encode(
                     messageType,
                     _prices,
@@ -431,7 +440,7 @@ contract Omniwin is
             });
 
             uint256 feeCCIP = IRouterClient(router).getFee(
-                _chainSelectors[i],
+                currentChain.chainSelector,
                 message
             );
 
@@ -439,13 +448,16 @@ contract Omniwin is
 
             LinkTokenInterface(link).approve(router, feeCCIP);
             messageId = IRouterClient(router).ccipSend(
-                _chainSelectors[i],
+                currentChain.chainSelector,
                 message
             );
 
             emit CreateRaffleToSidechain(
                 raffleId,
-                _chainSelectors[i],
+                currentChain.ccnsReceiverAddress,
+                currentChain.chainSelector,
+                currentChain.gasLimit,
+                currentChain.strict,
                 messageId
             );
         }
@@ -462,7 +474,7 @@ contract Omniwin is
         PriceStructure[] calldata _prices,
         ASSET_TYPE _assetType,
         uint256 _deadlineDuration,
-        uint64[] calldata _chainSelectors
+        SChains[] calldata _chainSelectors
     ) external payable returns (uint256) {
         require(
             _assetType != ASSET_TYPE.CCIP,
@@ -487,17 +499,18 @@ contract Omniwin is
      */
     function createRafffleOnSidechainFallback(
         uint256 _raffleId,
-        uint64[] calldata _chainSelectors
+        SChains[] calldata _chainSelectors
     ) external {
         RaffleStruct storage raffle = raffles[_raffleId];
         require(raffle.seller == msg.sender, "Not the seller");
 
         for (uint256 i = 0; i < _chainSelectors.length; i++) {
+            SChains memory currentChain = _chainSelectors[i];
             MESSAGE_TYPE messageType = MESSAGE_TYPE
                 .CREATE_RAFFLE_FROM_MAINCHAIN;
 
             Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
-                receiver: abi.encode(_chainSelectors[i]),
+                receiver: abi.encode(currentChain.ccnsReceiverAddress),
                 data: abi.encode(
                     messageType,
                     pricesList[_raffleId],
@@ -510,7 +523,7 @@ contract Omniwin is
             });
 
             uint256 feeCCIP = IRouterClient(router).getFee(
-                _chainSelectors[i],
+                currentChain.chainSelector,
                 message
             );
 
@@ -518,13 +531,16 @@ contract Omniwin is
 
             LinkTokenInterface(link).approve(router, feeCCIP);
             messageId = IRouterClient(router).ccipSend(
-                _chainSelectors[i],
+                currentChain.chainSelector,
                 message
             );
 
             emit CreateRaffleToSidechain(
                 _raffleId,
-                _chainSelectors[i],
+                currentChain.ccnsReceiverAddress,
+                currentChain.chainSelector,
+                currentChain.gasLimit,
+                currentChain.strict,
                 messageId
             );
         }
@@ -974,14 +990,6 @@ contract Omniwin is
         entryInfo.amountRaised = 0;
     }
 
-    /// @param _raffleId Id of the raffle
-    /// @return array of entries bougth of that particular raffle
-    function getEntriesBought(
-        uint256 _raffleId
-    ) external view returns (EntriesBought[] memory) {
-        return entriesList[_raffleId];
-    }
-
     /// @dev for different reasons player entries should be void
     /// this has a cost in gas, but this makes cheaper in gas the callback from chainlink
     /// This method has to be called for every raffle of the blacklisted player
@@ -1064,10 +1072,10 @@ contract Omniwin is
             PriceStructure[] memory prices,
             uint256 deadline,
             address seller,
-            uint64[] memory chainIds
+            SChains[] memory _chainSelectors
         ) = abi.decode(
                 message.data,
-                (uint8, uint128, PriceStructure[], uint256, address, uint64[])
+                (uint8, uint128, PriceStructure[], uint256, address, SChains[])
             );
 
         uint256 raffleId = _createRaffle(
@@ -1078,7 +1086,7 @@ contract Omniwin is
             ASSET_TYPE.CCIP,
             deadline,
             seller,
-            chainIds
+            _chainSelectors
         );
 
         address _receiver = abi.decode(message.sender, (address));
