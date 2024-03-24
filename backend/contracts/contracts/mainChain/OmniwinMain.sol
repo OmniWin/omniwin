@@ -145,12 +145,20 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
         bytes32 messageId
     );
 
+    event AckRaffleCreationFromSidechain(
+        uint256 raffleId,
+        address receiver,
+        bytes32 messageIdSourceChain,
+        bytes32 messageId
+    );
+
     struct RaffleCreationAckParams {
         address receiver;
         MESSAGE_TYPE messageType;
         bytes32 messageIdSourceChain;
         uint256 raffleId;
         Client.Any2EVMMessage message;
+        uint256 deadline;
     }
 
     struct RandomResult {
@@ -243,6 +251,11 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
     error WrongStatus();
     error FailSendEthToOW();
     error EntryDoesNotBelongToPlayer();
+    error NumEntriesIsZero();
+    error DuplicateChainSelectorError();
+    error DestinationChainNotAllowlisted();
+    error SourceChainNotAllowlisted(); // Used when the source chain has not been allowlisted by the contract owner.
+    error SenderNotAllowlisted(); // Used when the sender has not been allowlisted by the contract owner.
 
     mapping(uint256 => RandomResult) public requests;
     // map the requestId created by chainlink with the raffle info passed as param when calling getRandomNumber()
@@ -251,6 +264,16 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
     mapping(uint256 => PriceStructure[]) public pricesList;
     mapping(uint256 => FundingStructure) public fundingList;
     mapping(uint256 => EntriesBought[]) public entriesList;
+
+    //CCIP
+    // Mapping to keep track of allowlisted destination chains.
+    mapping(uint64 => bool) public allowlistedDestinationChains;
+
+    // Mapping to keep track of allowlisted source chains.
+    mapping(uint64 => bool) public allowlistedSourceChains;
+
+    // Mapping to keep track of allowlisted senders.
+    mapping(address => bool) public allowlistedSenders;
 
     // The main structure is an array of raffles
     RaffleStruct[] public raffles;
@@ -294,6 +317,48 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
             else _fee = 0.1 * 10 ** 18; // 0.1 LINK In Rinkeby and Goerli
             fee = _fee;
         }
+    }
+
+    /// @dev Modifier that checks if the chain with the given destinationChainSelector is allowlisted.
+    /// @param _destinationChainSelector The selector of the destination chain.
+    modifier onlyAllowlistedDestinationChain(uint64 _destinationChainSelector) {
+        if (!allowlistedDestinationChains[_destinationChainSelector])
+            revert DestinationChainNotAllowlisted();
+        _;
+    }
+
+    /// @dev Modifier that checks if the chain with the given sourceChainSelector is allowlisted and if the sender is allowlisted.
+    /// @param _sourceChainSelector The selector of the destination chain.
+    /// @param _sender The address of the sender.
+    modifier onlyAllowlisted(uint64 _sourceChainSelector, address _sender) {
+        if (!allowlistedSourceChains[_sourceChainSelector])
+            revert SourceChainNotAllowlisted();
+        if (!allowlistedSenders[_sender]) revert SenderNotAllowlisted();
+        _;
+    }
+
+    /// @dev Updates the allowlist status of a destination chain for transactions.
+    function allowlistDestinationChain(
+        uint64 _destinationChainSelector,
+        bool allowed
+    ) external {
+        if (!isOwner()) revert NotTheOwner();
+        allowlistedDestinationChains[_destinationChainSelector] = allowed;
+    }
+
+    /// @dev Updates the allowlist status of a source chain for transactions.
+    function allowlistSourceChain(
+        uint64 _sourceChainSelector,
+        bool allowed
+    ) external {
+        if (!isOwner()) revert NotTheOwner();
+        allowlistedSourceChains[_sourceChainSelector] = allowed;
+    }
+
+    /// @dev Updates the allowlist status of a sender for transactions.
+    function allowlistSender(address _sender, bool allowed) external {
+        if (!isOwner()) revert NotTheOwner();
+        allowlistedSenders[_sender] = allowed;
     }
 
     function isOwner() internal view returns (bool) {
@@ -380,8 +445,6 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
             revert DeadlineExceedsMaximum();
         }
 
-        //TODO:// check chainSelectors are valid
-
         //Prize is held on sidechain
         if (_assetType != ASSET_TYPE.CCIP) {
             // Handle the transfer and ownership validation based on asset type
@@ -412,7 +475,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
         if (prizesLength == 0) revert PriceStructureError();
 
         for (uint256 i = 0; i < _prices.length; ++i) {
-            require(_prices[i].numEntries != 0, "numEntries is 0");
+            if (_prices[i].numEntries == 0) revert NumEntriesIsZero();
 
             pricesList[raffleId].push(_prices[i]);
         }
@@ -420,6 +483,37 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
         fundingList[raffleId] = FundingStructure({
             minimumFundsInWei: _minimumFundsInWei
         });
+
+        if (_chainSelectors.length == 0) {
+            emit RaffleStarted(
+                raffleId,
+                _prizeAddress,
+                _prizeNumber,
+                _assetType
+            );
+            return raffleId;
+        }
+
+        // Check for duplicate chainSelectors
+        for (uint256 i = 0; i < _chainSelectors.length; i++) {
+            for (uint256 j = i + 1; j < _chainSelectors.length; j++) {
+                if (
+                    _chainSelectors[i].chainSelector ==
+                    _chainSelectors[j].chainSelector
+                ) {
+                    revert DuplicateChainSelectorError();
+                }
+            }
+        }
+
+        // Check if each chainSelector is allowlisted
+        for (uint256 i = 0; i < _chainSelectors.length; i++) {
+            if (
+                !allowlistedDestinationChains[_chainSelectors[i].chainSelector]
+            ) {
+                revert DestinationChainNotAllowlisted();
+            }
+        }
 
         for (uint256 i = 0; i < _chainSelectors.length; i++) {
             SChains memory currentChain = _chainSelectors[i];
@@ -437,7 +531,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
                 tokenAmounts: new Client.EVMTokenAmount[](0),
                 extraArgs: Client._argsToBytes(
                     // Additional arguments, setting gas limit
-                    Client.EVMExtraArgsV1({gasLimit: 300_000})
+                    Client.EVMExtraArgsV1({gasLimit: currentChain.gasLimit})
                 ),
                 feeToken: link
             });
@@ -1079,9 +1173,15 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
         usdcContractAddress = _usdcContractAddress;
     }
 
+    /// @dev Handles a received CCIP message, processes it, and acknowledges its receipt.
+    /// This internal function is called upon the receipt of a new message via CCIP from an allowlisted source chain and sender.
+    /// @param message The CCIP message received
     function _ccipReceive(
-        Client.Any2EVMMessage memory message
-    ) internal override {
+        Client.Any2EVMMessage memory message // onlyAllowlisted(
+        //     message.sourceChainSelector,
+    ) internal override //     abi.decode(message.sender, (address))
+    // )
+    {
         uint8 messageType = abi.decode(message.data, (uint8));
 
         if (messageType == uint8(MESSAGE_TYPE.CREATE_RAFFLE_FROM_SIDECHAIN)) {
@@ -1097,7 +1197,8 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
         Client.Any2EVMMessage memory message
     ) internal {
         //create raffle from side chain with prize on side chain and ack back to side chain
-        bytes32 messageIdSourceChain = message.messageId;
+        // bytes32 messageIdSourceChain = message.messageId;
+        bytes32 testMessageIdSourceChain = 0x894cccafe7a46ef3ce0297f766eb759c3aa439ab77472626d2ba98088308cee4;
 
         (
             uint8 messageTypeReceived,
@@ -1128,9 +1229,10 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
             memory raffleCreationAckParams = RaffleCreationAckParams({
                 receiver: _receiver,
                 messageType: MESSAGE_TYPE.CREATE_RAFFLE_ACK,
-                messageIdSourceChain: messageIdSourceChain,
+                messageIdSourceChain: testMessageIdSourceChain,
                 raffleId: raffleId,
-                message: message
+                message: message,
+                deadline: raffles[raffleId].deadline
             });
 
         _sendAckRaffleCreation(raffleCreationAckParams);
@@ -1141,7 +1243,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
             prices,
             deadline,
             seller,
-            messageIdSourceChain
+            testMessageIdSourceChain
         );
     }
 
@@ -1153,24 +1255,33 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
             data: abi.encode(
                 params.messageType,
                 params.messageIdSourceChain,
-                params.raffleId
+                params.raffleId,
+                params.deadline
             ),
             tokenAmounts: new Client.EVMTokenAmount[](0),
-            extraArgs: "",
+            extraArgs: Client._argsToBytes(
+                Client.EVMExtraArgsV1({gasLimit: 300_000})
+            ),
             feeToken: link
         });
 
-        uint256 feeCcip = IRouterClient(router).getFee(
+        uint256 feeCCIP = IRouterClient(router).getFee(
             params.message.sourceChainSelector,
             any2EvmMessage
         );
 
-        bytes32 messageId;
+        LinkTokenInterface(link).approve(router, feeCCIP);
 
-        LinkTokenInterface(link).approve(router, feeCcip);
-        messageId = IRouterClient(router).ccipSend(
+        bytes32 messageId = IRouterClient(router).ccipSend(
             params.message.sourceChainSelector,
             any2EvmMessage
+        );
+
+        emit AckRaffleCreationFromSidechain(
+            params.raffleId,
+            params.receiver,
+            params.messageIdSourceChain,
+            messageId
         );
     }
 

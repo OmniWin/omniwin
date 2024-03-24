@@ -6,7 +6,7 @@ import "@nomicfoundation/hardhat-ethers";
 import "@openzeppelin/hardhat-upgrades";
 import secrets from "./secrets.json";
 import "hardhat-contract-sizer";
-import "hardhat-insight";
+// import "hardhat-insight";
 
 
 const INFURA_API_KEY = vars.get("INFURA_API_KEY");

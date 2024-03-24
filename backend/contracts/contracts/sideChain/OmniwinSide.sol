@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
@@ -11,10 +10,11 @@ import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "hardhat/console.sol";
 
-contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
+contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     address immutable router;
     address immutable link;
 
+    address public owner;
     address public usdcContractAddress;
     address public mainChainRaffleAddress;
     uint64 public mainChainSelector;
@@ -97,6 +97,8 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
 
     error CreateRaffleError(string errorType);
     error EntryNotAllowed(string errorType);
+    error RaffleAlreadyExists();
+    error NotTheOwner();
 
     // Every raffle has a funding structure.
     struct FundingStructure {
@@ -152,6 +154,7 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
         address ccnsReceiverAddress;
         uint256 gasLimit;
         bool strict;
+        uint64 chainSelector;
     }
 
     mapping(uint64 => bool) public allowlistedDestinationChains;
@@ -175,11 +178,14 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
     constructor(address _router, address _link) CCIPReceiver(_router) {
         router = _router;
         link = _link;
-
-        _setupRole(OPERATOR_ROLE, msg.sender);
+        owner = msg.sender;
     }
 
     receive() external payable {}
+
+    function isOwner() internal view returns (bool) {
+        return msg.sender == owner;
+    }
 
     /// @dev Modifier that checks if the chain with the given destinationChainSelector is allowlisted.
     /// @param _destinationChainSelector The selector of the destination chain.
@@ -203,7 +209,8 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
     function allowlistDestinationChain(
         uint64 _destinationChainSelector,
         bool allowed
-    ) external onlyRole(OPERATOR_ROLE) {
+    ) external {
+        if (!isOwner()) revert NotTheOwner();
         allowlistedDestinationChains[_destinationChainSelector] = allowed;
     }
 
@@ -211,15 +218,14 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
     function allowlistSourceChain(
         uint64 _sourceChainSelector,
         bool allowed
-    ) external onlyRole(OPERATOR_ROLE) {
+    ) external {
+        if (!isOwner()) revert NotTheOwner();
         allowlistedSourceChains[_sourceChainSelector] = allowed;
     }
 
     /// @dev Updates the allowlist status of a sender for transactions.
-    function allowlistSender(
-        address _sender,
-        bool allowed
-    ) external onlyRole(OPERATOR_ROLE) {
+    function allowlistSender(address _sender, bool allowed) external {
+        if (!isOwner()) revert NotTheOwner();
         allowlistedSenders[_sender] = allowed;
     }
 
@@ -232,7 +238,7 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
      * @param _minimumFundsInWei minimum funds to be raised in wei usd
      * @param _prices array of price structures
      * @param _deadlineDuration duration of the raffle
-     * @param chainIds array of chain ids to send the message
+     * @param _chainSelectors array of chain selectors
      */
     function CreateRaffleCCIP(
         address _prizeAddress,
@@ -241,7 +247,7 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
         PriceStructure[] calldata _prices,
         ASSET_TYPE _assetType,
         uint256 _deadlineDuration,
-        uint64[] calldata chainIds
+        SChains[] memory _chainSelectors
     ) external {
         require(
             _deadlineDuration <= maxDeadlineDuration,
@@ -271,13 +277,11 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
             winner: address(0),
             seller: msg.sender,
             assetType: _assetType,
-            deadline: block.timestamp + _deadlineDuration,
+            deadline: 0,
             msgStatus: MessageStatus.SENT,
             timestamp: uint48(block.timestamp)
         });
-        console.log("testMessageId");
-        console.logBytes32(testMessageId);
-        console.log("tempRaffles[testMessageId]");
+
         tempMessageId = testMessageId;
 
         // console.log("messageId-initial");
@@ -297,26 +301,29 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
             _prizeNumber
         );
 
-        bytes32 messageId = _sendMessageCreateRaffleSideChain(
+        bytes32 messageId = _sendMessageCreateRaffleFromSideChain(
             _minimumFundsInWei,
             _prices,
             _deadlineDuration,
             msg.sender,
-            chainIds
+            _chainSelectors
         );
-
-        console.log("messageId");
-        console.logBytes32(messageId);
-        console.log("tempMessageId");
     }
 
-    function _sendMessageCreateRaffleSideChain(
+    function _sendMessageCreateRaffleFromSideChain(
         uint128 _minimumFundsInWei,
         PriceStructure[] calldata _prices,
         uint256 _deadlineDuration,
         address sender,
-        uint64[] calldata chainIds
+        SChains[] memory _chainSelectors
     ) internal returns (bytes32 messageId) {
+        //min gas needed for send and ack message
+        uint256 gasLimit = 700_000;
+
+        for (uint256 i = 0; i < _chainSelectors.length; ++i) {
+            gasLimit += _chainSelectors[i].gasLimit;
+        }
+
         MESSAGE_TYPE messageType = MESSAGE_TYPE.CREATE_RAFFLE_FROM_SIDECHAIN;
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(mainChainRaffleAddress),
@@ -326,14 +333,11 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
                 _prices,
                 _deadlineDuration,
                 sender,
-                chainIds
+                _chainSelectors
             ),
             tokenAmounts: new Client.EVMTokenAmount[](0),
             extraArgs: Client._argsToBytes(
-                // Additional arguments, setting gas limit
-                //TODO: //set gas limit using a function. This method needs more gas than the default
-                //or maybe set is as a parameter, because if one of the chains is ethereum it will need more gas
-                Client.EVMExtraArgsV1({gasLimit: 1_000_000})
+                Client.EVMExtraArgsV1({gasLimit: gasLimit})
             ),
             feeToken: link
         });
@@ -345,24 +349,28 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
     }
 
     //set mainChainSelector
-    function setMainChainSelector(
-        uint64 _mainChainSelector
-    ) external onlyRole(OPERATOR_ROLE) {
+    function setMainChainSelector(uint64 _mainChainSelector) external {
+        if (!isOwner()) revert NotTheOwner();
         mainChainSelector = _mainChainSelector;
     }
 
     //set mainChainRaffleAddress
     function setMainChainRaffleAddress(
         address _mainChainRaffleAddress
-    ) external onlyRole(OPERATOR_ROLE) {
+    ) external {
+        if (!isOwner()) revert NotTheOwner();
         mainChainRaffleAddress = _mainChainRaffleAddress;
     }
 
     function _ccipReceive(
-        Client.Any2EVMMessage memory any2EvmMessage // onlyAllowlisted(
-        //     abi.decode(any2EvmMessage.sender, (address))
-    ) internal override //     any2EvmMessage.sourceChainSelector,
-    // )
+        Client.Any2EVMMessage memory any2EvmMessage
+    )
+        internal
+        override
+        onlyAllowlisted(
+            any2EvmMessage.sourceChainSelector,
+            abi.decode(any2EvmMessage.sender, (address))
+        ) // Make sure source chain and sender are allowlisted
     {
         uint8 messageType = abi.decode(any2EvmMessage.data, (uint8));
 
@@ -378,10 +386,12 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
     function handleCreateRaffleAck(
         Client.Any2EVMMessage memory message
     ) internal {
-        (uint8 messageType, bytes32 messageId, uint256 raffleId) = abi.decode(
-            message.data,
-            (uint8, bytes32, uint256)
-        );
+        (
+            uint8 messageType,
+            bytes32 messageId,
+            uint256 raffleId,
+            uint256 deadline
+        ) = abi.decode(message.data, (uint8, bytes32, uint256, uint256));
 
         RaffleStructTemp memory tempRaffle = tempRaffles[messageId];
         PriceStructure[] memory prices = tempPricesList[messageId];
@@ -392,7 +402,7 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
             winner: address(0),
             seller: tempRaffle.seller,
             assetType: tempRaffle.assetType,
-            deadline: tempRaffle.deadline
+            deadline: deadline
         });
 
         for (uint256 i = 0; i < prices.length; ++i) {
@@ -425,6 +435,10 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
                 message.data,
                 (uint8, PriceStructure[], uint256, uint256)
             );
+
+        if (raffles[raffleId].deadline != 0) {
+            revert RaffleAlreadyExists();
+        }
 
         raffles[raffleId] = RaffleStruct({
             prizeNumber: 0,
@@ -661,17 +675,8 @@ contract OmniwinSide is AccessControl, CCIPReceiver, ReentrancyGuard {
         emit Refund(raffleId, refundAmount, msg.sender);
     }
 
-    function setUSDCTokenAddress(
-        address _usdcContractAddress
-    ) external onlyRole(OPERATOR_ROLE) {
+    function setUSDCTokenAddress(address _usdcContractAddress) external {
+        if (!isOwner()) revert NotTheOwner();
         usdcContractAddress = _usdcContractAddress;
-    }
-
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view override(AccessControl, CCIPReceiver) returns (bool) {
-        return
-            AccessControl.supportsInterface(interfaceId) ||
-            CCIPReceiver.supportsInterface(interfaceId);
     }
 }

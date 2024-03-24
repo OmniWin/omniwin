@@ -23,6 +23,13 @@ contract MockCCIPRouter is IRouter, IRouterClient {
     error InvalidExtraArgsTag();
     error ReceiverError(bytes error);
 
+    enum MESSAGE_TYPE {
+        CREATE_RAFFLE_FROM_SIDECHAIN,
+        CREATE_RAFFLE_ACK,
+        BUY_ENTRY,
+        CREATE_RAFFLE_FROM_MAINCHAIN
+    }
+
     event MessageExecuted(
         bytes32 messageId,
         uint64 sourceChainSelector,
@@ -103,6 +110,10 @@ contract MockCCIPRouter is IRouter, IRouterClient {
         uint256 gasLimit = _fromBytes(message.extraArgs).gasLimit;
         bytes32 mockMsgId = keccak256(abi.encode(message));
 
+        uint8 messageType = abi.decode(message.data, (uint8));
+
+        if (messageType == uint8(MESSAGE_TYPE.CREATE_RAFFLE_ACK)) {}
+
         Client.Any2EVMMessage memory executableMsg = Client.Any2EVMMessage({
             messageId: mockMsgId,
             sourceChainSelector: 16015286601757825753, // Sepolia
@@ -126,8 +137,9 @@ contract MockCCIPRouter is IRouter, IRouterClient {
             receiver
         );
 
-        if (!success) revert ReceiverError(retData);
-
+        if (!success) {
+            revert ReceiverError(retData);
+        }
         return mockMsgId;
     }
 

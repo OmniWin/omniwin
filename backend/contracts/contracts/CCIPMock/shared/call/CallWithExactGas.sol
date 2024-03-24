@@ -149,7 +149,7 @@ library CallWithExactGas {
         }
 
         // console.log("Call success:", success);
-        // console.log("Gas used:", gasUsed);
+        console.log("Gas used:", gasUsed);
         // console.log("Return data size:", retData.length);
 
         return (success, retData, gasUsed);
