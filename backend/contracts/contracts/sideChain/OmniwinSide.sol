@@ -99,6 +99,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     error EntryNotAllowed(string errorType);
     error RaffleAlreadyExists();
     error NotTheOwner();
+    error NotTheSeller();
 
     // Every raffle has a funding structure.
     struct FundingStructure {
@@ -238,7 +239,6 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
      * @param _minimumFundsInWei minimum funds to be raised in wei usd
      * @param _prices array of price structures
      * @param _deadlineDuration duration of the raffle
-     * @param _chainSelectors array of chain selectors
      */
     function CreateRaffleCCIP(
         address _prizeAddress,
@@ -246,8 +246,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         uint128 _minimumFundsInWei,
         PriceStructure[] calldata _prices,
         ASSET_TYPE _assetType,
-        uint256 _deadlineDuration,
-        SChains[] memory _chainSelectors
+        uint256 _deadlineDuration
     ) external {
         require(
             _deadlineDuration <= maxDeadlineDuration,
@@ -305,8 +304,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
             _minimumFundsInWei,
             _prices,
             _deadlineDuration,
-            msg.sender,
-            _chainSelectors
+            msg.sender
         );
     }
 
@@ -314,15 +312,10 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         uint128 _minimumFundsInWei,
         PriceStructure[] calldata _prices,
         uint256 _deadlineDuration,
-        address sender,
-        SChains[] memory _chainSelectors
+        address sender
     ) internal returns (bytes32 messageId) {
         //min gas needed for send and ack message
         uint256 gasLimit = 700_000;
-
-        for (uint256 i = 0; i < _chainSelectors.length; ++i) {
-            gasLimit += _chainSelectors[i].gasLimit;
-        }
 
         MESSAGE_TYPE messageType = MESSAGE_TYPE.CREATE_RAFFLE_FROM_SIDECHAIN;
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
@@ -332,8 +325,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
                 _minimumFundsInWei,
                 _prices,
                 _deadlineDuration,
-                sender,
-                _chainSelectors
+                sender
             ),
             tokenAmounts: new Client.EVMTokenAmount[](0),
             extraArgs: Client._argsToBytes(
@@ -678,5 +670,56 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     function setUSDCTokenAddress(address _usdcContractAddress) external {
         if (!isOwner()) revert NotTheOwner();
         usdcContractAddress = _usdcContractAddress;
+    }
+
+    function enableCreateRafffleOnSidechain(
+        uint256 _raffleId,
+        SChains[] calldata _chainSelectors
+    ) external {
+        RaffleStruct storage raffle = raffles[_raffleId];
+        if (raffle.seller != msg.sender) {
+            revert NotTheSeller();
+        }
+
+        for (uint256 i = 0; i < _chainSelectors.length; i++) {
+            SChains memory currentChain = _chainSelectors[i];
+            MESSAGE_TYPE messageType = MESSAGE_TYPE
+                .CREATE_RAFFLE_FROM_MAINCHAIN;
+
+            Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
+                receiver: abi.encode(currentChain.ccnsReceiverAddress),
+                data: abi.encode(
+                    messageType,
+                    pricesList[_raffleId],
+                    raffle.deadline,
+                    _raffleId
+                ),
+                tokenAmounts: new Client.EVMTokenAmount[](0),
+                extraArgs: "",
+                feeToken: link
+            });
+
+            uint256 feeCCIP = IRouterClient(router).getFee(
+                currentChain.chainSelector,
+                message
+            );
+
+            bytes32 messageId;
+
+            LinkTokenInterface(link).approve(router, feeCCIP);
+            messageId = IRouterClient(router).ccipSend(
+                currentChain.chainSelector,
+                message
+            );
+
+            // emit CreateRaffleToSidechain(
+            //     _raffleId,
+            //     currentChain.ccnsReceiverAddress,
+            //     currentChain.chainSelector,
+            //     currentChain.gasLimit,
+            //     currentChain.strict,
+            //     messageId
+            // );
+        }
     }
 }

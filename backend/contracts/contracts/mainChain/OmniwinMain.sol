@@ -399,6 +399,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
         bytes32 requestId,
         uint256 randomness
     ) internal override {
+        console.log("I m called by chainlink MOCK");
         // randomness is the actual random number. Now extract from the aux map the original param id of the call
         RaffleInfo memory raffleInfo = chainlinkRaffleInfo[requestId];
         // save the random number on the map with the original id as key
@@ -438,8 +439,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
         PriceStructure[] memory _prices,
         ASSET_TYPE _assetType,
         uint256 _deadlineDuration,
-        address seller,
-        SChains[] memory _chainSelectors
+        address seller
     ) internal returns (uint256) {
         if (_deadlineDuration > maxDeadlineDuration) {
             revert DeadlineExceedsMaximum();
@@ -484,17 +484,44 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
             minimumFundsInWei: _minimumFundsInWei
         });
 
-        if (_chainSelectors.length == 0) {
-            emit RaffleStarted(
-                raffleId,
-                _prizeAddress,
-                _prizeNumber,
-                _assetType
-            );
-            return raffleId;
+        emit RaffleStarted(raffleId, _prizeAddress, _prizeNumber, _assetType);
+
+        return raffleId;
+    }
+
+    function createRaffle(
+        address _prizeAddress,
+        uint256 _prizeNumber,
+        uint128 _minimumFundsInWei,
+        PriceStructure[] calldata _prices,
+        ASSET_TYPE _assetType,
+        uint256 _deadlineDuration
+    ) external payable returns (uint256) {
+        if (_assetType == ASSET_TYPE.CCIP) {
+            revert DirectCCIPRafflesNotAllowed();
         }
 
-        // Check for duplicate chainSelectors
+        return
+            _createRaffle(
+                _prizeAddress,
+                _prizeNumber,
+                _minimumFundsInWei,
+                _prices,
+                _assetType,
+                _deadlineDuration,
+                msg.sender
+            );
+    }
+
+    function enableCreateRafffleOnSidechain(
+        uint256 _raffleId,
+        SChains[] calldata _chainSelectors
+    ) external {
+        RaffleStruct storage raffle = raffles[_raffleId];
+        if (raffle.seller != msg.sender) {
+            revert NotTheSeller();
+        }
+
         for (uint256 i = 0; i < _chainSelectors.length; i++) {
             for (uint256 j = i + 1; j < _chainSelectors.length; j++) {
                 if (
@@ -524,99 +551,14 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
                 receiver: abi.encode(currentChain.ccnsReceiverAddress),
                 data: abi.encode(
                     messageType,
-                    _prices,
-                    block.timestamp + _deadlineDuration,
-                    raffleId
-                ),
-                tokenAmounts: new Client.EVMTokenAmount[](0),
-                extraArgs: Client._argsToBytes(
-                    // Additional arguments, setting gas limit
-                    Client.EVMExtraArgsV1({gasLimit: currentChain.gasLimit})
-                ),
-                feeToken: link
-            });
-
-            uint256 feeCCIP = IRouterClient(router).getFee(
-                currentChain.chainSelector,
-                message
-            );
-
-            bytes32 messageId;
-
-            LinkTokenInterface(link).approve(router, feeCCIP);
-            messageId = IRouterClient(router).ccipSend(
-                currentChain.chainSelector,
-                message
-            );
-
-            emit CreateRaffleToSidechain(
-                raffleId,
-                currentChain.ccnsReceiverAddress,
-                currentChain.chainSelector,
-                currentChain.gasLimit,
-                currentChain.strict,
-                messageId
-            );
-        }
-
-        emit RaffleStarted(raffleId, _prizeAddress, _prizeNumber, _assetType);
-
-        return raffleId;
-    }
-
-    function createRaffle(
-        address _prizeAddress,
-        uint256 _prizeNumber,
-        uint128 _minimumFundsInWei,
-        PriceStructure[] calldata _prices,
-        ASSET_TYPE _assetType,
-        uint256 _deadlineDuration,
-        SChains[] calldata _chainSelectors
-    ) external payable returns (uint256) {
-        if (_assetType == ASSET_TYPE.CCIP) {
-            revert DirectCCIPRafflesNotAllowed();
-        }
-
-        return
-            _createRaffle(
-                _prizeAddress,
-                _prizeNumber,
-                _minimumFundsInWei,
-                _prices,
-                _assetType,
-                _deadlineDuration,
-                msg.sender,
-                _chainSelectors
-            );
-    }
-
-    /**
-     * Create a raffle on the sidechain as a fallback if the main->side transaction fails
-     */
-    function createRafffleOnSidechainFallback(
-        uint256 _raffleId,
-        SChains[] calldata _chainSelectors
-    ) external {
-        RaffleStruct storage raffle = raffles[_raffleId];
-        if (raffle.seller != msg.sender) {
-            revert NotTheSeller();
-        }
-
-        for (uint256 i = 0; i < _chainSelectors.length; i++) {
-            SChains memory currentChain = _chainSelectors[i];
-            MESSAGE_TYPE messageType = MESSAGE_TYPE
-                .CREATE_RAFFLE_FROM_MAINCHAIN;
-
-            Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
-                receiver: abi.encode(currentChain.ccnsReceiverAddress),
-                data: abi.encode(
-                    messageType,
                     pricesList[_raffleId],
                     raffle.deadline,
                     _raffleId
                 ),
                 tokenAmounts: new Client.EVMTokenAmount[](0),
-                extraArgs: "",
+                extraArgs: Client._argsToBytes(
+                    Client.EVMExtraArgsV1({gasLimit: 300_000})
+                ),
                 feeToken: link
             });
 
@@ -1024,7 +966,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
 
     /// @param _raffleId Id of the raffle
     /// @notice the operator finish the raffle, if the desired funds has been reached
-    /// @dev it triggers Chainlink VRF1 consumer, and generates a random number that is normalized and checked that corresponds to a MW player
+    /// @dev it triggers Chainlink VRF1 consumer, and generates a random number that is normalized and checked that corresponds to a OW player
     function setWinner(uint256 _raffleId) external nonReentrant {
         if (!isOwner()) revert NotTheOwner();
 
@@ -1205,11 +1147,10 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
             uint128 minimumFundsInWei,
             PriceStructure[] memory prices,
             uint256 deadline,
-            address seller,
-            SChains[] memory _chainSelectors
+            address seller
         ) = abi.decode(
                 message.data,
-                (uint8, uint128, PriceStructure[], uint256, address, SChains[])
+                (uint8, uint128, PriceStructure[], uint256, address)
             );
 
         uint256 raffleId = _createRaffle(
@@ -1219,8 +1160,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBase, CCIPReceiver {
             prices,
             ASSET_TYPE.CCIP,
             deadline,
-            seller,
-            _chainSelectors
+            seller
         );
 
         address _receiver = abi.decode(message.sender, (address));
