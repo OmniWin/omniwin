@@ -126,7 +126,8 @@ export default function RaffleDefault(raffle: RaffleCard) {
                             <div className="min-w-[6rem]">
                                 {/* <button className="text-sm font-bold text-smoke-900 bg-gradient-to-b from-sky-400 to-sky-500 hover:to-sky-600 rounded-md px-3 py-1.5 w-full leading-5"> */}
                                 {/* <button className="text-sm font-bold text-smoke-900 bg-gradient-to-b bg-[#23f7dd] hover:bg-[#08d3ba] rounded-md px-3 py-1.5 w-full leading-5"> */}
-                                <button className="text-sm font-bold text-white bg-[#1475e1] hover:bg-[#1475e1] rounded-md px-3 py-1.5 w-full leading-5">
+                                {/* <button className="text-sm font-bold text-white bg-[#1475e1] hover:bg-[#1475e1] rounded-md px-3 py-1.5 w-full leading-5"> */}
+                                <button className="text-sm font-bold text-smoke-900 bg-jade-500 hover:bg-jade-600 rounded-md px-3 py-1.5 w-full leading-5">
                                     Enter Now
                                     {/* Enter
                                                         <br />

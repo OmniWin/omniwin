@@ -51,6 +51,19 @@ export const TopNavigation = () => {
     return (
         <>
             <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-zinc-950 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+                <Link href="/" className="font-himagsikan text-[#6cf60f] text-4xl inline-flex items-center gap-3 hue-rotate-[45deg] sm:hidden">
+                    <img className="h-10  w-auto" src="/images/omniwin-logo.png" alt="Your Company" />
+                    {/* <span
+                        style={{
+                            // "-webkit-text-stroke-width": "1px",
+                            // "-webkit-text-stroke-color": "black",
+                            WebkitTextStrokeWidth: "1px",
+                            WebkitTextStrokeColor: "black",
+                        }}
+                    >
+                        OmniWin
+                    </span> */}
+                </Link>
                 {/* <button type="button" className="-m-2.5 p-2.5 text-zinc-700 lg:hidden" onClick={() => dispatch(sidebarSlice.actions.setSidebarOpenState(true))}>
                     <span className="sr-only">Open sidebar</span>
                     <Bars3Icon className="h-6 w-6" aria-hidden="true" />
@@ -99,7 +112,7 @@ export const TopNavigation = () => {
                         {/* <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-zinc-950/10" aria-hidden="true" /> */}
 
                         <WalletConnect />
-                        <w3m-button />
+                        {/* <w3m-button /> */}
                         {/* Profile dropdown */}
                         {/* <Menu as="div" className="relative">
                             <Menu.Button className="-m-1.5 flex items-center p-1.5">

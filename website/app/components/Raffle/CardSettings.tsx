@@ -4,7 +4,7 @@ import { classNames } from '@/app/utils';
 import { useSelector, useDispatch, userSettingsSlice } from "@/lib/redux";
 import {selectUserSettingsState} from "@/lib/redux/slices/userSettingsSlice/selectors";
 
-export default function CardSettings ({showStyle, showDisplay}: {showStyle?: boolean, showDisplay?: boolean}) {
+export default function CardSettings ({showStyle, showDisplay, setDisplay, display}: {showStyle?: boolean, showDisplay?: boolean, setDisplay?: any, display?: string}) {
     const userSettingsState = useSelector(selectUserSettingsState);
     const dispatch = useDispatch();
 
@@ -77,12 +77,12 @@ export default function CardSettings ({showStyle, showDisplay}: {showStyle?: boo
                             {/* <div className="flex items-center bg-zinc-800 rounded-lg px-3 py-2"> */}
                             <span className="text-zinc-400 text-xs mr-2 uppercase">Display type</span>
                             <button
-                                onClick={() => dispatch(userSettingsSlice.actions.setCardDisplay("carousel"))}
+                                onClick={() => typeof setDisplay === 'function' ? setDisplay('carousel') : dispatch(userSettingsSlice.actions.setCardDisplay("carousel"))}
                                 type="button"
-                                className={classNames("py-1.5 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none focus:ring-0", userSettingsState.userSettings.display === "carousel" && "bg-zinc-700")}
+                                className={classNames("py-1.5 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none focus:ring-0", (display ? display === 'carousel' : userSettingsState.userSettings.display === "carousel") && "bg-zinc-700")}
                             >
                                 <svg
-                                    className={`${userSettingsState.userSettings.display === "carousel" ? "fill-zinc-100 stroke-zinc-100" : "fill-zinc-500 stroke-zinc-500"}`}
+                                    className={`${(display ? display === 'carousel' : userSettingsState.userSettings.display === "carousel") ? "fill-zinc-100 stroke-zinc-100" : "fill-zinc-500 stroke-zinc-500"}`}
                                     xmlns="http://www.w3.org/2000/svg"
                                     height="24"
                                     viewBox="0 -960 960 960"
@@ -92,12 +92,12 @@ export default function CardSettings ({showStyle, showDisplay}: {showStyle?: boo
                                 </svg>
                             </button>
                             <button
-                                onClick={() => dispatch(userSettingsSlice.actions.setCardDisplay("grid"))}
+                                onClick={() => typeof setDisplay === 'function' ? setDisplay('grid') : dispatch(userSettingsSlice.actions.setCardDisplay("grid"))}
                                 type="button"
-                                className={classNames("py-1.5 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none focus:ring-0", userSettingsState.userSettings.display === "grid" && "bg-zinc-700")}
+                                className={classNames("py-1.5 px-2 rounded-lg cursor-pointer transition-all ease-in-out duration-300 focus:outline-none focus:ring-0", (display ? display === 'grid' : userSettingsState.userSettings.display === "grid") && "bg-zinc-700")}
                             >
                                 <svg
-                                    className={`${userSettingsState.userSettings.display === "grid" ? "fill-zinc-100 stroke-zinc-100" : "fill-zinc-500 stroke-zinc-500"}`}
+                                    className={`${(display ? display === 'grid' : userSettingsState.userSettings.display === "grid") ? "fill-zinc-100 stroke-zinc-100" : "fill-zinc-500 stroke-zinc-500"}`}
                                     xmlns="http://www.w3.org/2000/svg"
                                     height="24"
                                     viewBox="0 -960 960 960"

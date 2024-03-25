@@ -18,6 +18,7 @@ import MetaMaskIcon from "../Icons/MetaMask";
 import WalletConnectIcon from "../Icons/WalletConnect";
 import CoinbaseWalletIcon from "../Icons/Coinbase";
 import AccessFormByInvitation from "../User/AccessFormByInvitation";
+import { BackgroundBeams } from "@/components/ui/background-beams";
 
 // Rudex ModalOpen state
 import { useSelector, useDispatch, userSettingsSlice } from "@/lib/redux";
@@ -35,7 +36,7 @@ const WalletConnect = () => {
 
     const { chain } = useNetwork();
     const { connect, connectors } = useConnect();
-    // const { disconnect } = useDisconnect();
+    const { disconnect } = useDisconnect();
     const { data: session } = useSession();
     const { signMessage, isLoading, error, status, isError } = useSignMessage({
         onSuccess: async (signature, variables) => {
@@ -57,7 +58,7 @@ const WalletConnect = () => {
                         description: "An error occurred while signing in",
                         variant: "error",
                     });
-                    await disconnect()
+                    await disconnectWallet()
                 }
             }
         },
@@ -67,6 +68,7 @@ const WalletConnect = () => {
 
     const supportedChains = ["Ethereum", "Binance Smart Chain", "Polygon", "Goerli", "Polygon Mumbai"];
 
+    // Invalidate user state if session is null
     useEffect(() => {
         if (!session) {
             dispatch(userSettingsSlice.actions.setUser({}));
@@ -79,15 +81,15 @@ const WalletConnect = () => {
 
     // Sign in with Ethereum if the user has a referral code
     useEffect(() => {
-        if (userSettingsState.usedReferralCode && !session && connector && !userExists && address) {
-            // Open the wallet connector modal if the user has a referral code and is not connected
-            !userSettingsState.isWalletConnectorModalOpen && dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true));
-            signWithEthereum();
-        }
+        // if (userSettingsState.usedReferralCode && !session && connector && !userExists && address) {
+        //     // Open the wallet connector modal if the user has a referral code and is not connected
+        //     !userSettingsState.isWalletConnectorModalOpen && dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true));
+        //     signWithEthereum();
+        // }
 
-        if (userExists && !session && connector && address) {
-            signWithEthereum();
-        }
+        // if (userExists && !session && connector && address) {
+        //     signWithEthereum();
+        // }
     }, [userSettingsState.usedReferralCode, session, connector, userExists, address]);
 
     // Show modal if the use is connected with wallet but didn't use referral code
@@ -137,11 +139,13 @@ const WalletConnect = () => {
         }
     };
 
-    const disconnect = async () => {
-        dispatch(userSettingsSlice.actions.setUser({}))
+    const disconnectWallet = async () => {
         // dispatch(userSettingsSlice.actions.setUsedReferralCode(''))
+        dispatch(userSettingsSlice.actions.setUser({}))
         dispatch(userSettingsSlice.actions.setWalletStatusModalOpen(false))
+        dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(false))
         await siweConfig.signOut();
+        await disconnect();
     }
 
     if (!isMounted) {
@@ -153,10 +157,14 @@ const WalletConnect = () => {
             <>
                 <button
                     onClick={() => dispatch(userSettingsSlice.actions.setWalletStatusModalOpen(true))}
-                    className="gap-x-3 inline-flex items-center pr-1 pl-3 py-1 rounded-full text-zinc-100 text-sm border border-zinc-800 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
+                    // className="gap-x-3 inline-flex items-center pr-1 pl-3 py-1 rounded-full text-zinc-100 text-sm border border-zinc-800 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
+                    // className="gap-x-3 inline-flex items-center pr-1 pl-3 py-1 rounded-md text-zinc-100 text-sm border border-zinc-800 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
+                    className="gap-x-3 inline-flex items-center pl-3 rounded-md text-zinc-100 text-sm border border-zinc-800 bg-zinc-900 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
                 >
                     {balance && `${balance.formatted} ${balance.symbol}`}{" "}
-                    <span className="inline-flex items-center rounded-2xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2">
+                    {/* <span className="inline-flex items-center rounded-2xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2"> */}
+                    {/* <span className="inline-flex items-center rounded-sm border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2"> */}
+                    <span className="inline-flex items-center rounded-sm bg-gradient-to-tl from-zinc-800 to-zinc-800/30 py-2.5 px-2.5">
                         {/* Icon of selected wallet */}
                         <span className="mr-1">
                             {connector?.name === "MetaMask" && <MetaMaskIcon className="w-5 h-5" />}
@@ -171,9 +179,8 @@ const WalletConnect = () => {
 
                 <Dialog open={userSettingsState.isWalletStatusModalOpen} onOpenChange={(open) => dispatch(userSettingsSlice.actions.setWalletStatusModalOpen(open))}>
                     <DialogContent className="sm:max-w-[425px] lg:max-w-lg">
-                        <DialogHeader>
-                            {/* <DialogTitle className="text-white">Connected as {session.user?.name || shortenAddress(address)}</DialogTitle>
-                            <DialogDescription>Choose your wallet.</DialogDescription> */}
+                        <BackgroundBeams />
+                        <div className="relative z-10">
                             <div className="flex justify-center">
                                 {connector?.name === "MetaMask" && <MetaMaskIcon className="w-24 h-24" />}
                                 {connector?.name === "Coinbase Wallet" && <CoinbaseWalletIcon className="w-24 h-24" />}
@@ -202,21 +209,11 @@ const WalletConnect = () => {
                                 </p>
                             </div>
                             <div className="text-center">
-                                <Button variant="secondary" className="!mt-10 w-full" onClick={async () => await disconnect()}>
-                                    {/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="w-5 h-5 mr-2">
-                                        <path
-                                            className="opacity-40"
-                                            d="M199.7 60.8c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96l0-256c0-53 43-96 96-96l64 0c17.7 0 32 14.3 32 32z"
-                                        />
-                                        <path
-                                            className="fill-emerald-600/40"
-                                            d="M508.4 225.5L385.7 102.7c-6.4-6.4-15-9.9-24-9.9c-18.7 0-33.9 15.2-33.9 33.9l0 62.1-128 0c-17.7 0-32 14.3-32 32l0 64c0 17.7 14.3 32 32 32l128 0 0 62.1c0 18.7 15.2 33.9 33.9 33.9c9 0 17.6-3.6 24-9.9L508.4 280.1c7.2-7.2 11.3-17.1 11.3-27.3s-4.1-20.1-11.3-27.3z"
-                                        />
-                                    </svg> */}
+                                <Button variant="secondary" className="!mt-10 w-full" onClick={async () => await disconnectWallet()}>
                                     Disconnect
                                 </Button>
                             </div>
-                        </DialogHeader>
+                        </div>
                     </DialogContent>
                 </Dialog>
             </>
@@ -234,10 +231,14 @@ const WalletConnect = () => {
             {address && (
                 <button
                     onClick={() => dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true))}
-                    className="gap-x-3 inline-flex items-center pr-1 pl-3 py-1 rounded-full text-zinc-100 text-sm border border-zinc-800 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
+                    // className="gap-x-3 inline-flex items-center pr-1 pl-3 py-1 rounded-full text-zinc-100 text-sm border border-zinc-800 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
+                    // className="gap-x-3 inline-flex items-center pr-1 pl-3 py-1 rounded-md text-zinc-100 text-sm border border-zinc-800 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
+                    className="gap-x-3 inline-flex items-center pl-3 rounded-md text-zinc-100 text-sm border border-zinc-800 bg-zinc-900 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
                 >
                     {balance && `${balance.formatted} ${balance.symbol}`}{" "}
-                    <span className="inline-flex items-center rounded-2xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2">
+                    {/* <span className="inline-flex items-center rounded-2xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2"> */}
+                    {/* <span className="inline-flex items-center rounded-sm border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2"> */}
+                    <span className="inline-flex items-center rounded-sm bg-gradient-to-tl from-zinc-800 to-zinc-800/30 py-2.5 px-2.5">
                         {/* Icon of selected wallet */}
                         <span className="mr-1">
                             {connector?.name === "MetaMask" && <MetaMaskIcon className="w-5 h-5" />}
@@ -251,90 +252,106 @@ const WalletConnect = () => {
 
             <Dialog open={userSettingsState.isWalletConnectorModalOpen} onOpenChange={(open) => dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(open))}>
                 <DialogContent className="sm:max-w-[425px] lg:max-w-2xl">
-                    <DialogHeader>
-                        <DialogTitle className="text-white">
-                            {!address && 'Connect Wallet'}
-                            {address && !userSettingsState.usedReferralCode && !userExists && "Access by invitation"}
-                            {/* {connector && isLoading && userSettingsState.usedReferralCode && ""} */}
-                        </DialogTitle>
-                        {/* <DialogDescription>Choose your wallet.</DialogDescription> */}
-                    </DialogHeader>
-                    {address && !userSettingsState.usedReferralCode && !userExists && <AccessFormByInvitation />}
-                    {!address && (
-                        <div className="">
-                            <p className="text-zinc-400 text-sm mb-2">Supported chains:</p>
-                            <div className="flex flex-wrap gap-4 mb-10">
-                                {supportedChains.map((chain) => (
-                                    <Badge key={chain} variant="zinc">
-                                        {chain}
-                                    </Badge>
-                                ))}
+                    <BackgroundBeams />
+                    <div className="relative z-10 space-y-4">
+                        <DialogHeader>
+                            <DialogTitle className="text-white">
+                                {!address && 'Connect Wallet'}
+                                {address && !userSettingsState.usedReferralCode && !userExists && "Access by invitation"}
+                                {address && connector && userExists && !isLoading && <div className="text-center mb-8">Sign in</div>}
+                                {connector && isLoading && (userSettingsState.usedReferralCode || userExists) && <div className="text-center mb-8">{connector?.name} loading...</div>}
+                                {/* {connector && isLoading && userSettingsState.usedReferralCode && ""} */}
+                            </DialogTitle>
+                            {/* <DialogDescription>Choose your wallet.</DialogDescription> */}
+                        </DialogHeader>
+                        {/* Choose wallet connector */}
+                        {!address && (
+                            <div className="">
+                                <p className="text-zinc-400 text-sm mb-2">Supported chains:</p>
+                                <div className="flex flex-wrap gap-4 mb-10">
+                                    {supportedChains.map((chain) => (
+                                        <Badge key={chain} variant="zinc">
+                                            {chain}
+                                        </Badge>
+                                    ))}
+                                </div>
+                                <p className="text-zinc-400 text-sm mb-2">Use one of the following wallets to connect to the dApp:</p>
+                                <div className="space-y-4">
+                                    {filteredConnectors.map((connector) => {
+                                        let icon;
+                                        switch (connector.name) {
+                                            case "MetaMask":
+                                                icon = <MetaMaskIcon className="w-8 h-8" />;
+                                                break;
+                                            case "Coinbase Wallet":
+                                                icon = <CoinbaseWalletIcon className="w-8 h-8 rounded-full" />;
+                                                break;
+                                            case "WalletConnect":
+                                                icon = <WalletConnectIcon className="w-12 h-12 -m-2" />;
+                                                break;
+                                            default:
+                                                icon = null;
+                                        }
+                                        return (
+                                            <button
+                                                key={connector.id}
+                                                className="w-full flex rounded-md py-2 px-3 border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 items-center gap-2 text-zinc-200 group"
+                                                onClick={() => handleConnect(connector.id)}
+                                            >
+                                                {icon}
+                                                <span>{connector.name}</span>
+                                                <ChevronRightIcon className="w-5 h-5 text-zinc-200 group-hover:text-zinc-100 ml-auto" />
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                <p className="text-xs text-zinc-400 mt-10 pb-3">
+                                    By using OmniWin, you agree to our{" "}
+                                    <a className="!underline-none text-zinc-200 hover:text-white" href="/terms-of-use" target="_blank">
+                                        Terms of Service
+                                    </a>{" "}
+                                    and our{" "}
+                                    <a className="!underline-none text-zinc-200 hover:text-white" href="/privacy-policy" target="_blank">
+                                        Privacy Policy
+                                    </a>
+                                    .
+                                </p>
                             </div>
+                        )}
+                        {/* Referral code form after used a connector */}
+                        {address && !userSettingsState.usedReferralCode && !userExists && <AccessFormByInvitation />}
+                        {/* Sign modal content */}
+                        {address && connector && userExists && (
+                            <>
+                                <div className="text-center">
+                                    <div className="bg-zinc-800 p-4 animate-bounce inline-block rounded-full">
+                                        <svg className="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                            <path className="opacity-40" d="M0 80C0 53.5 21.5 32 48 32H432c26.5 0 48 21.5 48 48V96v32 8.6c-9.4-5.4-20.3-8.6-32-8.6l-64 0v0H48C21.5 128 0 106.5 0 80z" />
+                                            <path
+                                                className="fill-jade-600"
+                                                d="M48 128H96v0l352 0c.4 0 .9 0 1.3 0c11.2 .2 21.6 3.6 30.7 8.9v-.3c19.1 11.1 32 31.7 32 55.4V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V240 192 80c0 26.5 21.5 48 48 48zM416 336a32 32 0 1 0 0-64 32 32 0 1 0 0 64z"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
+                                {!isLoading && <>
+                                        <p className="text-lg text-zinc-200 text-center xl:px-20">Omniwin Dapp needs to connect to your wallet</p>
+                                        <p className="text-zinc-400 text-sm mb-2 text-center xl:px-20">Sign this message to prove you own this wallet and proceed. Canceling will disconnect you.</p>
+                                    </>}
+                                {isLoading && <p className="text-zinc-400 text-sm mb-2 text-center xl:px-20">Sign the message in your {connector.name} wallet to proceed.</p>}
 
-                            <p className="text-zinc-400 text-sm mb-2">Use one of the following wallets to connect to the dApp:</p>
-                            <div className="space-y-4">
-                                {filteredConnectors.map((connector) => {
-                                    let icon;
-                                    switch (connector.name) {
-                                        case "MetaMask":
-                                            icon = <MetaMaskIcon className="w-8 h-8" />;
-                                            break;
-                                        case "Coinbase Wallet":
-                                            icon = <CoinbaseWalletIcon className="w-8 h-8 rounded-full" />;
-                                            break;
-                                        case "WalletConnect":
-                                            icon = <WalletConnectIcon className="w-12 h-12 -m-2" />;
-                                            break;
-                                        default:
-                                            icon = null;
-                                    }
-                                    return (
-                                        <button
-                                            key={connector.id}
-                                            className="w-full flex rounded-md py-2 px-3 border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 items-center gap-2 text-zinc-200 group"
-                                            onClick={() => handleConnect(connector.id)}
-                                        >
-                                            {icon}
-                                            <span>{connector.name}</span>
-                                            <ChevronRightIcon className="w-5 h-5 text-zinc-200 group-hover:text-zinc-100 ml-auto" />
-                                        </button>
-                                    );
-                                })}
-                            </div>
-
-                            <p className="text-xs text-zinc-400 mt-10 pb-3">
-                                By using OmniWin, you agree to our{" "}
-                                <a className="!underline-none text-zinc-200 hover:text-white" href="/terms-of-use" target="_blank">
-                                    Terms of Service
-                                </a>{" "}
-                                and our{" "}
-                                <a className="!underline-none text-zinc-200 hover:text-white" href="/privacy-policy" target="_blank">
-                                    Privacy Policy
-                                </a>
-                                .
-                            </p>
-                        </div>
-                    )}
-                    {/* Loading metamask sign */}
-                    {connector && isLoading && (userSettingsState.usedReferralCode || userExists) && (
-                        <div className="flex flex-col items-center justify-center space-y-10">
-                            <div className="flex items-center gap-x-2">
-                                <svg aria-hidden="true" className="inline w-8 h-8 text-zinc-400 animate-spin fill-jade-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                                        fill="currentColor"
-                                    />
-                                    <path
-                                        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                                        fill="currentFill"
-                                    />
-                                </svg>
-                                <p className="text-zinc-100 text-xl">{connector?.name} loading...</p>
-                            </div>
-
-                            <p className="text-zinc-400">Sign the message in your MetaMask to sign in safely.</p>
-                        </div>
-                    )}
+                                {!isLoading && 
+                                    <div className="flex gap-6">
+                                        <Button variant="outline" className="!mt-10 w-full" onClick={async () => await disconnectWallet()}>
+                                            Cancel
+                                        </Button>
+                                        <Button variant="primary" className="!mt-10 w-full" onClick={async () => await signWithEthereum()}>
+                                            Sign
+                                        </Button>
+                                    </div>}
+                            </>
+                        )}
+                    </div>
                 </DialogContent>
             </Dialog>
         </>
