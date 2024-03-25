@@ -201,7 +201,7 @@ export const RaffleList = () => {
         <>
             {/* <div className="mt-5 grid min-h-[18rem] gap-x-[40px] gap-y-0 rounded-lg border border-smoke-800 px-6 py-6 grid-auto-fit-[18.5rem] lg:px-4 lg:py-4 2xl:px-[26px] 2xl:py-6"> */}
             <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl">
-                <h2 className="text-base font-semibold leading-8 text-sky-400">The most popular NFTs</h2>
+                <h2 className="text-base font-semibold leading-8 text-emerald-400">The most popular NFTs</h2>
                 <p className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">Trending</p>
                 <p className="mt-6 text-lg leading-8 text-gray-300">Target Values are determined and set by the raffle creator.</p>
             </div>

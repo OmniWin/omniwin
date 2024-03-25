@@ -18,7 +18,7 @@ const staticPlatforms = [
     { id: "twitter", label: "Twitter", icon: faXTwitter, color: "text-black", iconType: "fontawesome" },
     { id: "discord", label: "Discord", icon: faDiscord, color: "text-discord", iconType: "fontawesome" },
     { id: "telegram", label: "Telegram", icon: faTelegram, color: "text-telegram", iconType: "fontawesome" },
-    { id: "email", label: "Email", icon: faEnvelope, color: "text-black", iconType: "svg" },
+    // { id: "email", label: "Email", icon: faEnvelope, color: "text-black", iconType: "svg" },
 ];
 
 import { useSelector, useDispatch, userSettingsSlice } from "@/lib/redux";
@@ -32,11 +32,12 @@ const LinkSocialPlatforms: React.FC = () => {
     const discordLoginParams: UseDiscordLoginParams = {
         clientId: '1220451304674037801',
         redirectUri: 'http://omniwin.local/profile/settings',
-        responseType: 'code', // or 'code'
+        responseType: 'token', // or 'code'
         scopes: ['identify', 'email'],
         onSuccess: (response: any) => {
             // Handle successful login
             console.log('Login successful:', response);
+            handleSync('discord', response);
         },
         onFailure: (error: any) => {
             // Handle login failure
@@ -53,13 +54,13 @@ const LinkSocialPlatforms: React.FC = () => {
             setPlatforms((prevPlatforms) =>
                 prevPlatforms.map((platform) => {
                     if (platform.id === "twitter") {
-                        return { ...platform, synced: !!Object.keys(userSettingsState.user?.twitter ?? {}).length , value: userSettingsState.user.twitter };
+                        return { ...platform, synced: !!Object.keys(userSettingsState.user?.twitter ?? {}).length , value: userSettingsState.user.twitter?.username ?? '' };
                     }
                     if (platform.id === "discord") {
-                        return { ...platform, synced: !!Object.keys(userSettingsState.user?.discord ?? {}).length , value: userSettingsState.user.discord };
+                        return { ...platform, synced: !!Object.keys(userSettingsState.user?.discord ?? {}).length , value: userSettingsState.user.discord?.user?.username };
                     }
                     if (platform.id === "telegram") {
-                        return { ...platform, synced: !!Object.keys(userSettingsState.user?.telegram ?? {}).length , value: userSettingsState.user.telegram };
+                        return { ...platform, synced: !!Object.keys(userSettingsState.user?.telegram ?? {}).length , value: userSettingsState.user.telegram?.username };
                     }
                     if (platform.id === "email") {
                         return { ...platform, synced: !!userSettingsState.user.email, value: userSettingsState.user.email };
@@ -100,37 +101,7 @@ const LinkSocialPlatforms: React.FC = () => {
         } else if (platformId === "twitter") {
             // window.open('https://api.twitter.com/oauth/authenticate?oauth_token=1234567890', '_blank');
         } else if (platformId === "discord") {
-            window.open(buildUrl(), '_blank');
-            // const popupWidth = 500;
-            // const popupHeight = 600;
-            // const left = window.screen.width / 2 - popupWidth / 2;
-            // const top = window.screen.height / 2 - popupHeight / 2;
-
-            // const popup = window.open(buildUrl(), 'discord-login', 
-            //     // `width=${popupWidth},height=${popupHeight},top=${top},left=${left}`
-            //     `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,\n' +
-            //     'width=700,height=800,left=50%,top=50%`
-            // );
-
-            // // Optional: Monitor the popup for closure (e.g., user closes the login window)
-            // const intervalId = setInterval(() => {
-            //     popup?.postMessage('', 'http://omniwin.local/profile/settings') // Replace * with your origin
-
-            //     // if (popup?.closed) {
-            //     //     console.log('Discord login popup closed');
-            //     //     // Handle popup closure as needed (e.g., refresh user state) 
-            //     //     clearInterval(intervalId);
-            //     // }
-            // }, 500); // Check every second
-
-            // window.addEventListener("message", (event) => {
-            //     if (event.data.code) {
-            //         clearInterval(intervalId)
-            //         popup?.close()
-        
-            //         console.log(event.data.code)
-            //     }
-            // }, false);
+            window.open(buildUrl());
         }
         console.log(`Clicked ${platformId}`);
     }
@@ -169,7 +140,7 @@ const LinkSocialPlatforms: React.FC = () => {
                     </div>
                     <span className="flex-1 text-zinc-200 space-x-1">
                         <span>{!platform.synced && platform.label}</span>
-                        <span className="text-zinc-400">{platform.synced ? `Connected as ${platform.value.username}` : "Not Synced"}</span>
+                        <span className="text-zinc-400">{platform.synced ? `Connected as ${platform.value}` : "Not Synced"}</span>
                     </span>
                     {!platform.synced && <Button onClick={() => handleOnClick(platform.id)} variant="secondary" className="relative">
                         <span>

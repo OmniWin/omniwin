@@ -16,10 +16,13 @@ import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/se
 
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import { classNames } from "@/app/utils";
 
 export default function UserHeader() {
     // const dispatch = useDispatch();
+    const { push } = useRouter();
     const userSettingsState = useSelector(selectUserSettingsState);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -27,9 +30,15 @@ export default function UserHeader() {
         setIsMounted(true);
     }, []);
 
+    useEffect(() => {
+        if (!Object.keys(userSettingsState.user).length) {
+            push("/");
+        }
+    }, [userSettingsState.user]);
+
     return (
         <>
-            <div className="pt-16 -mt-3 md:-mt-12 -mx-3 md:-mx-12 overflow-hidden shadow shadow-zinc-900 bg-gradient-to-tr from-zinc-800 to-zinc-800/5 relative">
+            <div className="pt-0 sm:pt-16 -mt-3 md:-mt-12 -mx-3 md:-mx-12 overflow-hidden shadow shadow-zinc-900 bg-gradient-to-tr from-zinc-800 to-zinc-800/5 relative">
                 {/* <img className="h-32 w-full object-cover lg:h-48" src={profile.coverImageUrl} alt="" /> */}
                 <div
                     className="w-full object-cover h-full pt-20 opacity-60 absolute left-0 top-0"
