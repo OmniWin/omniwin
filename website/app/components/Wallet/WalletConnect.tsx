@@ -12,7 +12,11 @@ import { checkIfUserExists, createAccount } from "@/app/services/authService";
 
 import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/moving-border";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+
 import { Badge } from "@/components/ui/badge";
 import MetaMaskIcon from "../Icons/MetaMask";
 import WalletConnectIcon from "../Icons/WalletConnect";
@@ -57,7 +61,7 @@ const WalletConnect = () => {
                         description: "An error occurred while signing in",
                         variant: "error",
                     });
-                    await disconnect()
+                    await disconnect();
                 }
             }
         },
@@ -138,11 +142,11 @@ const WalletConnect = () => {
     };
 
     const disconnect = async () => {
-        dispatch(userSettingsSlice.actions.setUser({}))
+        dispatch(userSettingsSlice.actions.setUser({}));
         // dispatch(userSettingsSlice.actions.setUsedReferralCode(''))
-        dispatch(userSettingsSlice.actions.setWalletStatusModalOpen(false))
+        dispatch(userSettingsSlice.actions.setWalletStatusModalOpen(false));
         await siweConfig.signOut();
-    }
+    };
 
     if (!isMounted) {
         return <div>Loading...</div>;
@@ -183,11 +187,19 @@ const WalletConnect = () => {
                             <div className="text-center">
                                 <p className="text-zinc-200 text-xl flex items-center justify-center mb-1">
                                     {session.user?.name || shortenAddress(address)}
-                                    <Button variant="ghost" className="!ml-2 !p-0 hover:!bg-transparent !inline-block !h-auto" onClick={() => copyToClipboard(address ?? '').then(() => toast({
-                                        title: "Copied",
-                                        description: "Address copied to clipboard",
-                                        duration: 3000,
-                                    }))}>
+                                    <Button
+                                        variant="ghost"
+                                        className="!ml-2 !p-0 hover:!bg-transparent !inline-block !h-auto"
+                                        onClick={() =>
+                                            copyToClipboard(address ?? "").then(() =>
+                                                toast({
+                                                    title: "Copied",
+                                                    description: "Address copied to clipboard",
+                                                    duration: 3000,
+                                                })
+                                            )
+                                        }
+                                    >
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" className="h-6 w-6 inline-block ml-1">
                                             <path className="fill-emerald-600/30" d="M128 128H48c-26.5 0-48 21.5-48 48V464c0 26.5 21.5 48 48 48H272c26.5 0 48-21.5 48-48V416H256v32H64V192h64V128z" />
                                             <path
@@ -226,7 +238,10 @@ const WalletConnect = () => {
     return (
         <>
             {!session && !address && (
-                <Button variant="soft" onClick={() => dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true))}>
+                // <Button variant="soft" onClick={() => dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true))}>
+                //     Connect Wallet
+                // </Button>
+                <Button onClick={() => dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true))} borderRadius="0.375rem" className={cn(buttonVariants({ variant: "soft", size: "default" }), 'bg-zinc-900')}>
                     Connect Wallet
                 </Button>
             )}
@@ -253,7 +268,7 @@ const WalletConnect = () => {
                 <DialogContent className="sm:max-w-[425px] lg:max-w-2xl">
                     <DialogHeader>
                         <DialogTitle className="text-white">
-                            {!address && 'Connect Wallet'}
+                            {!address && "Connect Wallet"}
                             {address && !userSettingsState.usedReferralCode && !userExists && "Access by invitation"}
                             {/* {connector && isLoading && userSettingsState.usedReferralCode && ""} */}
                         </DialogTitle>
