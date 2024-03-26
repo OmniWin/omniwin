@@ -4,7 +4,7 @@ import { classNames } from '@/app/utils';
 import { useSelector, useDispatch, userSettingsSlice } from "@/lib/redux";
 import {selectUserSettingsState} from "@/lib/redux/slices/userSettingsSlice/selectors";
 
-export default function CardSettings ({showStyle, showDisplay, setDisplay, display}: {showStyle?: boolean, showDisplay?: boolean, setDisplay?: any, display?: string}) {
+export default function CardSettings ({showStyle, showDisplay, setDisplay, display, showDisplayLabel = true}: {showStyle?: boolean, showDisplay?: boolean, setDisplay?: any, display?: string, showDisplayLabel?: boolean}) {
     const userSettingsState = useSelector(selectUserSettingsState);
     const dispatch = useDispatch();
 
@@ -75,7 +75,7 @@ export default function CardSettings ({showStyle, showDisplay, setDisplay, displ
                     <>
                         <div className="flex items-center px-3">
                             {/* <div className="flex items-center bg-zinc-800 rounded-lg px-3 py-2"> */}
-                            <span className="text-zinc-400 text-xs mr-2 uppercase">Display type</span>
+                            {showDisplayLabel && <span className="text-zinc-400 text-xs mr-2 uppercase">Display type</span>}
                             <button
                                 onClick={() => typeof setDisplay === 'function' ? setDisplay('carousel') : dispatch(userSettingsSlice.actions.setCardDisplay("carousel"))}
                                 type="button"
