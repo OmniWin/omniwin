@@ -1,13 +1,6 @@
+// import { classNames } from "@/app/utils";
 import { ArrowTopRightOnSquareIcon, TicketIcon } from "@heroicons/react/24/outline";
 import { ListBulletIcon, QueueListIcon } from "@heroicons/react/24/solid";
-import { RaffleParticipantsResponse, LinkType, Participants } from "@/app/types";
-import { shortenAddress } from "@/app/utils";
-import { ExplorerLink } from "@/app/components/Common/TransactionExplorerLink"
-import { fetchRaffleEntrants } from '../../services/raffleService';
-import { useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import useEventSourceListener from '@/app/hooks/useSSE';
-import React, { useRef, useEffect, useCallback, useState } from 'react';
-
 
 type ActivityItem = {
     user: {
@@ -18,156 +11,96 @@ type ActivityItem = {
     date: string;
     dateTime: string;
 };
-
-export default function Participants({ lotId, initialParticipants }: { lotId: string, initialParticipants: Participants[] }) {
-
-    const sortedParticipants = initialParticipants.sort((a, b) => b.total_tickets - a.total_tickets);
-    const limit = 10;
-
-    const {
-        fetchNextPage,
-        fetchPreviousPage,
-        hasNextPage,
-        hasPreviousPage,
-        isFetchingNextPage,
-        isFetchingPreviousPage,
-        ...result
-    } = useInfiniteQuery({
-        queryKey: ['participants', lotId],
-        //@ts-ignore
-        queryFn: ({ pageParam = 0 }) => {
-            return fetchRaffleEntrants(lotId, limit, pageParam);
+const activityItems: ActivityItem[] = [
+    {
+        user: {
+            name: "Michael Foster",
+            imageUrl: "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
         },
-        //@ts-ignore
-        getNextPageParam: (_, allPages) => {
-            const totalItemsFetched = allPages.reduce((total, page) => total + page.items.length, 0);
-
-            return totalItemsFetched;
+        tickets: 15,
+        date: "45 minutes ago",
+        dateTime: "2023-01-23T11:00",
+    },
+    {
+        user: {
+            name: "Lindsay Walton",
+            imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
         },
-        initialData: () => ({
-            pages: [{
-                items: sortedParticipants
-            }] as { items: Participants[] }[],
-            pageParams: [undefined],
-        }),
-        staleTime: Infinity,
-        refetchOnWindowFocus: false,
-    });
+        tickets: 15,
+        date: "3 hours ago",
+        dateTime: "2023-01-23T09:00",
+    },
+    {
+        user: {
+            name: "Courtney Henry",
+            imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        },
+        tickets: 15,
+        date: "12 hours ago",
+        dateTime: "2023-01-23T00:00",
+    },
+    {
+        user: {
+            name: "Courtney Henry",
+            imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        },
+        tickets: 15,
+        date: "2 days ago",
+        dateTime: "2023-01-21T13:00",
+    },
+    {
+        user: {
+            name: "Michael Foster",
+            imageUrl: "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        },
+        tickets: 15,
+        date: "5 days ago",
+        dateTime: "2023-01-18T12:34",
+    },
+    {
+        user: {
+            name: "Courtney Henry",
+            imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        },
+        tickets: 15,
+        date: "1 week ago",
+        dateTime: "2023-01-16T15:54",
+    },
+    {
+        user: {
+            name: "Michael Foster",
+            imageUrl: "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        },
+        tickets: 15,
+        date: "1 week ago",
+        dateTime: "2023-01-16T11:31",
+    },
+    {
+        user: {
+            name: "Whitney Francis",
+            imageUrl: "https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        },
+        tickets: 15,
+        date: "2 weeks ago",
+        dateTime: "2023-01-09T08:45",
+    },
+];
 
-    const observer = useRef<IntersectionObserver | null>(null);
-    const lastParticipantRef = useCallback((node: Element | null) => {
-        if (isFetchingNextPage) return;
-
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && hasNextPage) {
-                fetchNextPage();
-            }
-        });
-
-        if (node) observer.current.observe(node);
-    }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-
-
-    const queryClient = useQueryClient();
-    const handleEvent = (eventData: {
-        nft_id: number;
-        participants: Participants[];
-        // participants: { bonus: number, recipient: string, tickets: number }[];
-        tickets_bought: number;
-    }[]) => {
-        for (let i = 0; i < eventData.length; i++) {
-            const eventData_ = eventData[i];
-
-            if (eventData_.nft_id === parseInt(lotId)) {
-                queryClient.setQueryData(['activity', lotId], (oldData: { pages: { items: Participants[] }[], pageParams: (string | undefined)[] } | undefined) => {
-
-                    // const updatedItems = eventData_.participants.map(participant => ({
-                    //     recipient: participant.recipient,
-                    //     total_tickets: participant.tickets,
-                    // }));
-
-                    if (!oldData) {
-                        // If there's no old data, create the initial structure
-                        return {
-                            pages: [{
-                                items: eventData_.participants.map(participant => ({
-                                    recipient: participant.recipient,
-                                    total_tickets: participant.total_tickets,
-                                })).sort((a, b) => b.total_tickets - a.total_tickets)
-                            }],
-                            pageParams: [undefined] // Assuming your initial pageParam is undefined
-                        };
-                    }
-
-                    // Flag to check if the participant was updated
-                    let participantUpdated = false;
-
-                    // Iterate through all pages to find and update the participant if exists
-                    const updatedPages = oldData.pages.map(page => {
-                        const updatedItems = page.items.map(item => {
-                            const foundParticipant = eventData_.participants.find(participant => participant.recipient === item.recipient);
-                            if (foundParticipant) {
-                                participantUpdated = true; // Mark as updated
-                                // Return the updated participant info
-                                return { ...item, total_tickets: foundParticipant.total_tickets };
-                            }
-                            // Return the item as is if not found
-                            return item;
-                        });
-
-                        return { ...page, items: updatedItems };
-                    });
-
-
-                    // Calculate total participants across all pages
-                    const totalParticipants = oldData ? oldData.pages.reduce((acc, page) => acc + page.items.length, 0) : 0;
-                    const maxCapacityUpToCurrentPage = oldData.pages.length * limit;
-
-                    // If the participant was not found and updated, add it to the page if page is not full => no more results in DB
-                    if (!participantUpdated && totalParticipants < maxCapacityUpToCurrentPage) {
-                        eventData_.participants.forEach(newParticipant => {
-                            // Add the new participant to the last page's items
-                            const lastPageIndex = updatedPages.length - 1;
-                            updatedPages[lastPageIndex].items.push({
-                                max_id_ticket: newParticipant.max_id_ticket,
-                                block: newParticipant.block,
-                                recipient: newParticipant.recipient,
-                                total_tickets: newParticipant.total_tickets,
-                                total_bonus: newParticipant.total_bonus,
-                                total_tokens_spent: newParticipant.total_tokens_spent,
-                                username: newParticipant.username,
-                            });
-                        });
-                    }
-
-                    // Sort the last page after adding new participants to maintain order
-                    updatedPages[updatedPages.length - 1].items.sort((a, b) => b.total_tickets - a.total_tickets);
-
-                    return {
-                        ...oldData,
-                        pages: updatedPages,
-                        // pageParams remains unchanged unless your logic for fetching next pages is affected by these updates
-                    };
-                });
-            }
-        }
-    };
-
-    useEventSourceListener(handleEvent);
-
+export default function Participants() {
     return (
         <div className="bg-zinc-900 mt-10">
             <h2 className="flex items-center gap-2 text-md lg:text-xl text-zinc-100 font-semibold mt-8 mb-5">
                 <ListBulletIcon className="h-7 w-7 text-zinc-400" aria-hidden="true" />
                 <span>Participants</span>
             </h2>
-            <div className="border border-zinc-800 rounded-xl  overflow-auto max-h-80">
+            <div className="border border-zinc-800 rounded-xl mt-">
                 <table className="w-full whitespace-nowrap text-left">
                     <colgroup>
                         <col className="w-full sm:w-4/12" />
                         <col className="lg:w-4/12" />
                         <col className="lg:w-2/12" />
+                        {/* <col className="lg:w-1/12" />
+                        <col className="lg:w-1/12" /> */}
                     </colgroup>
                     <thead className="border-b border-white/10 text-sm leading-6 text-white">
                         <tr>
@@ -177,34 +110,33 @@ export default function Participants({ lotId, initialParticipants }: { lotId: st
                             <th scope="col" className="hidden py-2 pl-0 pr-8 text-right font-semibold md:table-cell lg:pr-20">
                                 Tickets
                             </th>
+                            <th scope="col" className="hidden py-2 pl-0 pr-4 text-right font-semibold sm:table-cell sm:pr-6 lg:pr-8">
+                                Purchased at
+                            </th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                        {result.data?.pages.map((page, pageIndex) => (
-                            page.items.map((participant, participantIndex) => {
-                                // Check if the current participant is the last item in the last page
-                                const isLastParticipant = pageIndex === result.data.pages.length - 1 && participantIndex === page.items.length - 1;
-                                return (
-                                    <tr
-                                        key={`${pageIndex}-${participantIndex}`}
-                                        ref={isLastParticipant ? lastParticipantRef : null} // Attach the ref to the last item
-                                        className="hover:bg-zinc-800"
-                                    >
-                                        <td className="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
-                                            <div className="flex items-center gap-x-4">
-                                                <img src={""} alt="" className="h-8 w-8 rounded-full bg-zinc-800" />
-                                                <div className="truncate text-sm font-medium leading-6 text-white">{shortenAddress(participant.recipient)}</div>
-                                            </div>
-                                        </td>
-                                        <td className="hidden py-4 pl-0 pr-8 text-right text-sm leading-6 text-zinc-400 md:table-cell lg:pr-20">
-                                            <div className="inline-flex items-center gap-2">
-                                                <TicketIcon className="h-5 w-5 text-zinc-400" aria-hidden="true" />
-                                                <span className="text-zinc-100">{participant.total_tickets}</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })
+                        {activityItems.map((item) => (
+                            <tr key={item.user.name} className="hover:bg-zinc-800">
+                                <td className="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
+                                    <div className="flex items-center gap-x-4">
+                                        <img src={item.user.imageUrl} alt="" className="h-8 w-8 rounded-full bg-zinc-800" />
+                                        <div className="truncate text-sm font-medium leading-6 text-white">{item.user.name}</div>
+                                    </div>
+                                </td>
+                                <td className="hidden py-4 pl-0 pr-8 text-right text-sm leading-6 text-zinc-400 md:table-cell lg:pr-20">
+                                    <div className="inline-flex items-center gap-2">
+                                        <TicketIcon className="h-5 w-5 text-zinc-400" aria-hidden="true" />
+                                        <span className="text-zinc-100">{item.tickets}</span>
+                                    </div>
+                                </td>
+                                <td className="hidden py-4 pl-0 pr-4 text-right text-sm leading-6 text-zinc-400 sm:table-cell sm:pr-6 lg:pr-8">
+                                    <a href="#" className="inline-flex items-center gap-2 hover:text-zinc-200">
+                                        <time dateTime={item.dateTime}>{item.date}</time>
+                                        <ArrowTopRightOnSquareIcon className="h-5 w-5" aria-hidden="true" />
+                                    </a>
+                                </td>
+                            </tr>
                         ))}
                     </tbody>
                 </table>
