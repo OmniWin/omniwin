@@ -51,8 +51,27 @@ describe("Omniwin", function () {
     }
 
     async function deployVrfCoordinator(MockLinkToken: any) {
-        const VrfCoordinator = await ethers.deployContract("VRFCoordinatorMock", [MockLinkToken]);
+        // const baseFee = 0.1 * 10 ** 18;
+        const baseFee = BigInt("100000000000000000");
+        //It's used to calculate the variable part of the fee for a VRF request, which depends on the amount of gas used by the callback function in your contract (the function that receives and processes the random numbers).
+        const gasPriceLink = 1000000000; //1e9; //1e9 = 0.000000001 LINK per gas
+        const VrfCoordinator = await ethers.deployContract("VRFCoordinatorV2Mock", [baseFee, gasPriceLink]);
         await VrfCoordinator.waitForDeployment();
+
+        const tx = await VrfCoordinator.createSubscription();
+        await tx.wait(); // Wait for the transaction to be mined
+
+        // Fetch the transaction receipt to access the event logs
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+
+        // Assuming the event is called "SubscriptionCreated" and it's the first event
+        const subIdEvent = receipt?.logs.map(log => VrfCoordinator.interface.parseLog(log))
+                                        .find(log => log?.name === "SubscriptionCreated");
+
+        const subId = subIdEvent?.args.subId
+
+        console.log("Subscription ID:", subId);
+        VrfCoordinator.fundSubscription(subId, BigInt("1000000000000000000"));
 
         return VrfCoordinator;
     }
@@ -88,6 +107,7 @@ describe("Omniwin", function () {
         const vrfCoordinator = await deployVrfCoordinator(MockLinkToken);
         console.log("VRF Coordinator deployed to:", vrfCoordinator.target);
         expect(vrfCoordinator).to.exist;
+  
 
         //mint some USDC
         const mintAmount = 1000000000;
@@ -98,7 +118,7 @@ describe("Omniwin", function () {
         const MockRouterClient = await deployMockCCIPRouter();
         console.log("MockRouterClient deployed to:", MockRouterClient.target);
         
-
+        const subscriptionId = BigInt(1);
 
         const vrfCoordinatorBNB = routerConfig.bnbChainTestnet.vrfCoordinator;
         const linkTokenBNB =  routerConfig.bnbChainTestnet.feeTokens[0];
@@ -106,11 +126,16 @@ describe("Omniwin", function () {
         const mainnetBNB = false;
         const routerBNB = routerConfig.bnbChainTestnet.address;
 
-        const omniwinMain = await ethers.deployContract("Omniwin", [vrfCoordinator, MockLinkToken, keyHashBNB, mainnetBNB, MockRouterClient.target]);
+        const omniwinMain = await ethers.deployContract("Omniwin", [vrfCoordinator, MockLinkToken, keyHashBNB, mainnetBNB, MockRouterClient.target,subscriptionId]);
         await omniwinMain.waitForDeployment();
         console.log("Main contract deployed to:", await omniwinMain.getAddress());
 
-        
+          //Adding the consumer contract to the subscription
+        //Only owner of subscription can add consumers
+        await vrfCoordinator.addConsumer(subscriptionId, omniwinMain.target);
+        //fulfillrandomwords
+        // await vrfCoordinator.connect(owner).fulfillRandomWords(1, omniwinMain.target);
+
 
         await omniwinMain.setUSDCTokenAddress(usdc.target);
 
@@ -147,7 +172,7 @@ describe("Omniwin", function () {
         console.log("Omniwin Sidechain deployed to:", omniwinSide.target, "with owner:", owner.address);
         console.log("Omniwin Sidechain2 deployed to:", omniwinSide2.target, "with owner:", owner.address);
 
-        return { omniwinMain, omniwinSide,omniwinSide2,MockLinkToken, MockRouterClient, nft, erc20, usdc, owner, otherAccount };
+        return { omniwinMain, omniwinSide,omniwinSide2,MockLinkToken, MockRouterClient,vrfCoordinator, nft, erc20, usdc, owner, otherAccount };
     }
 
     it("Should mint NFT and transfer to other account", async function () {
@@ -1324,7 +1349,7 @@ describe("Omniwin", function () {
     describe("Raffle vrf", function () {
         beforeEach(async function () {
             // Load the initial setup fixture
-            const { omniwinMain,omniwinSide,usdc, nft, erc20, owner, otherAccount,MockLinkToken ,MockRouterClient} = await loadFixture(deployContract);
+            const { omniwinMain,omniwinSide,usdc, nft, erc20, owner, otherAccount,MockLinkToken ,MockRouterClient,vrfCoordinator} = await loadFixture(deployContract);
 
             const minimumFundsInWeis = ethers.parseUnits("3", 6);
             const assetType = 0; // ERC20 token, adjust based on enum order
@@ -1453,12 +1478,15 @@ describe("Omniwin", function () {
             expect(funding[2]).to.be.equal(totalFunding);
             
             // Extend this object with more properties as needed by tests
-            this.testContext = { omniwinMain, omniwinSide,usdc, erc20, otherAccount };
+            this.testContext = { omniwinMain, omniwinSide,usdc, erc20, otherAccount,vrfCoordinator };
         });
 
         it("Pick a winner", async function () {
-            const { omniwinMain, omniwinSide,usdc, erc20, otherAccount } = this.testContext;
+            const { omniwinMain, omniwinSide,usdc, erc20, otherAccount,vrfCoordinator } = this.testContext;
             const raffleId = 0;
+
+            console.log("account: ",otherAccount.address);
+            console.log("omniwinMain: ",omniwinMain.target);
 
             //set winner
             const tx = await omniwinMain.setWinner(raffleId);
@@ -1466,7 +1494,14 @@ describe("Omniwin", function () {
             //check for event
             const amountRaised = (await omniwinMain.rafflesEntryInfo(raffleId))[2];
             console.log("Usd raised: ",BigInt(amountRaised)/BigInt(10**6));
+
+
+
             await expect(tx).to.emit(omniwinMain, "SetWinnerTriggered").withArgs(raffleId, amountRaised);
+
+            const requestId = 1;
+            const tx2 = await vrfCoordinator.fulfillRandomWords(requestId,omniwinMain.target)
+            const tx2Receipt = await tx2.wait();
         });
     });
 });

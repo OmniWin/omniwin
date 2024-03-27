@@ -6,6 +6,7 @@ import {VRFCoordinatorV2Interface} from "./interfaces/VRFCoordinatorV2Interface.
 import {VRFConsumerBaseV2} from "./vrf/VRFConsumerBaseV2.sol";
 import {ConfirmedOwner} from "./shared/ConfirmedOwner.sol";
 
+import "hardhat/console.sol";
 // solhint-disable chainlink-solidity/prefix-immutable-variables-with-i
 // solhint-disable custom-errors
 // solhint-disable avoid-low-level-calls
@@ -167,6 +168,7 @@ contract VRFCoordinatorV2Mock is VRFCoordinatorV2Interface, ConfirmedOwner {
             _requestId,
             _words
         );
+
         s_config.reentrancyLock = true;
         (bool success, ) = _consumer.call{gas: req.callbackGasLimit}(callReq);
         s_config.reentrancyLock = false;
