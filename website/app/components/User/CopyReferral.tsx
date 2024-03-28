@@ -6,13 +6,32 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { share } from "@/app/utils";
 
-interface CopyReferralProps {
-    referralCode?: string;
-}
+import { useSelector } from "@/lib/redux";
+import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
 
-const CopyReferral: React.FC<CopyReferralProps> = ({ referralCode }) => {
-    if (!referralCode) {
-        return null; // Don't render anything if no referral code is provided
+const CopyReferral: React.FC = () => {
+    const userSettingsState = useSelector(selectUserSettingsState);
+    const [isMounted, setIsMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+        return () => setIsMounted(false);
+    }, []);
+
+    if (isMounted && !userSettingsState.user?.referral_code) {
+        return (
+            <div className="space-x-3 flex items-center px-3 py-2 h-full rounded-xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 w-full">
+                No Referral Code
+            </div>
+        )
+    }
+
+    if (!isMounted) {
+        return (
+            <div className="space-x-3 flex items-center px-3 py-2 h-full rounded-xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 w-full">
+                Loading...
+            </div>
+        )
     }
 
     return (
@@ -33,13 +52,13 @@ const CopyReferral: React.FC<CopyReferralProps> = ({ referralCode }) => {
             <Input
                 id="referralCode"
                 type="text"
-                value={referralCode}
+                value={userSettingsState.user?.referral_code || ""}
                 readOnly
                 className="!bg-transparent !border-0 !outline-none !ring-0 !ring-offset-0 uppercase text-xl flex-1"
             />
             <Button onClick={() => share('default', {
                 title: 'OmniWin Referral Code',
-                text: `Use my referral code ${referralCode} to join OmniWin and earn rewards!`,
+                text: `Use my referral code ${userSettingsState.user?.referral_code || ""} to join OmniWin and earn rewards!`,
                 url: 'https://omniwin.com',
             })} variant="secondary">
                 Share

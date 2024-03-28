@@ -24,6 +24,10 @@
  */
 
 /* Components */
+import BNB from "@/public/images/coins/BNB.svg"
+import ETH from "@/public/images/coins/ETH.svg"
+import MATIC from "@/public/images/coins/MATIC.svg"
+
 // import Tabs from "@/app/components/Raffle/Tabs";
 import Activity from "@/app/components/Raffle/Activity";
 import Participants from "@/app/components/Raffle/Participants";
@@ -272,13 +276,37 @@ export default function RafflePage({
         id: string;
     };
 }) {
-    const queryClient = useQueryClient();
+    // const queryClient = useQueryClient();
     const { open } = useWeb3Modal()
+    const [isMounted, setIsMounted] = useState(false);
 
-    const { data: raffleData, isLoading, error } = useQuery<RaffleResponse['data'], Error>({
-        queryKey: ['raffleData', params.id],
-        queryFn: () => fetchRaffleData(params.id)
-    });
+    const isLoading = false
+    const error = false
+    const raffleData = {
+        nft: {
+            full_price: 240000,
+            ticket_price: 4000,
+            tickets_bought: 21,
+            tickets_total: 21,
+            end_timestamp: 1715533544,
+            nft_name: "W#872",
+            nft_image: "872_goerli.png",
+            nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+            asset_type: "ERC721",
+            nft_id: 3,
+            token_id: "872",
+            network: "GOERLI",
+            collection_name: "Wrapped Cryptopunks",
+            is_verified: true,
+            is_favorite: false,
+            favorites_count: 10,
+            count_views: 100,
+        }
+    }
+    // const { data: raffleData2, isLoading, error } = useQuery<RaffleResponse['data'], Error>({
+    //     queryKey: ['raffleData', params.id],
+    //     queryFn: () => fetchRaffleData(params.id)
+    // });
 
     const handleEvent = (eventData: {
         nft_id: number;
@@ -290,20 +318,20 @@ export default function RafflePage({
 
             if (eventData_.nft_id === parseInt(params.id)) {
                 console.log('Event data for NFT:', eventData_);
-                queryClient.setQueryData(['raffleData', params.id], (oldData: RaffleResponse['data'] | undefined) => {
-                    return {
-                        ...oldData,
-                        nft: {
-                            ...oldData?.nft,
-                            tickets_bought: eventData_.tickets_bought
-                        },
-                    };
-                });
+                // queryClient.setQueryData(['raffleData', params.id], (oldData: RaffleResponse['data'] | undefined) => {
+                //     return {
+                //         ...oldData,
+                //         nft: {
+                //             ...oldData?.nft,
+                //             tickets_bought: eventData_.tickets_bought
+                //         },
+                //     };
+                // });
             }
         }
     };
 
-    useEventSourceListener(handleEvent);
+    // useEventSourceListener(handleEvent);
 
     if (isLoading || !raffleData) return raffleSkeleton();
     if (error) return <div>An error occurred: {error.message}</div>;
@@ -311,21 +339,19 @@ export default function RafflePage({
     const progress = ((raffleData.nft.tickets_bought / raffleData.nft.tickets_total) * 100);
     const timeLeft = formatCountdown(new Date(), new Date(raffleData.nft.end_timestamp * 1000));
 
-
-
     const toggleFavorite = async () => {
         // Optimistically update the UI
-        queryClient.setQueryData(['raffleData', params.id], (oldData: RaffleResponse['data']) => {
-            if (!oldData) return undefined; // or however you want to handle this case
-            return {
-                ...oldData,
-                nft: {
-                    ...oldData.nft,
-                    is_favorite: !oldData.nft.is_favorite,
-                    favorites_count: oldData.nft.is_favorite ? oldData.nft.favorites_count - 1 : oldData.nft.favorites_count + 1,
-                },
-            };
-        });
+        // queryClient.setQueryData(['raffleData', params.id], (oldData: RaffleResponse['data']) => {
+        //     if (!oldData) return undefined; // or however you want to handle this case
+        //     return {
+        //         ...oldData,
+        //         nft: {
+        //             ...oldData.nft,
+        //             is_favorite: !oldData.nft.is_favorite,
+        //             favorites_count: oldData.nft.is_favorite ? oldData.nft.favorites_count - 1 : oldData.nft.favorites_count + 1,
+        //         },
+        //     };
+        // });
 
         try {
             const result = await addFavorite(params.id); // Send the update to the server
@@ -334,41 +360,26 @@ export default function RafflePage({
             }
         } catch (error) {
             // Revert to previous state in case of an error
-            queryClient.setQueryData(['raffleData', params.id], (oldData: RaffleResponse['data']) => {
-                if (!oldData) return undefined; // or however you want to handle this case
-                return {
-                    ...oldData,
-                    nft: {
-                        ...oldData.nft,
-                        is_favorite: !oldData.nft.is_favorite,
-                        favorites_count: oldData.nft.is_favorite ? oldData.nft.favorites_count + 1 : oldData.nft.favorites_count - 1,
-                    },
-                };
-            });
+            // queryClient.setQueryData(['raffleData', params.id], (oldData: RaffleResponse['data']) => {
+            //     if (!oldData) return undefined; // or however you want to handle this case
+            //     return {
+            //         ...oldData,
+            //         nft: {
+            //             ...oldData.nft,
+            //             is_favorite: !oldData.nft.is_favorite,
+            //             favorites_count: oldData.nft.is_favorite ? oldData.nft.favorites_count + 1 : oldData.nft.favorites_count - 1,
+            //         },
+            //     };
+            // });
             // Handle error (e.g., show a message to the user)
         }
-    };
-
-
-    const contest = {
-        id: 9750,
-        title: "BoredApeYachtClub",
-        price: "1000",
-        currency: "USDC",
-        // image: "https://metadata.degods.com/g/1570-dead.png",
-        image: "https://ipfs.raribleuserdata.com/ipfs/QmUbgubLVZdyZF1ocsJisX7weQARQ2fgxDiTHJYcG6UViq",
-        chain: "Goerli Network",
-        chainIcon: "/icons.svg#ethereumChain",
-        tickets: 50,
-        raisedTickets: 5,
-        endingIn: "1 day",
     };
 
     const priceVariants = [
         {
             id: 1,
             name: "1",
-            price: "0.006",
+            price: "0.525",
             currency: "USDC",
             recomanded: false,
             tickets: 1,
@@ -376,7 +387,7 @@ export default function RafflePage({
         {
             id: 2,
             name: "1",
-            price: "0.012",
+            price: "0.11",
             currency: "USDC",
             recomanded: false,
             tickets: 10,
@@ -384,7 +395,7 @@ export default function RafflePage({
         {
             id: 3,
             name: "10",
-            price: "0.11",
+            price: "0.012",
             currency: "USDC",
             recomanded: false,
             tickets: 100,
@@ -392,12 +403,16 @@ export default function RafflePage({
         {
             id: 4,
             name: "50",
-            price: "0.525",
+            price: "0.006",
             currency: "USDC",
             recomanded: true,
             tickets: 500,
         },
     ];
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     return (
         <>
@@ -420,15 +435,24 @@ export default function RafflePage({
                         {/* <span className="text-gray-400">#{contest.id}</span> */}
                     </h1>
                     {/* <Countdown date={Date.now() + 1000000000} renderer={countdownRederer}></Countdown> */}
-                    <Countdown date={raffleData.nft.end_timestamp * 1000} renderer={countdownRederer}></Countdown>
+                    {isMounted && <Countdown date={raffleData.nft.end_timestamp * 1000} renderer={countdownRederer}></Countdown>}
                 </div>
 
                 <div className="grid items-center grid-cols-2 xl:grid-cols-5 mt-8 border-zinc-800 border rounded-xl">
                     {/* <div className="grid items-center lg:grid-cols-8 mt-8"> */}
-                    <div className="p-4 flex items-center justify-center gap-3 col-span-1 xl:border-r border-zinc-800 h-full">
+                    <div className="p-4 flex items-center xl:justify-center gap-3 col-span-1 xl:border-r border-zinc-800 h-full">
                         {/* <div className="p-4 flex items-center gap-3 lg:col-span-1 h-full"> */}
                         <div className="relative">
-                            <img className="w-10 h-w-10 rounded-full" src="https://pbs.twimg.com/profile_images/885868801232961537/b1F6H4KC_400x400.jpg" alt="Avatar of Jonathan Reinink" />
+                            {/* <img className="w-10 h-w-10 rounded-full" src="https://pbs.twimg.com/profile_images/885868801232961537/b1F6H4KC_400x400.jpg" alt="Avatar of Jonathan Reinink" /> */}
+                            <CustomImageWithFallback
+                                width={128} // Placeholder width for aspect ratio calculation
+                                height={128} // Placeholder height for aspect ratio calculation
+                                // src="/images/banner/7.jpg"
+                                src={`/images/banner/1.jpg`}
+                                alt=""
+                                containerClass="flex items-center !w-auto !sm:w-full"
+                                className="h-14 w-14 rounded"
+                            />
                         </div>
                         <div>
                             <div className="text-zinc-400 text-sm">Owner</div>
@@ -464,7 +488,7 @@ export default function RafflePage({
                         </div>
                     </div>
                     {/* <div className="p-4 flex items-center justify-center lg:col-span-1 bg-gradient-to-b from-zinc-900 to-zinc-800/50 rounded-tr-xl rounded-br-xl"> */}
-                    <div className="p-4 flex items-center justify-center col-span-1 col-start-2 row-start-1 xl:col-start-5 xl:bg-gradient-to-b from-zinc-900 to-emerald-800/5 rounded-tr-xl rounded-br-xl">
+                    <div className="p-4 flex items-center justify-end xl:justify-center col-span-1 col-start-2 row-start-1 xl:col-start-5 xl:bg-gradient-to-b from-zinc-900 to-emerald-800/5 rounded-tr-xl rounded-br-xl">
                         {/* <div className="p-4 flex flex-col items-center lg:col-span-2 border-zinc-800 border rounded-xl"> */}
                         <div>
                             <div className="text-zinc-400 text-sm">Market value</div>
@@ -502,7 +526,7 @@ export default function RafflePage({
                                 className="relative z-[2] object-cover rounded-xl h-full w-full xl:max-h-144"
                             />
                         </div>
-                        <div className="flex items-center justify-between mt-7 text-sm">
+                        <div className="flex items-center justify-between mt-7 text-sm relative z-10">
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2 text-zinc-400 cursor-pointer">
                                     <button
@@ -544,11 +568,39 @@ export default function RafflePage({
                     </div>
                     <div className="">
                         <h2 className="flex items-center gap-2 text-md lg:text-xl text-zinc-100 font-semibold mb-5">
-                            <TicketIcon className="inline-block h-8 w-8 text-zinc-500 -rotate-90" />
-                            <span>
+                            <TicketIcon className="inline-block h-9 w-9 text-zinc-500 -rotate-90" />
+                            <div className="flex-1">
                                 Purchase Tickets
-                                {/* <div className="text-xs text-zinc-400">Available Tickets 500</div> */}
-                            </span>
+                                <div className="text-xs text-zinc-400">
+                                    <span>Buy tickets on:</span>
+                                    <span className="inline-flex items-center gap-2 ml-2">
+                                        <CustomImageWithFallback
+                                            width={20} // Placeholder width for aspect ratio calculation
+                                            height={20} // Placeholder height for aspect ratio calculation
+                                            src={ETH}
+                                            alt=""
+                                            containerClass="inline-block"
+                                            className="h-4 w-4 inline-block"
+                                        />
+                                        <CustomImageWithFallback
+                                            width={20} // Placeholder width for aspect ratio calculation
+                                            height={20} // Placeholder height for aspect ratio calculation
+                                            src={BNB}
+                                            alt=""
+                                            containerClass="inline-block"
+                                            className="h-4 w-4 inline-block"
+                                        />
+                                        <CustomImageWithFallback
+                                            width={20} // Placeholder width for aspect ratio calculation
+                                            height={20} // Placeholder height for aspect ratio calculation
+                                            src={MATIC}
+                                            alt=""
+                                            containerClass="inline-block"
+                                            className="h-4 w-4 inline-block"
+                                        />
+                                    </span>
+                                </div>
+                            </div>
                         </h2>
                         <div className="flex flex-col rounded-xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30">
                             {priceVariants.map((variant) => (
@@ -570,7 +622,7 @@ export default function RafflePage({
                                         <div className="xl:flex items-center gap-1">
                                             <div className="text-4xl font-bold text-zinc-100">{variant.tickets}</div>
                                             <div className="flex items-center text-xs xl:text-sm text-zinc-400">
-                                                <div className="flex items-center gap-1 mt-2 xl:mt-5">
+                                                <div className="flex items-center gap-1 mt-2 xl:mt-5 pb-1">
                                                     {/* USDC logo */}
                                                     <div>
                                                         {variant.price} {variant.currency} per entry
@@ -602,7 +654,7 @@ export default function RafflePage({
                             ))}
                         </div>
                         <h2 className="flex items-center gap-2 text-md lg:text-xl text-zinc-100 font-semibold mt-8 mb-5">
-                            <ShoppingCartIcon className="inline-block h-7 w-7 text-zinc-500" />
+                            <ShoppingCartIcon className="inline-block h-8 w-8 text-zinc-500" />
                             <span>
                                 Order Summary
                                 {/* <InformationCircleIcon className="inline-block h-5 w-5 text-zinc-400" /> */}

@@ -24,7 +24,7 @@ export function formatCountdown(startDate: Date, endDate: Date): { diff: number;
     return { diff: diffSeconds, unit: "secs", hasEnded: false };
 }
 
-export function shortenAddress(address: string | undefined, left: number = 6, right: number = 4): string | undefined {
+export function shortenAddress(address: string | undefined, left: number = 4, right: number = 6): string | undefined {
     if (!address) return undefined;
 
     const leftPart = address.slice(0, left);
@@ -119,6 +119,17 @@ export function share(platform: SocialPlatform | "default", options: ShareOption
 
     // Open share URL in a new tab if it's not empty
     if (shareUrl) window.open(shareUrl, "_blank");
+}
+
+export async function copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text).then(
+        () => {
+            
+        },
+        (err) => {
+            console.error("Failed to copy to clipboard:", err);
+        }
+    );
 }
 
 import { CountdownRendererProps } from "@/app/types";

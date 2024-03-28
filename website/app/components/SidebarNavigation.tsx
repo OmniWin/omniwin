@@ -31,14 +31,16 @@ import {
 } from "@heroicons/react/24/outline";
 import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
 
-import { useSelector, useDispatch, sidebarSlice } from "@/lib/redux";
+import { useSelector, useDispatch, sidebarSlice, userSettingsSlice } from "@/lib/redux";
 import { selectSidebarOpenState, selectSidebarToggleState } from "@/lib/redux/slices/sidebarSlice/selectors";
+import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
 
 interface NavigationItemChildren {
     name: string;
     href: string;
     current: boolean;
     icon: any;
+    needsSession: boolean;
 }
 interface NavigationItem {
     name: string;
@@ -49,15 +51,15 @@ interface NavigationItem {
 }
 
 const initialNavigation = [
-    { name: "Home", href: "/", icon: HomeIcon, current: true, children: null },
-    { name: "Explore", href: "/raffles", icon: BookOpenIcon, current: false, children: null },
+    { name: "Home", href: "/", icon: HomeIcon, current: true, needsSession: false, children: null },
+    { name: "Explore", href: "/raffles", icon: BookOpenIcon, current: false, needsSession: false, children: null },
     {
         name: "Challenges",
         icon: TrophyIcon,
         current: false,
         children: [
-            { name: "List", href: "/challenges/list", current: false, icon: TableCellsIcon },
-            { name: "Leaderboard", href: "/challenges/leaderboard", current: false, icon: ChartBarIcon },
+            { name: "List", href: "/challenges/list", current: false, needsSession: false, icon: TableCellsIcon },
+            { name: "Leaderboard", href: "/challenges/leaderboard", current: false, needsSession: true, icon: ChartBarIcon },
         ],
     },
     {
@@ -65,12 +67,12 @@ const initialNavigation = [
         icon: UserIcon,
         current: false,
         children: [
-            // { name: "Profile", href: "/profile", current: false, icon: InformationCircleIcon },
-            { name: "Inventory", href: "/profile/inventory", current: false, icon: RectangleStackIcon },
-            { name: "Tickets", href: "/profile/tickets", current: false, icon: TicketIcon },
-            { name: "Favorites", href: "/profile/favorites", current: false, icon: HeartIcon },
-            { name: "Settings", href: "/profile/settings", current: false, icon: Cog6ToothIcon },
-            // { name: "Support", href: "#", current: false, icon: QuestionMarkCircleIcon },
+            // { name: "Profile", href: "/profile", current: false, needsSession: true, icon: InformationCircleIcon },
+            { name: "Inventory", href: "/profile/inventory", current: false, needsSession: true, icon: RectangleStackIcon },
+            { name: "Tickets", href: "/profile/tickets", current: false, needsSession: true, icon: TicketIcon },
+            { name: "Favorites", href: "/profile/favorites", current: false, needsSession: true, icon: HeartIcon },
+            { name: "Settings", href: "/profile/settings", current: false, needsSession: true, icon: Cog6ToothIcon },
+            // { name: "Support", href: "#", current: false, needsSession: true, icon: QuestionMarkCircleIcon },
         ],
     },
 ];
@@ -261,6 +263,7 @@ export const SidebarNavigation = () => {
     const dispatch = useDispatch();
     const sidebarOpenState = useSelector(selectSidebarOpenState);
     const sidebarToggleState = useSelector(selectSidebarToggleState);
+    const userSettingsState = useSelector(selectUserSettingsState);
 
     const groupedSidebarIconsByNames: { [key: string]: { children: { [key: string]: JSX.Element }, icon: JSX.Element } } = navigationIcons.reduce((acc: { [key: string]: { children: { [key: string]: JSX.Element }, icon: JSX.Element } }, item) => {
         if (item.children) {
@@ -302,6 +305,22 @@ export const SidebarNavigation = () => {
         );
     }, [path]);
 
+    useEffect(() => {
+        const isActiveNavItemThatNeedsSession = navigation.reduce((acc, item) => {
+            if (item.children) {
+                const isActiveChild = item.children.some((child) => child.current && child.needsSession);
+                if (isActiveChild) {
+                    acc = true
+                }
+            }
+            return acc;
+        }, false);
+
+        if (isActiveNavItemThatNeedsSession) {
+            dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true));
+        }
+    }, [navigation]);
+
     // If user clicks inside the sidebar switch the toggle state to !toggleSidebar
     useEffect(() => {
         const sidebar = document.querySelector(".sidebar");
@@ -323,17 +342,18 @@ export const SidebarNavigation = () => {
         }
     }, [sidebarToggleState.toggleSidebar]); // Empty dependency array
 
-    const stopClosing = (key: number, childKey: number, event: React.MouseEvent<HTMLAnchorElement>) => {
-        // if clicked link is in the same active parent then don't close the disclosure
-        if (navigation[key].children && navigation[key]?.children?.[childKey].current) {
-            event.preventDefault();
-            event.stopPropagation();
+    const checkIfSessionExists = (e: any) => {
+        if (!userSettingsState.user?.address) {
+            e.preventDefault();
+            e.stopPropagation();
+            dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true));
+            return false
         }
     }
 
     return (
         <>
-            <Transition.Root show={sidebarOpenState.isSidebarOpen} as={Fragment}>
+            {/* <Transition.Root show={sidebarOpenState.isSidebarOpen} as={Fragment}>
                 <Dialog as="div" className="relative z-50 lg:hidden" onClose={() => dispatch(sidebarSlice.actions.setSidebarOpenState(false))}>
                     <Transition.Child
                         as={Fragment}
@@ -408,7 +428,6 @@ export const SidebarNavigation = () => {
                                                                                 {item.children &&
                                                                                     item.children.map((subItem) => (
                                                                                         <li key={subItem.name}>
-                                                                                            {/* 44px */}
                                                                                             <Disclosure.Button
                                                                                                 as={Link}
                                                                                                 href={subItem.href}
@@ -448,7 +467,7 @@ export const SidebarNavigation = () => {
                         </Transition.Child>
                     </div>
                 </Dialog>
-            </Transition.Root>
+            </Transition.Root> */}
 
             {/* Static sidebar for desktop */}
             <div className={`hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col transition-all duration-300 group-[parent]`}>
@@ -504,7 +523,7 @@ export const SidebarNavigation = () => {
                                                     </span>
                                                 </Link>
                                             ) : (
-                                                <Disclosure as="div" defaultOpen={item.children.some((child) => child.current)} key={'collapse'+item.children.some((child) => child.current)}>
+                                                <Disclosure as="div" defaultOpen={item.children.some((child) => child.current)} key={'collapse'+item?.name + item.current}>
                                                     {({ open }) => (
                                                         <>
                                                             <Disclosure.Button
@@ -529,15 +548,14 @@ export const SidebarNavigation = () => {
                                                                     aria-hidden="true"
                                                                 />
                                                             </Disclosure.Button>
-                                                            <Disclosure.Panel as="ul" className="mt-1">
+                                                            <Disclosure.Panel as="ul" className="mt-1 space-y-2">
                                                                 {item.children &&
                                                                     item.children.map((subItem, childrenKey) => (
                                                                         <li key={subItem.name}>
-                                                                            {/* 44px */}
-                                                                            <Disclosure.Button
-                                                                                as="a"
+                                                                            <Link
+                                                                                // as={Link}
+                                                                                onClick={(e) => subItem?.needsSession ? checkIfSessionExists(e) : () => {}}
                                                                                 href={subItem.href}
-                                                                                onClick={(e: any) => stopClosing(navKey, childrenKey, e)}
                                                                                 className={classNames(
                                                                                     // subItem.current ? "text-jade-400" : "text-zinc-400/90 hover:bg-zinc-800 hover:text-white",
                                                                                     subItem.current ? "text-jade-400 bg-zinc-800/70" : "text-zinc-400/90 hover:bg-zinc-800 hover:text-white",
@@ -557,7 +575,7 @@ export const SidebarNavigation = () => {
                                                                                 >
                                                                                     {subItem.name}
                                                                                 </span>
-                                                                            </Disclosure.Button>
+                                                                            </Link>
                                                                         </li>
                                                                     ))}
                                                             </Disclosure.Panel>

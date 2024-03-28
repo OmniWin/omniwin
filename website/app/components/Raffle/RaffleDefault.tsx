@@ -66,7 +66,7 @@ export default function RaffleDefault(raffle: RaffleCard) {
                             <CheckBadgeIcon className="inline-block h-6 xl:h-5 w-6 xl:w-5 text-[#1475e1] z-10 relative" />
                             <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 inset-0 rounded-full bg-white h-3 w-3"></div>
                         </div>
-                        <p className="text-smoke-300 font-bold truncate select-text max-w-36 leading-none xl:leading-tight">
+                        <p className="text-smoke-300 font-bold truncate select-text max-w-36 xl:max-w-24 leading-none xl:leading-tight">
                             {/* <span className="text-smoke-300 font-bold truncate select-text max-w-14 block xl:hidden text-[11px] leading-none">#{raffle.id}</span> */}
                             {raffle.nft_name}
                         </p>
@@ -126,7 +126,8 @@ export default function RaffleDefault(raffle: RaffleCard) {
                             <div className="min-w-[6rem]">
                                 {/* <button className="text-sm font-bold text-smoke-900 bg-gradient-to-b from-sky-400 to-sky-500 hover:to-sky-600 rounded-md px-3 py-1.5 w-full leading-5"> */}
                                 {/* <button className="text-sm font-bold text-smoke-900 bg-gradient-to-b bg-[#23f7dd] hover:bg-[#08d3ba] rounded-md px-3 py-1.5 w-full leading-5"> */}
-                                <button className="text-sm font-bold text-white bg-[#1475e1] hover:bg-[#1475e1] rounded-md px-3 py-1.5 w-full leading-5">
+                                {/* <button className="text-sm font-bold text-white bg-[#1475e1] hover:bg-[#1475e1] rounded-md px-3 py-1.5 w-full leading-5"> */}
+                                <button className="text-sm font-bold text-smoke-900 bg-jade-500 hover:bg-jade-600 rounded-md px-3 py-1.5 w-full leading-5">
                                     Enter Now
                                     {/* Enter
                                                         <br />

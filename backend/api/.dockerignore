@@ -1,1 +1,28 @@
-**/node_modules
+# General
+.git
+.gitignore
+.dockerignore
+node_modules
+npm-debug.log
+yarn-error.log
+.vscode
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dependency directories
+node_modules/
+
+# Build output
+dist/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# OS files
+.DS_Store

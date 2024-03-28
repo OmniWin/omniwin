@@ -17,7 +17,7 @@ const ToastViewport = React.forwardRef<
     ref={ref}
     className={cn(
       // "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
-      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:top-0 sm:right-0 sm:bottom-auto sm:flex-col md:max-w-[420px]",
+      "fixed top-0 z-[1000] flex max-h-screen w-full flex-col-reverse p-4 sm:top-0 sm:right-0 sm:bottom-auto sm:flex-col md:max-w-[420px]",
       className
     )}
     {...props}
@@ -30,9 +30,11 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "border bg-white text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50",
+        default: "border bg-white text-zinc-950 dark:bg-zinc-900 dark:text-zinc-50 w-auto",
         destructive:
           "destructive group border-red-500 bg-red-500 text-zinc-50 dark:border-red-900 dark:bg-red-900 dark:text-zinc-50",
+        error: "border-blood-500 text-zinc-50 dark:border-blood-900 bg-zinc-900 dark:text-zinc-50 justify-normal items-start",
+        success: "border-green-500 text-zinc-50 dark:border-green-900 bg-zinc-900 dark:text-zinc-50 justify-normal items-start",
       },
     },
     defaultVariants: {

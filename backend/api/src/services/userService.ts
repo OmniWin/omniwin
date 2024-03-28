@@ -15,8 +15,33 @@ export class UserService {
         return user;
     }
 
+    async createUser(data: any) {
+        return await this.userRepository.createUser(data);
+    }
+
     async fetchUserSettings(address: string) {
-        return await this.userRepository.findByAddress(address);
+        return await this.userRepository.findByAddress(address, {
+            address: true,
+            username: true,
+            // avatar: true,
+            email: true,
+            twitter: true,
+            discord: true,
+            telegram: true,
+            description: true,
+        });
+    }
+
+    async getUserByReferralCode(referralCode: string) {
+        return await this.userRepository.getUserByReferralCode(referralCode);
+    }
+
+    async exists(address: string) {
+        return await this.userRepository.exists(address);
+    }
+
+    async updateUser(address: string, data: any) {
+        return await this.userRepository.updateUser(address, data);
     }
 
 }

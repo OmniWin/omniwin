@@ -1,22 +1,23 @@
 import { SiweMessage } from 'siwe'
 import { createSIWEConfig } from '@web3modal/siwe'
+import { getCsrfToken, signIn, signOut, getSession } from 'next-auth/react'
 import type { SIWECreateMessageArgs, SIWESession, SIWEVerifyMessageArgs } from '@web3modal/core'
-import { getNonce, getSession, signOut, validateMessage } from '@/app/services/authService'
-export const siweConfig = createSIWEConfig({
-  createMessage: ({ nonce, address, chainId }: SIWECreateMessageArgs) =>
-    new SiweMessage({
+
+const siweConfig = createSIWEConfig({
+  createMessage: ({ nonce, address, chainId }: SIWECreateMessageArgs) => {
+    console.log('nonce', nonce, 'address', address, 'chainId', chainId)
+    return new SiweMessage({
       version: '1',
       domain: window.location.host,
       uri: window.location.origin,
       address,
       chainId,
       nonce,
-      // Human-readable ASCII assertion that the user will sign, and it must not contain `\n`.
-      statement: 'Sign in to Omniwin.'
-    }).prepareMessage(),
+      statement: 'Sign in OmniWin dApp.'
+    }).prepareMessage()
+  },
   getNonce: async () => {
-    // Fetch nonce from your SIWE server
-    const nonce = await getNonce()
+    const nonce = await getCsrfToken()
     if (!nonce) {
       throw new Error('Failed to get nonce!')
     }
@@ -24,36 +25,40 @@ export const siweConfig = createSIWEConfig({
     return nonce
   },
   getSession: async () => {
-    // Fetch currently authenticated user
     const session = await getSession()
     if (!session) {
       throw new Error('Failed to get session!')
     }
 
-    const { address, chainId } = session.data
+    const { address, chainId } = session as unknown as SIWESession
 
     return { address, chainId }
   },
   verifyMessage: async ({ message, signature }: SIWEVerifyMessageArgs) => {
     try {
-      // Use your SIWE server to verify if the message and the signature are valid
-      // Your back-end will tipically rely on SiweMessage(message).validate(signature)
-      const isValid = await validateMessage({ message, signature })
+      const success = await signIn('credentials', {
+        message,
+        redirect: false,
+        signature,
+        callbackUrl: '/protected'
+      })
 
-      return isValid
+      return Boolean(success?.ok)
     } catch (error) {
       return false
     }
   },
   signOut: async () => {
     try {
-      // Sign out by calling the relevant endpoint on your back-end
-      console.log('Signing out called from siweConfig.')
-      await signOut()
+      await signOut({
+        redirect: false
+      })
 
       return true
     } catch (error) {
       return false
     }
-  },
+  }
 })
+
+export default siweConfig

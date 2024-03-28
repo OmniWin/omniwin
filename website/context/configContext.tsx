@@ -1,38 +1,47 @@
 'use client'
 
 import React, { ReactNode } from 'react'
-import { config, projectId } from '@/config'
+// import { config, projectId } from '@/config'
 
-import { createWeb3Modal } from '@web3modal/wagmi/react'
+import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react'
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+// import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-import { State, WagmiProvider } from 'wagmi'
-import { siweConfig } from '@/config/siweConfig'
+import { WagmiConfig } from 'wagmi'
+import siweConfig from '@/config/siweConfig'
+import { mainnet, sepolia } from 'wagmi/chains'
 
 // Setup queryClient
-const queryClient = new QueryClient()
+// const queryClient = new QueryClient()
+const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+
+if (!projectId) throw new Error("Missing NEXT_PUBLIC_PROJECT_ID");
+
+const wagmiConfig = defaultWagmiConfig({
+  chains: [mainnet, sepolia],
+  projectId,
+});
+
 
 if (!projectId) throw new Error('Project ID is not defined')
 
 // Create modal
 createWeb3Modal({
     siweConfig,
-    wagmiConfig: config,
+    wagmiConfig,
     projectId,
-    enableAnalytics: true // Optional - defaults to your Cloud configuration
+    enableAnalytics: true,
 })
 
 export function Web3Modal({
     children,
-    initialState
 }: {
     children: ReactNode
-    initialState?: State
 }) {
     return (
-        <WagmiProvider config={config} initialState={initialState}>
-            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-        </WagmiProvider>
+        <WagmiConfig config={wagmiConfig as any}>
+            {/* <QueryClientProvider client={queryClient}>{children}</QueryClientProvider> */}
+            {children}
+        </WagmiConfig>
     )
 }

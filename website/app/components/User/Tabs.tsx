@@ -44,21 +44,22 @@ export default function UserTabs() {
         );
     }, [path]);
 
+    // Scroll to active tab on mount
+    useEffect(() => {
+        const activeTab = navigation.find((tab) => tab.current);
+        if (activeTab) {
+            const tab = document.querySelector(`[href="${activeTab.href}"]`);
+            if (tab) {
+                tab.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+            }
+        }
+    }, [navigation]);
+
     return (
         <>
-            {/* <div className="mx-auto max-w-5xl 2xl:max-w-7xl 3xl:max-w-8xl px-4 sm:px-6 lg:px-8 relative z-[2] py-10">
-                <nav className="flex space-x-4" aria-label="Tabs">
-                    {tabs.map((tab, key) => (
-                        <Link key={tab.name} href={tab.href}>
-                            <Button variant={tab.current ? "soft" : "ghost"}>{tab.name}</Button>
-                        </Link>
-                    ))}
-                </nav>
-            </div> */}
-
             <div className="sticky -top-[45px] bg-zinc-900 z-[30] border-b border-zinc-800 -mx-3 md:-mx-12">
-                <div className="mx-auto max-w-5xl 2xl:max-w-7xl 3xl:max-w-8xl px-4 sm:px-6 lg:px-8 relative z-[2]">
-                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                <div className="mx-auto w-full sm:max-w-5xl 2xl:max-w-7xl 3xl:max-w-8xl px-4 sm:px-6 lg:px-8 relative z-[2] overflow-scroll no-scrollbar">
+                    <nav className="-mb-px flex space-x-2 sm:space-x-8 justify-center sm:justify-normal" aria-label="Tabs">
                         {navigation.map((tab) => (
                             <Link
                                 key={tab.name}

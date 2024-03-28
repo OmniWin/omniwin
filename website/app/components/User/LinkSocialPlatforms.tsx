@@ -12,24 +12,103 @@ import { faEnvelope } from "@fortawesome/free-regular-svg-icons";
 import { syncSocialPlatforms } from "@/app/services/userSettingsService";
 
 import TelegramLoginButton, { TelegramUser } from 'telegram-login-button'
+import { useDiscordLogin, UseDiscordLoginParams } from 'react-discord-login';
 
-const platforms = [
+const staticPlatforms = [
     { id: "twitter", label: "Twitter", icon: faXTwitter, color: "text-black", iconType: "fontawesome" },
     { id: "discord", label: "Discord", icon: faDiscord, color: "text-discord", iconType: "fontawesome" },
     { id: "telegram", label: "Telegram", icon: faTelegram, color: "text-telegram", iconType: "fontawesome" },
-    { id: "email", label: "Email", icon: faEnvelope, color: "text-black", iconType: "svg" },
+    // { id: "email", label: "Email", icon: faEnvelope, color: "text-black", iconType: "svg" },
 ];
 
+import { useSelector, useDispatch, userSettingsSlice } from "@/lib/redux";
+import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
+
 const LinkSocialPlatforms: React.FC = () => {
+    const dispatch = useDispatch();
+    const userSettingsState = useSelector(selectUserSettingsState);
+    const [platforms, setPlatforms] = React.useState(staticPlatforms);
+
+    const discordLoginParams: UseDiscordLoginParams = {
+        clientId: '1220451304674037801',
+        redirectUri: 'http://omniwin.local/profile/settings',
+        responseType: 'token', // or 'code'
+        scopes: ['identify', 'email'],
+        onSuccess: (response: any) => {
+            // Handle successful login
+            console.log('Login successful:', response);
+            handleSync('discord', response);
+        },
+        onFailure: (error: any) => {
+            // Handle login failure
+            console.error('Login failed:', error);
+        },
+    };
+
+    const { buildUrl, isLoading } = useDiscordLogin(discordLoginParams);
+
+    // Let's add user socials to the platforms array [socials are in userSettingsState.user.twitter, userSettingsState.user.discord, userSettingsState.user.telegram, userSettingsState.user.email]
+
+    React.useEffect(() => {
+        if (userSettingsState.user) {
+            setPlatforms((prevPlatforms) =>
+                prevPlatforms.map((platform) => {
+                    if (platform.id === "twitter") {
+                        return { ...platform, synced: !!Object.keys(userSettingsState.user?.twitter ?? {}).length , value: userSettingsState.user.twitter?.username ?? '' };
+                    }
+                    if (platform.id === "discord") {
+                        return { ...platform, synced: !!Object.keys(userSettingsState.user?.discord ?? {}).length , value: userSettingsState.user.discord?.user?.username };
+                    }
+                    if (platform.id === "telegram") {
+                        return { ...platform, synced: !!Object.keys(userSettingsState.user?.telegram ?? {}).length , value: userSettingsState.user.telegram?.username };
+                    }
+                    if (platform.id === "email") {
+                        return { ...platform, synced: !!userSettingsState.user.email, value: userSettingsState.user.email };
+                    }
+                    return platform;
+                })
+            );
+        }
+    }, [userSettingsState.user]);
+
     const handleSync = async (platformId: string, user?: TelegramUser) => {
         // Placeholder for actual sync logic
-        syncSocialPlatforms(platformId, user).then((res) => console.log(`Synced ${platformId}`, res));
+        syncSocialPlatforms(platformId, user).then((res) => {
+            // Update userSettingsState.user with the new data based on the platform
+            switch (platformId) {
+                case "twitter":
+                    dispatch(userSettingsSlice.actions.setUser({ ...userSettingsState.user, twitter: res }));
+                    break;
+                case "discord":
+                    dispatch(userSettingsSlice.actions.setUser({ ...userSettingsState.user, discord: res }));
+                    break;
+                case "telegram":
+                    dispatch(userSettingsSlice.actions.setUser({ ...userSettingsState.user, telegram: res }));
+                    break;
+                // case "email":
+                //     dispatch(userSettingsSlice.actions.setUser({ ...userSettingsState.user, email: res.data }));
+                //     break;
+                default:
+                    break;
+            }
+        });
         console.log(`Synced ${platformId}`);
     };
 
+    const handleOnClick = (platformId: string) => {
+        if (platformId === "telegram") {
+            return;
+        } else if (platformId === "twitter") {
+            // window.open('https://api.twitter.com/oauth/authenticate?oauth_token=1234567890', '_blank');
+        } else if (platformId === "discord") {
+            window.open(buildUrl());
+        }
+        console.log(`Clicked ${platformId}`);
+    }
+
     return (
         <div className="space-y-4">
-            {platforms.map((platform) => (
+            {platforms.map((platform: any) => (
                 <div
                     key={platform.id}
                     className="space-x-3 flex items-center px-3 py-2 h-full rounded-xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
@@ -59,17 +138,27 @@ const LinkSocialPlatforms: React.FC = () => {
                             </>
                         )}
                     </div>
-                    <span className="flex-1 text-zinc-200">Not synced</span>
-                    <Button onClick={() => platform.id === 'telegram' ? '' : handleSync(platform.id)} variant="secondary" className="relative">
+                    <span className="flex-1 text-zinc-200 space-x-1">
+                        <span>{!platform.synced && platform.label}</span>
+                        <span className="text-zinc-400">{platform.synced ? `Connected as ${platform.value}` : "Not Synced"}</span>
+                    </span>
+                    {!platform.synced && <Button onClick={() => handleOnClick(platform.id)} variant="secondary" className="relative">
                         <span>
                             {platform.id === 'telegram' && <TelegramLoginButton
-                                // className="opacity-0 absolute left-0 top-0 w-full h-full"
+                                className="opacity-0 absolute left-0 top-0 w-full h-full"
                                 botName={process.env.NEXT_PUBLIC_BOT_USERNAME || ''}
                                 dataOnauth={(user: TelegramUser) => handleSync('telegram', user)}
                             />}
+                            {/* {platform.id === 'twitter' && <TwitterLogin
+                                // className="opacity-0 absolute left-0 top-0 w-full h-full"
+                                authCallback={(err, res) => console.log('caca', err, res)}
+                                consumerKey={process.env.TWITTER_CONSUMER_KEY || ''}
+                                consumerSecret={process.env.TWITTER_CONSUMER_SECRET || ''}
+                            />} */}
                             Sync
                         </span>
-                    </Button>
+                    </Button>}
+
                 </div>
             ))}
         </div>

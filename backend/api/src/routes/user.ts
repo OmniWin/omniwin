@@ -2,9 +2,23 @@ import { FastifyInstance } from "fastify";
 import { UserController } from '../controllers/userController';
 
 async function routes(fastify: FastifyInstance, options: any) {
-    fastify.post('/user/settings', {
+    fastify.get('/user/settings', {
         onRequest: [fastify.authenticate],
     }, UserController.settings)
+
+    // Create user if not exists
+    fastify.post('/user', {
+        onRequest: [],
+    }, UserController.create)
+
+    // Update user settings
+    fastify.put('/user', {
+        // onRequest: [fastify.authenticate],
+        onRequest: [fastify.authenticate],
+    }, UserController.update)
+
+    // Check if user exists
+    fastify.post('/user/exists', UserController.exists)
 }
 
 export default routes;

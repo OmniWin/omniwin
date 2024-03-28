@@ -79,18 +79,29 @@ model User {
   updated_at          DateTime  @default(now()) @updatedAt
   email               String?   @unique
   username            String?   @unique
-  description         String?   @db.Text
+  description         String?   @db.VarChar(600)
   issued_at           DateTime?
   chainId             Int
-  telegram            Json?   @default("{}")
-  twitter             Json?   @default("{}")
-  discord             Json?   @default("{}")
+  avatar              String?   @default("")
+  telegram            Json?     @default("{}")
+  twitter             Json?     @default("{}")
+  discord             Json?     @default("{}")
+  referral_code       String?   @unique
   Season_Leaderboard  Season_Leaderboard[]
   User_Quests         User_Quests[]
   User_Quest_Steps    User_Quest_Steps[]
+  Referral            Referral[]
 
   @@index([username])
   @@index([email])
+}
+
+model Referral {
+  id                Int      @id @default(autoincrement())
+  referred_user_id  Int
+  referral_code     String
+  created_at        DateTime @default(now())
+  User              User     @relation(fields: [referred_user_id], references: [id_user])
 }
 
 model Favorites {
