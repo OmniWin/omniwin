@@ -7,6 +7,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import {routerConfig} from "../constants/constants"
 import { omniwinMainSol } from "../typechain-types/contracts/mainChain";
+import exp from "constants";
 enum ASSET_TYPE {
     ERC20,
     ERC721,
@@ -250,7 +251,7 @@ describe("Omniwin", function () {
 
             //check funding list
             const funding = await omniwinMain.fundingList(raffleId)
-            expect(funding).to.be.equal(minimumFundsInWeis);
+            expect(funding.minimumFundsInWei).to.be.equal(minimumFundsInWeis);
 
             const contractPricesList = await omniwinMain.pricesList(raffleId,0);
             expect(contractPricesList.price).to.be.equal(prices[0].price);
@@ -1349,7 +1350,7 @@ describe("Omniwin", function () {
     describe("Raffle vrf", function () {
         beforeEach(async function () {
             // Load the initial setup fixture
-            const { omniwinMain,omniwinSide,usdc, nft, erc20, owner, otherAccount,MockLinkToken ,MockRouterClient,vrfCoordinator} = await loadFixture(deployContract);
+            const { omniwinMain,omniwinSide, omniwinSide2, usdc, nft, erc20, owner, otherAccount,MockLinkToken ,MockRouterClient,vrfCoordinator} = await loadFixture(deployContract);
 
             const minimumFundsInWeis = ethers.parseUnits("3", 6);
             const assetType = 0; // ERC20 token, adjust based on enum order
@@ -1359,19 +1360,20 @@ describe("Omniwin", function () {
 
             //allow destination chain - allow messages from main chain to be sent only to BNBTestnet
             await omniwinMain.allowlistDestinationChain(routerConfig.bnbChainTestnet.chainSelector, true);
+            await omniwinMain.allowlistDestinationChain(routerConfig.polygonMumbai.chainSelector, true);
 
             //alow source chain from sidecontract. We allow to receive messages from main chain (sourceChainSelector)
             const sourceChainSelector = routerConfig.ethereumSepolia.chainSelector;
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true); //sepolia chainSelector cuz its hardcoded in the mockup
-
             //allow sender from main contract. We allow main contract (the address) to send messages to side contract
             await omniwinSide.allowlistSender(omniwinMain.target, true);
-
-
             await omniwinMain.allowlistSourceChain(sourceChainSelector, true); //sepolia chainSelector cuz its hardcoded in the mockup
-
             await omniwinMain.allowlistSender(omniwinSide.target, true);
 
+            await omniwinSide2.allowlistSourceChain(sourceChainSelector, true); //sepolia chainSelector cuz its hardcoded in the mockup
+            //allow sender from main contract. We allow main contract (the address) to send messages to side contract
+            await omniwinSide2.allowlistSender(omniwinMain.target, true);
+            await omniwinMain.allowlistSender(omniwinSide2.target, true);
 
             //mint some USDC
             const mintAmount = ethers.parseUnits("10000", 6);
@@ -1426,13 +1428,21 @@ describe("Omniwin", function () {
                 {
                     ccnsReceiverAddress: omniwinSide.target, // This should be an Ethereum address
                     chainSelector: routerConfig.bnbChainTestnet.chainSelector, // This should be a numerical chain identifier
-                    gasLimit: 300_000,
+                    gasLimit: 350_000,
+                    strict: false
+                },
+                {
+                    ccnsReceiverAddress: omniwinSide2.target, // This should be an Ethereum address
+                    chainSelector: routerConfig.polygonMumbai.chainSelector, // This should be a numerical chain identifier
+                    gasLimit: 350_000,
                     strict: false
                 }
             ];
 
+            const gasLimit = chainSelectors.map((chain) => chain.gasLimit).reduce((a, b) => a + b, 0);
+
             // Enable raffle on sidechain
-            const tx2 = await omniwinMain.connect(otherAccount).enableCreateRafffleOnSidechain(0, chainSelectors);
+            const tx2 = await omniwinMain.connect(otherAccount).enableCreateRafffleOnSidechain(0, chainSelectors, { gasLimit: gasLimit });
 
 
             const raffleId = 0
@@ -1472,13 +1482,25 @@ describe("Omniwin", function () {
             await buyTx1Side.wait();
 
 
+
+
+             // C. Buy tickets on side chain 2
+            //give allowance to omniwin side for first buy
+            await usdc.connect(otherAccount).approve(omniwinSide2.target, prices[priceIndex].price);
+            expect(await usdc.allowance(otherAccount.address, omniwinSide2.target)).to.be.equal(prices[priceIndex].price);
+
+            // Buy entry type 1
+            const buyTx2Side = await omniwinSide2.connect(otherAccount).buyEntry(raffleId, priceIndex, prices[priceIndex].price);
+            await buyTx2Side.wait();
+
+
             const funding = await omniwinMain.rafflesEntryInfo(raffleId)
-            const totalFunding = prices[priceIndex].price + prices[priceIndex].price + price2;
+            const totalFunding = prices[priceIndex].price + prices[priceIndex].price + price2 + prices[priceIndex].price;
 
             expect(funding[2]).to.be.equal(totalFunding);
             
             // Extend this object with more properties as needed by tests
-            this.testContext = { omniwinMain, omniwinSide,usdc, erc20, otherAccount,vrfCoordinator };
+            this.testContext = { omniwinMain, omniwinSide, omniwinSide2,usdc, erc20, otherAccount,vrfCoordinator };
         });
 
         it("Pick a winner", async function () {
@@ -1489,19 +1511,59 @@ describe("Omniwin", function () {
             console.log("omniwinMain: ",omniwinMain.target);
 
             //set winner
-            const tx = await omniwinMain.setWinner(raffleId);
+            const callbackGasLimit = 300_000;
+            const requestConfirmations = 10;
+            const randomness = 1;
+            const tx = await omniwinMain.setWinner(raffleId, callbackGasLimit, requestConfirmations, randomness);
 
             //check for event
             const amountRaised = (await omniwinMain.rafflesEntryInfo(raffleId))[2];
             console.log("Usd raised: ",BigInt(amountRaised)/BigInt(10**6));
 
-
-
             await expect(tx).to.emit(omniwinMain, "SetWinnerTriggered").withArgs(raffleId, amountRaised);
 
+            //manually call fulfillRandomWords (on mainnet chainlink will do this)
             const requestId = 1;
-            const tx2 = await vrfCoordinator.fulfillRandomWords(requestId,omniwinMain.target)
-            const tx2Receipt = await tx2.wait();
+            await vrfCoordinator.fulfillRandomWords(requestId,omniwinMain.target)
+
+
+            //we send all supported chains, and let the contract check it should send messages to them
+            const allSupportedChains = [
+                {
+                    ccnsReceiverAddress: omniwinSide.target,
+                    gasLimit: 500_000,
+                    strict: false,
+                    chainSelector: routerConfig.bnbChainTestnet.chainSelector
+                }
+            ] 
+            //After fulfillRandomWords has been called => winner has been set in the raffle
+            const tx2 = await omniwinMain.sendPrizeDistributionMessages(raffleId, allSupportedChains)
+            await expect(tx2).to.emit(omniwinMain, "FeeTransferredToPlatform")
+
+            for(let chain of allSupportedChains){
+                await expect(tx2).to.emit(omniwinMain, "PrizeDistributionToSidechain")
+            }
+
+
+
+            const fundingList = await omniwinMain.fundingList(raffleId);
+            expect(fundingList.platformFeeCollected).to.be.equal(true);
+
+            //FeeTransferredToPlatform
+
+            //check if winner has been set
+            const winner = await omniwinMain.raffles(raffleId);
+            expect(winner.winner).to.be.equal(otherAccount.address);
+
+            //claim raised money on main chain
+            await omniwinMain.connect(otherAccount).claimCash(raffleId);
+
+            const winnerBalanceBefore = await erc20.balanceOf(otherAccount.address);
+            //winner claim prize
+            await omniwinMain.connect(otherAccount).claimPrize(raffleId);
+            //expect winner to hold the prize
+            const winnerBalanceAfterClaim = await erc20.balanceOf(otherAccount.address);
+            expect(winnerBalanceAfterClaim).to.be.equal(winnerBalanceBefore + BigInt(100));
         });
     });
 });

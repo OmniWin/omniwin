@@ -38,8 +38,8 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     }
 
     enum STATUS {
-        ACCEPTED, // the seller stakes the nft for the raffle
         PENDING, // the raffle is pending to be created - waiting for ack from main chain
+        ACCEPTED, // the seller stakes the nft for the raffle
         CANCELLED, // the operator cancels the raffle and transfer the remaining funds after 30 days passes
         CLOSING_REQUESTED, // the operator sets a winner
         ENDED, // the raffle is finished, and NFT and funds were transferred
@@ -56,7 +56,8 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         CREATE_RAFFLE_FROM_SIDECHAIN,
         CREATE_RAFFLE_ACK,
         BUY_ENTRY,
-        CREATE_RAFFLE_FROM_MAINCHAIN
+        CREATE_RAFFLE_FROM_MAINCHAIN,
+        PRIZE_DISTRIBUTION
     }
 
     event MessageSent(bytes32 messageId);
@@ -100,10 +101,18 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     error RaffleAlreadyExists();
     error NotTheOwner();
     error NotTheSeller();
+    error NotTheWinner();
+    error PrizeNotHere();
+    error AlreadyClaimed();
+    error FailedToSendCashForSeller();
 
     // Every raffle has a funding structure.
     struct FundingStructure {
         uint128 minimumFundsInWeis;
+        bool platformFeeCollected;
+        bool prizeClaimed;
+        bool cashClaimed;
+        uint256 amountForSeller;
     }
 
     struct CreateRaffle {
@@ -312,7 +321,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         uint128 _minimumFundsInWei,
         PriceStructure[] calldata _prices,
         uint256 _deadlineDuration,
-        address sender
+        address seller
     ) internal returns (bytes32 messageId) {
         //min gas needed for send and ack message
         uint256 gasLimit = 700_000;
@@ -325,7 +334,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
                 _minimumFundsInWei,
                 _prices,
                 _deadlineDuration,
-                sender
+                seller
             ),
             tokenAmounts: new Client.EVMTokenAmount[](0),
             extraArgs: Client._argsToBytes(
@@ -367,15 +376,98 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         uint8 messageType = abi.decode(any2EvmMessage.data, (uint8));
 
         if (messageType == uint8(MESSAGE_TYPE.CREATE_RAFFLE_ACK)) {
-            handleCreateRaffleAck(any2EvmMessage);
+            _handleCreateRaffleAck(any2EvmMessage);
         }
 
         if (messageType == uint8(MESSAGE_TYPE.CREATE_RAFFLE_FROM_MAINCHAIN)) {
             handleCreateRaffleFromMainChain(any2EvmMessage);
         }
+
+        if (messageType == uint8(MESSAGE_TYPE.PRIZE_DISTRIBUTION)) {
+            _handlePrizeDistribution(any2EvmMessage);
+        }
     }
 
-    function handleCreateRaffleAck(
+    function _handlePrizeDistribution(
+        Client.Any2EVMMessage memory message
+    ) internal {
+        console.log("Sidechain prize distribution");
+        (
+            uint8 messageType,
+            uint256 raffleId,
+            address winner,
+            address seller,
+            uint256 amountForSeller
+        ) = abi.decode(
+                message.data,
+                (uint8, uint256, address, address, uint256)
+            );
+
+        RaffleStruct storage raffle = raffles[raffleId];
+        raffle.winner = winner;
+
+        fundingList[raffleId].amountForSeller = amountForSeller;
+    }
+
+    function claimCash(uint256 _raffleId) external nonReentrant {
+        RaffleStruct storage raffle = raffles[_raffleId];
+
+        if (raffle.seller != msg.sender) {
+            revert NotTheSeller();
+        }
+
+        if (fundingList[_raffleId].cashClaimed) {
+            revert AlreadyClaimed();
+        }
+
+        IERC20 usdc = IERC20(usdcContractAddress);
+        //check contract balance of usdc
+        if (
+            !usdc.transfer(msg.sender, fundingList[_raffleId].amountForSeller)
+        ) {
+            revert FailedToSendCashForSeller();
+        }
+
+        fundingList[_raffleId].cashClaimed = true;
+    }
+
+    function claimPrize(uint256 _raffleId) external nonReentrant {
+        RaffleStruct storage raffle = raffles[_raffleId];
+
+        if (raffle.assetType == ASSET_TYPE.CCIP) {
+            revert PrizeNotHere();
+        }
+
+        if (raffle.winner != msg.sender) {
+            revert NotTheWinner();
+        }
+
+        if (fundingList[_raffleId].prizeClaimed) {
+            revert AlreadyClaimed();
+        }
+
+        if (raffle.assetType == ASSET_TYPE.ERC721) {
+            IERC721(raffle.prizeAddress).transferFrom(
+                address(this),
+                msg.sender,
+                raffle.prizeNumber
+            );
+        } else if (raffle.assetType == ASSET_TYPE.ERC20) {
+            IERC20(raffle.prizeAddress).transfer(
+                msg.sender,
+                raffle.prizeNumber
+            );
+        } else if (raffle.assetType == ASSET_TYPE.ETH) {
+            (bool sent, ) = payable(msg.sender).call{value: raffle.prizeNumber}(
+                ""
+            );
+            require(sent, "Failed to send ETH to winner");
+        }
+
+        fundingList[_raffleId].prizeClaimed = true;
+    }
+
+    function _handleCreateRaffleAck(
         Client.Any2EVMMessage memory message
     ) internal {
         (
@@ -403,7 +495,13 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
 
         saveEntryInfo(raffleId);
 
-        fundingList[raffleId] = FundingStructure({minimumFundsInWeis: 0});
+        fundingList[raffleId] = FundingStructure({
+            minimumFundsInWeis: 0,
+            platformFeeCollected: false,
+            prizeClaimed: false,
+            cashClaimed: false,
+            amountForSeller: 0
+        });
 
         tempRaffles[messageId].msgStatus = MessageStatus.PROCESSEDONDESTINATION;
 
@@ -447,7 +545,13 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
 
         saveEntryInfo(raffleId);
 
-        fundingList[raffleId] = FundingStructure({minimumFundsInWeis: 0});
+        fundingList[raffleId] = FundingStructure({
+            minimumFundsInWeis: 0,
+            platformFeeCollected: false,
+            prizeClaimed: false,
+            cashClaimed: false,
+            amountForSeller: 0
+        });
 
         emit RaffleCreated(raffleId, address(0), 0, ASSET_TYPE.CCIP);
     }

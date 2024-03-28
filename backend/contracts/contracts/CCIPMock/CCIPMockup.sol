@@ -96,7 +96,7 @@ contract MockCCIPRouter is IRouter, IRouterClient {
     /// @dev Returns a mock message ID, which is not calculated from the message contents in the
     /// same way as the real message ID.
     function ccipSend(
-        uint64, // destinationChainSelector
+        uint64 destinationChainSelector, // destinationChainSelector
         Client.EVM2AnyMessage calldata message
     ) external payable returns (bytes32) {
         if (message.receiver.length != 32)
