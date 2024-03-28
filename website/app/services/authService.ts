@@ -1,5 +1,5 @@
-// const domain = process.env.NEXT_PUBLIC_API_URL;
-const domain = 'http://omniwin.local/b';
+const domain = process.env.NEXT_PUBLIC_API_URL;
+// const domain = 'http://omniwin.local/b';
 
 export const createAccount = async (body: any) => {
     try {

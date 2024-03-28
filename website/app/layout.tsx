@@ -27,7 +27,7 @@ import type { Metadata } from "next";
 // import { cookieToInitialState } from "wagmi";
 
 // import { config } from "@/config";
-import { Web3Modal } from "@/context";
+// import { Web3Modal } from "@/context";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -48,11 +48,11 @@ export default async function RootLayout(props: React.PropsWithChildren) {
                     </head>
                     <body className={inter.className}>
                         <SessionProvider session={session} refetchInterval={0}>
-                            <Web3Modal>
+                            {/* <Web3Modal> */}
                                 {/* <MainLayout>{pageProps.children}</MainLayout> */}
                                 <MainLayout>{props.children}</MainLayout>
                                 <Toaster />
-                            </Web3Modal>
+                            {/* </Web3Modal> */}
                         </SessionProvider>
                     </body>
                 </html>
