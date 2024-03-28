@@ -1,5 +1,6 @@
 // const getDomain = () => process.env[typeof window === 'undefined' ? 'NEXT_PUBLIC_SSR_API_URL' : 'NEXT_PUBLIC_API_URL'];
-const domain = 'http://omniwin.local/b';
+// const domain = 'http://omniwin.local/b';
+const domain = process.env.NEXT_PUBLIC_API_URL;
 
 export const syncSocialPlatforms = async (platform: string, data: any) => {
     try {
