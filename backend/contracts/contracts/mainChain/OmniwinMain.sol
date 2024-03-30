@@ -271,7 +271,6 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
     error FailSendEthToOW();
     error EntryDoesNotBelongToPlayer();
     error NumEntriesIsZero();
-    error DuplicateChainSelectorError();
     error DestinationChainNotAllowlisted();
     error SourceChainNotAllowlisted(); // Used when the source chain has not been allowlisted by the contract owner.
     error SenderNotAllowlisted(); // Used when the sender has not been allowlisted by the contract owner.
@@ -663,60 +662,42 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
 
     function enableCreateRafffleOnSidechain(
         uint256 _raffleId,
-        SChains[] calldata _chainSelectors
+        SChains calldata _chainSelector
     ) external {
         RaffleStruct storage raffle = raffles[_raffleId];
         if (raffle.seller != msg.sender) {
             revert NotTheSeller();
         }
 
-        for (uint256 i = 0; i < _chainSelectors.length; i++) {
-            for (uint256 j = i + 1; j < _chainSelectors.length; j++) {
-                if (
-                    _chainSelectors[i].chainSelector ==
-                    _chainSelectors[j].chainSelector
-                ) {
-                    revert DuplicateChainSelectorError();
-                }
-            }
-        }
-
         // Check if each chainSelector is allowlisted
-        for (uint256 i = 0; i < _chainSelectors.length; i++) {
-            if (
-                !allowlistedDestinationChains[_chainSelectors[i].chainSelector]
-            ) {
-                revert DestinationChainNotAllowlisted();
-            }
+        if (!allowlistedDestinationChains[_chainSelector.chainSelector]) {
+            revert DestinationChainNotAllowlisted();
         }
 
-        for (uint256 i = 0; i < _chainSelectors.length; i++) {
-            SChains memory currentChain = _chainSelectors[i];
-            MESSAGE_TYPE messageType = MESSAGE_TYPE
-                .CREATE_RAFFLE_FROM_MAINCHAIN;
+        SChains memory currentChain = _chainSelector;
+        MESSAGE_TYPE messageType = MESSAGE_TYPE.CREATE_RAFFLE_FROM_MAINCHAIN;
 
-            bytes memory data = abi.encode(
-                messageType,
-                pricesList[_raffleId],
-                raffle.deadline,
-                _raffleId
-            );
-            bytes32 messageId = sendMessage(
-                currentChain.chainSelector,
-                currentChain.ccnsReceiverAddress,
-                data,
-                currentChain.gasLimit
-            );
+        bytes memory data = abi.encode(
+            messageType,
+            pricesList[_raffleId],
+            raffle.deadline,
+            _raffleId
+        );
+        bytes32 messageId = sendMessage(
+            currentChain.chainSelector,
+            currentChain.ccnsReceiverAddress,
+            data,
+            currentChain.gasLimit
+        );
 
-            emit CreateRaffleToSidechain(
-                _raffleId,
-                currentChain.ccnsReceiverAddress,
-                currentChain.chainSelector,
-                currentChain.gasLimit,
-                currentChain.strict,
-                messageId
-            );
-        }
+        emit CreateRaffleToSidechain(
+            _raffleId,
+            currentChain.ccnsReceiverAddress,
+            currentChain.chainSelector,
+            currentChain.gasLimit,
+            currentChain.strict,
+            messageId
+        );
     }
 
     function handleAssetTransferAndValidation(
@@ -820,6 +801,8 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         }
 
         fundingList[_raffleId].cashClaimed = true;
+
+        //emit claimed cash
     }
 
     function claimPrize(uint256 _raffleId) external nonReentrant {
@@ -866,6 +849,8 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         }
 
         fundingList[_raffleId].prizeClaimed = true;
+
+        //emit claimed prize
     }
 
     function claimRefundTickets(uint256 _raffleId) external nonReentrant {
@@ -1247,10 +1232,11 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             uint128 minimumFundsInWei,
             PriceStructure[] memory prices,
             uint256 deadline,
-            address seller
+            address seller,
+            uint256 gasLimitAck
         ) = abi.decode(
                 message.data,
-                (uint8, uint128, PriceStructure[], uint256, address)
+                (uint8, uint128, PriceStructure[], uint256, address, uint256)
             );
 
         uint256 raffleId = _createRaffle(
@@ -1279,7 +1265,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             message.sourceChainSelector,
             _sender,
             data,
-            300_000
+            gasLimitAck
         );
 
         emit AckRaffleCreationFromSidechain(
@@ -1287,15 +1273,6 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             _sender,
             testMessageIdSourceChain,
             messageId
-        );
-
-        emit RaffleCreatedFromSidechain(
-            raffleId,
-            minimumFundsInWei,
-            prices,
-            deadline,
-            seller,
-            testMessageIdSourceChain
         );
     }
 
