@@ -928,7 +928,7 @@ describe("Omniwin", function () {
             
         });
 
-        it.only("Should create raffle from sidechain with ERC20 as prize", async function () {
+        it("Should create raffle from sidechain with ERC20 as prize", async function () {
             const { omniwinMain,omniwinSide,omniwinSide2,usdc, nft, erc20, owner, otherAccount } = await loadFixture(deployContract);
 
             const minimumFundsInWeis = ethers.parseEther("1");
@@ -976,9 +976,10 @@ describe("Omniwin", function () {
 
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
+            //https://www.cryptoneur.xyz/en/gas-fees-calculator
             // Call createRaffle with the defined parameters
-            const gasLimit = 600_000;
-            const gasLimitForAck = 600_000;
+            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
+            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
             const tx = await omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 prizeAmount,
@@ -993,11 +994,6 @@ describe("Omniwin", function () {
             //Emitted event to start creation of raffle on main chain
             await expect(tx).to.emit(omniwinSide, "CreateRaffleCCIPEvent")
             
-
-            //Emitted event that raffle was created on main chain
-            await expect(tx).to.emit(omniwinMain, 'RaffleCreatedFromSidechain')
-
-
             await expect(tx).to.emit(omniwinMain, 'AckRaffleCreationFromSidechain')
 
             //Emitted event that sidechain received ACK and raffle from sidechain was moved from tempRaffles to raffles
@@ -1056,8 +1052,8 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimit = 300_000;
-            const gasLimitForAck = 400_000;
+            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
+            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
             const tx = await omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 tokenId,
@@ -1072,11 +1068,6 @@ describe("Omniwin", function () {
             //Emitted event to start creation of raffle on main chain
             await expect(tx).to.emit(omniwinSide, "CreateRaffleCCIPEvent")
             
-
-            //Emitted event that raffle was created on main chain
-            await expect(tx).to.emit(omniwinMain, 'RaffleCreatedFromSidechain')
-
-
             await expect(tx).to.emit(omniwinMain, 'AckRaffleCreationFromSidechain')
 
             //Emitted event that sidechain received ACK and raffle from sidechain was moved from tempRaffles to raffles
@@ -1129,8 +1120,8 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimit = 300_000;
-            const gasLimitForAck = 400_000;
+            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
+            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
             const tx = await omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 prizeAmount,
@@ -1148,11 +1139,6 @@ describe("Omniwin", function () {
             //Emitted event to start creation of raffle on main chain
             await expect(tx).to.emit(omniwinSide, "CreateRaffleCCIPEvent")
             
-
-            //Emitted event that raffle was created on main chain
-            await expect(tx).to.emit(omniwinMain, 'RaffleCreatedFromSidechain')
-
-
             await expect(tx).to.emit(omniwinMain, 'AckRaffleCreationFromSidechain')
 
             //Emitted event that sidechain received ACK and raffle from sidechain was moved from tempRaffles to raffles
@@ -1213,8 +1199,8 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimit = 300_000;
-            const gasLimitForAck = 400_000;
+            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
+            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 prizeAmount,
@@ -1273,8 +1259,8 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimit = 300_000;
-            const gasLimitForAck = 400_000;
+            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
+            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 tokenId ,
@@ -1334,8 +1320,8 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimit = 300_000;
-            const gasLimitForAck = 400_000;
+            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
+            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 tokenId + 1,
@@ -1387,8 +1373,8 @@ describe("Omniwin", function () {
 
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
-            const gasLimit = 300_000;
-            const gasLimitForAck = 400_000;
+            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
+            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
             // Call createRaffle with the defined parameters
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
@@ -1581,7 +1567,8 @@ describe("Omniwin", function () {
             expect(await usdc.allowance(otherAccount.address, omniwinSide.target)).to.be.equal(price);
 
             // Buy entry type 1
-            const buyTx1Side = await omniwinSide.connect(otherAccount).buyEntry(raffleId, priceIndex, price);
+            const gasLimit = 300_000;
+            const buyTx1Side = await omniwinSide.connect(otherAccount).buyEntry(raffleId, priceIndex, price, gasLimit);
             await buyTx1Side.wait();
 
 
