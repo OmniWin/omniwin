@@ -51,7 +51,7 @@ import { fetchRaffleData, addFavorite } from '../../services/raffleService';
 
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useWeb3Modal } from '@web3modal/wagmi/react'
+// import { useWeb3Modal } from '@web3modal/wagmi/react'
 
 import useEventSourceListener from '@/app/hooks/useSSE';
 
@@ -277,7 +277,7 @@ export default function RafflePage({
     };
 }) {
     // const queryClient = useQueryClient();
-    const { open } = useWeb3Modal()
+    // const { open } = useWeb3Modal()
     const [isMounted, setIsMounted] = useState(false);
 
     const isLoading = false
@@ -356,7 +356,8 @@ export default function RafflePage({
         try {
             const result = await addFavorite(params.id); // Send the update to the server
             if (result.message === "Unauthorized") {
-                open(); // This might require additional handling to ensure state consistency
+                // TODO: open wallet connect modal
+                // open(); // This might require additional handling to ensure state consistency
             }
         } catch (error) {
             // Revert to previous state in case of an error

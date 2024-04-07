@@ -12,8 +12,8 @@ import { checkIfUserExists, createAccount } from "@/app/services/authService";
 
 import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
-import { Button } from "@/components/ui/moving-border";
+import { Button } from "@/components/ui/button";
+import { Button as ButtonWithMovingBorder } from "@/components/ui/moving-border";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -238,9 +238,9 @@ const WalletConnect = () => {
                 // <Button variant="soft" onClick={() => dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true))}>
                 //     Connect Wallet
                 // </Button>
-                <Button onClick={() => dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true))} borderRadius="0.375rem" className={cn(buttonVariants({ variant: "soft", size: "default" }), 'bg-zinc-900')}>
+                <ButtonWithMovingBorder onClick={() => dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true))} borderRadius="0.375rem" className={cn(buttonVariants({ variant: "soft", size: "default" }), 'bg-zinc-900')}>
                     Connect Wallet
-                </Button>
+                </ButtonWithMovingBorder>
             )}
 
             {address && (

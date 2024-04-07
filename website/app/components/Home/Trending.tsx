@@ -340,12 +340,10 @@ export const Trending = () => {
             <div className="relative">
                 {display === "grid" && (
                     <div className={classNames("relative flex flex-wrap sm:grid sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-x-3 gap-y-4 lg:gap-y-3 mt-8 xl:mt-12")}>
-                        {trending.map((item) => (
-                            <>
-                                <div className="w-[calc(33%-.45rem)] sm:w-auto inline-block">
-                                    <RaffleMetaWin {...item} />
-                                </div>
-                            </>
+                        {trending.map((item, key) => (
+                            <div key={'trending'+key} className="w-[calc(33%-.45rem)] sm:w-auto inline-block">
+                                <RaffleMetaWin {...item} />
+                            </div>
                         ))}
                     </div>
                 )}
@@ -360,19 +358,17 @@ export const Trending = () => {
                         >
                             <CarouselContent className="-ml-1">
                                 {trending.map((item, key) => (
-                                    <>
-                                        <CarouselItem className={classNames("basis-1/3 lg:basis-1/4 xl:basis-1/6 2xl:basis-[10%] lg:pl-6 pl-0", key === 0 && "")}>
-                                            <div className="hardware-accelerate">
-                                                <RaffleMetaWin {...item} />
-                                            </div>
-                                        </CarouselItem>
-                                    </>
+                                    <CarouselItem key={'trendingCarousel'+key} className={classNames("basis-1/3 lg:basis-1/4 xl:basis-1/6 2xl:basis-[10%] lg:pl-3 pl-0", key === 0 && "")}>
+                                        <div className="hardware-accelerate">
+                                            <RaffleMetaWin {...item} />
+                                        </div>
+                                    </CarouselItem>
                                 ))}
                             </CarouselContent>
-                            <div className="absolute top-0 z-10 w-14 h-full to-transparent cursor-pointer group transition-all before:to-transparent before:absolute before:top-0 before:w-full before:h-full before:opacity-0 hover:before:opacity-100 before:transition-all overflow-hidden from-zinc-900/90 before:from-zinc-900/90 left-0 lg:-left-2 bg-gradient-to-r before:left-0 before:bg-gradient-to-r -translate-x-2">
+                            <div className="absolute top-0 z-10 w-14 h-full to-transparent cursor-pointer group transition-all before:to-transparent before:absolute before:top-0 before:w-full before:h-full before:opacity-0 hover:before:opacity-100 before:transition-all from-zinc-900/20 before:from-zinc-900/20 lg:from-zinc-900/90 lg:before:from-zinc-900/90 left-0 lg:-left-2 bg-gradient-to-r before:left-0 before:bg-gradient-to-r -translate-x-2">
                                 <CarouselPrevious className="left-0 transition-all group-hover:scale-110" />
                             </div>
-                            <div className="absolute top-0 z-10 w-14 h-full to-transparent cursor-pointer group transition-all before:to-transparent before:absolute before:top-0 before:w-full before:h-full before:opacity-0 hover:before:opacity-100 before:transition-all overflow-hidden from-zinc-900/90 before:from-zinc-900/90 right-0 lg:-right-2 bg-gradient-to-l before:right-0 before:bg-gradient-to-l translate-x-2">
+                            <div className="absolute top-0 z-10 w-14 h-full to-transparent cursor-pointer group transition-all before:to-transparent before:absolute before:top-0 before:w-full before:h-full before:opacity-0 hover:before:opacity-100 before:transition-all from-zinc-900/20 before:from-zinc-900/20 lg:from-zinc-900/90 lg:before:from-zinc-900/90 right-0 lg:-right-2 bg-gradient-to-l before:right-0 before:bg-gradient-to-l translate-x-2">
                                 <CarouselNext className="right-0 transition-all group-hover:scale-110" />
                             </div>
                         </Carousel>

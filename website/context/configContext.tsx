@@ -26,12 +26,12 @@ const wagmiConfig = defaultWagmiConfig({
 if (!projectId) throw new Error('Project ID is not defined')
 
 // Create modal
-createWeb3Modal({
-    siweConfig,
-    wagmiConfig,
-    projectId,
-    enableAnalytics: true,
-})
+// createWeb3Modal({
+//     siweConfig,
+//     wagmiConfig,
+//     projectId,
+//     enableAnalytics: true,
+// })
 
 export function Web3Modal({
     children,

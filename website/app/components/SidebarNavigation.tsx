@@ -34,6 +34,8 @@ import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
 import { useSelector, useDispatch, sidebarSlice, userSettingsSlice } from "@/lib/redux";
 import { selectSidebarOpenState, selectSidebarToggleState } from "@/lib/redux/slices/sidebarSlice/selectors";
 import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
+import ClaimFaucetModal from "./Wallet/ClaimFaucetModal";
+import {Button} from "@/components/ui/button";
 
 interface NavigationItemChildren {
     name: string;
@@ -58,7 +60,7 @@ const initialNavigation = [
         icon: TrophyIcon,
         current: false,
         children: [
-            { name: "List", href: "/challenges/list", current: false, needsSession: false, icon: TableCellsIcon },
+            { name: "List", href: "/challenges/list", current: false, needsSession: true, icon: TableCellsIcon },
             { name: "Leaderboard", href: "/challenges/leaderboard", current: false, needsSession: true, icon: ChartBarIcon },
         ],
     },
@@ -622,6 +624,9 @@ export const SidebarNavigation = () => {
                                 </a>
                             </li> */}
                             <li className="mt-auto">
+                                {/* <ClaimFaucetModal>
+                                    <Button variant="soft" className="w-full">Get tokens</Button>
+                                </ClaimFaucetModal> */}
                                 <a
                                     href="#"
                                     className={classNames(

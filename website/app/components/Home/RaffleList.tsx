@@ -330,10 +330,10 @@ export const RaffleList = () => {
                     <div>
                         <h2 className="text-base font-semibold leading-8 text-emerald-400">The most popular NFTs</h2>
                         <p className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">Trending</p>
-                        <p className="mt-2 text-sm text-zinc-400 flex items-center gap-1">
+                        {/* <p className="mt-2 text-sm text-zinc-400 flex items-center gap-1">
                             <InformationCircleIcon className="h-5 w-5 inline-block" aria-hidden="true" />
                             Target Values are determined and set by the raffle creator.
-                        </p>
+                        </p> */}
                     </div>
                     <CardSettings showStyle={false} showDisplay={true} display={display} setDisplay={setDisplay} showDisplayLabel={false} />
                 </div>
@@ -342,12 +342,10 @@ export const RaffleList = () => {
             <div className="relative">
                 {display === "grid" && (
                     <div className={classNames("sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-6 4xl:grid-cols-8 3xl: sm:gap-x-4 gap-y-4 lg:gap-y-6 mt-8 xl:mt-12")}>
-                        {trending.map((item) => (
-                            <>
-                                <div className="w-[calc(33%-.45rem)] sm:w-auto inline-block">
-                                    <RaffleDefault {...item} />
-                                </div>
-                            </>
+                        {trending.map((item, key) => (
+                            <div key={'list'+key} className="w-[calc(33%-.45rem)] sm:w-auto inline-block">
+                                <RaffleDefault {...item} />
+                            </div>
                         ))}
                     </div>
                 )}
@@ -362,13 +360,11 @@ export const RaffleList = () => {
                         >
                             <CarouselContent className="-ml-1">
                                 {trending.map((item, key) => (
-                                    <>
-                                        <CarouselItem className={classNames("basis-1/2 lg:basis-1/3 xl:basis-1/3 2xl:basis-[15%] lg:pl-6 pl-0", key === 0 && "")}>
-                                            <div className="hardware-accelerate">
-                                                <RaffleDefault {...item} />
-                                            </div>
-                                        </CarouselItem>
-                                    </>
+                                    <CarouselItem key={'listCarousel'+key} className={classNames("lg:basis-1/3 xl:basis-1/3 2xl:basis-[15%] lg:pl-6 pl-0", key === 0 && "")}>
+                                        <div className="hardware-accelerate mx-4">
+                                            <RaffleDefault {...item} />
+                                        </div>
+                                    </CarouselItem>
                                 ))}
                             </CarouselContent>
                             <div className="absolute top-0 z-10 w-14 h-full to-transparent cursor-pointer group transition-all before:to-transparent before:absolute before:top-0 before:w-full before:h-full before:opacity-0 hover:before:opacity-100 before:transition-all overflow-hidden from-zinc-900/90 before:from-zinc-900/90 left-0 lg:-left-2 bg-gradient-to-r before:left-0 before:bg-gradient-to-r -translate-x-2">

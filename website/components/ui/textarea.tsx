@@ -40,9 +40,9 @@ const textareaVariants = cva(
         overlappingLabel: "rounded-md border-0 py-1.5 text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 dark:ring-zinc-600 dark:placeholder:text-zinc-400",
       },
       size: {
-        sm: "min-h-[60px] px-3 py-2 text-sm",
-        md: "min-h-[80px] px-4 py-2 text-base", // Default size
-        lg: "min-h-[100px] px-5 py-2 text-lg",
+        sm: "min-h-[60px] px-3 py-2 text-xs sm:text-sm",
+        md: "min-h-[80px] px-4 py-2 text-sm sm:text-base", // Default size
+        lg: "min-h-[100px] px-5 py-2 text-base sm:text-lg",
       },
     },
     defaultVariants: {

@@ -54,7 +54,7 @@ const CopyReferral: React.FC = () => {
                 type="text"
                 value={userSettingsState.user?.referral_code || ""}
                 readOnly
-                className="!bg-transparent !border-0 !outline-none !ring-0 !ring-offset-0 uppercase text-xl flex-1"
+                className="!bg-transparent !border-0 !outline-none !ring-0 !ring-offset-0 uppercase text-md sm:text-xl flex-1"
             />
             <Button onClick={() => share('default', {
                 title: 'OmniWin Referral Code',

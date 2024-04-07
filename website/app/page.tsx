@@ -21,9 +21,9 @@ export default function IndexPage() {
             <section>
                 <PaidContests />
             </section>
-            <section>
+            {/* <section>
                 <RaffleList />
-            </section>
+            </section> */}
         </div>
       </>
     );

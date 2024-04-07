@@ -18,6 +18,7 @@ export default function RaffleEse(raffle: RaffleCard) {
             {/* <img className="object-cover inset-0 rounded-lg h-full w-full min-h-[inherit]" alt="img" src={'https://web3trust.app/nft/'+ raffle.nft_image} /> */}
             <CustomImageWithFallback
                 className="object-cover inset-0 rounded-lg h-full w-full min-h-[inherit]"
+                containerClass='min-h-[inherit]'
                 alt={"Raffle for " + raffle.nft_name + " to win it"}
                 width={100} // Placeholder width for aspect ratio calculation
                 height={100} // Placeholder height for aspect ratio calculation
@@ -104,13 +105,13 @@ export default function RaffleEse(raffle: RaffleCard) {
                     <div className="flex flex-row justify-between py-2.5 px-3 w-full">
                         <div className="flex flex-col items-center max-w-[30%] min-w-[30%]">
                             <p className="text-[11px] xl:text-xs font-bold text-smoke-300">Market value</p>
-                            <p className="2xl:text-xl xl:text-lg font-bold text-white truncate select-text">{formatMoney(raffle.full_price, "USD")}</p>
+                            <p className="2xl:text-xl xl:text-base font-bold text-white truncate select-text">{formatMoney(raffle.full_price, "USD")}</p>
                         </div>
                         <div className={classNames("flex max-w-[30%] min-w-[30%]", timeLeft.hasEnded && "flex-col items-center")}>
                             {timeLeft.hasEnded ? (
                                 <>
                                     <p className="text-[11px] xl:text-xs font-bold text-smoke-300">Winner</p>
-                                    <p className="2xl:text-xl xl:text-lg font-bold text-jade-400 truncate select-text">{raffle.nft_owner.length > 10 ? shortenAddress(raffle.nft_owner, 3, 3) : raffle.nft_owner}</p>
+                                    <p className="2xl:text-xl xl:text-base font-bold text-jade-400 truncate select-text">{raffle.nft_owner.length > 10 ? shortenAddress(raffle.nft_owner, 3, 3) : raffle.nft_owner}</p>
                                 </>
                             ) : (
                                 <button className="text-md font-bold text-smoke-900 bg-gradient-to-b from-jade-400 to-jade-500 group-hover:to-jade-400 rounded-lg px-3 py-1.5 w-full leading-5">Play</button>
@@ -118,7 +119,7 @@ export default function RaffleEse(raffle: RaffleCard) {
                         </div>
                         <div className="flex flex-col items-center max-w-[30%] min-w-[30%]">
                             <p className="text-[11px] xl:text-xs font-bold text-smoke-300">Ticket price</p>
-                            <p className="2xl:text-xl xl:text-lg font-bold text-white truncate select-text">{formatMoney(raffle.ticket_price, "USD")}</p>
+                            <p className="2xl:text-xl xl:text-base font-bold text-white truncate select-text">{formatMoney(raffle.ticket_price, "USD")}</p>
                         </div>
                     </div>
                 </div>

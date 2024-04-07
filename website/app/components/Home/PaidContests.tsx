@@ -331,7 +331,9 @@ export const PaidContests = () => {
                     <div>
                         <h2 className="text-base font-semibold leading-8 text-emerald-400">Paid contest</h2>
                         <p className="mt-2 text-2xl font-bold tracking-tight text-white xl:text-4xl">
-                            These contests are promoted by the creators. <br /> Win them by playing.
+                            {/* <span className="hidden sm:block">These contests are promoted by the creators. <br /> Win them by playing.</span> */}
+                            {/* <span className="block sm:hidden">Promoted raffles</span> */}
+                            <span className="">Promoted raffles</span>
                         </p>
                     </div>
                     <CardSettings showStyle={false} showDisplay={true} display={display} setDisplay={setDisplay} showDisplayLabel={false} />
@@ -340,12 +342,10 @@ export const PaidContests = () => {
             <div className="relative">
                 {display === "grid" && (
                     <div className={classNames("grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-6 gap-6 mt-8 xl:mt-12")}>
-                        {trending.map((item) => (
-                            <>
-                                <div className="w-[calc(33%-.45rem)] sm:w-auto inline-block">
-                                    <RaffleEse {...item} />
-                                </div>
-                            </>
+                        {trending.map((item, key) => (
+                            <div key={'paid'+key} className="w-[calc(33%-.45rem)] sm:w-auto inline-block">
+                                <RaffleEse {...item} />
+                            </div>
                         ))}
                     </div>
                 )}
@@ -360,19 +360,17 @@ export const PaidContests = () => {
                         >
                             <CarouselContent className="-ml-1">
                                 {trending.map((item, key) => (
-                                    <>
-                                        <CarouselItem className={classNames("basis-1/2 lg:basis-1/2 xl:basis-1/2 2xl:basis-1/5 lg:pl-6 pl-0", key === 0 && "")}>
-                                            <div className="hardware-accelerate">
-                                                <RaffleEse {...item} />
-                                            </div>
-                                        </CarouselItem>
-                                    </>
+                                    <CarouselItem key={'paidCarousel'+key} className={classNames("lg:basis-1/2 xl:basis-1/3 2xl:basis-1/5 lg:pl-3 pl-2", key === 0 && "")}>
+                                        <div className="hardware-accelerate">
+                                            <RaffleEse {...item} />
+                                        </div>
+                                    </CarouselItem>
                                 ))}
                             </CarouselContent>
-                            <div className="absolute top-0 z-10 w-14 h-full to-transparent cursor-pointer group transition-all before:to-transparent before:absolute before:top-0 before:w-full before:h-full before:opacity-0 hover:before:opacity-100 before:transition-all overflow-hidden from-zinc-900/90 before:from-zinc-900/90 left-0 lg:-left-2 bg-gradient-to-r before:left-0 before:bg-gradient-to-r -translate-x-2">
+                            <div className="absolute top-0 z-10 w-14 h-full to-transparent cursor-pointer group transition-all before:to-transparent before:absolute before:top-0 before:w-full before:h-full before:opacity-0 hover:before:opacity-100 before:transition-all from-zinc-900/20 before:from-zinc-900/20 lg:from-zinc-900/90 lg:before:from-zinc-900/90 left-0 lg:-left-2 bg-gradient-to-r before:left-0 before:bg-gradient-to-r -translate-x-2">
                                 <CarouselPrevious className="left-0 transition-all group-hover:scale-110" />
                             </div>
-                            <div className="absolute top-0 z-10 w-14 h-full to-transparent cursor-pointer group transition-all before:to-transparent before:absolute before:top-0 before:w-full before:h-full before:opacity-0 hover:before:opacity-100 before:transition-all overflow-hidden from-zinc-900/90 before:from-zinc-900/90 right-0 lg:-right-2 bg-gradient-to-l before:right-0 before:bg-gradient-to-l translate-x-2">
+                            <div className="absolute top-0 z-10 w-14 h-full to-transparent cursor-pointer group transition-all before:to-transparent before:absolute before:top-0 before:w-full before:h-full before:opacity-0 hover:before:opacity-100 before:transition-all from-zinc-900/20 before:from-zinc-900/20 lg:from-zinc-900/90 lg:before:from-zinc-900/90 right-0 lg:-right-2 bg-gradient-to-l before:right-0 before:bg-gradient-to-l translate-x-2">
                                 <CarouselNext className="right-0 transition-all group-hover:scale-110" />
                             </div>
                         </Carousel>
