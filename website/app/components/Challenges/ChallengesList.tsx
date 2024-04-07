@@ -38,7 +38,7 @@ export default function ChallengesList() {
                     <span className="mb-1 py-px pr-px text-sm font-medium text-zinc-100 flex justify-between w-full">
                         {step.name}
                         {/* <span className="text-sm text-zinc-400">{step.points} points</span> */}
-                        <Badge className='inline-flex gap-1' variant="emerald">
+                        <Badge className='inline-flex gap-1 whitespace-nowrap' variant="emerald">
                           <CheckIcon className="h-4 w-4" aria-hidden="true" />
                           Claimed
                         </Badge>
@@ -82,7 +82,7 @@ export default function ChallengesList() {
                     <span className="mb-1 py-px pr-px text-sm font-medium text-zinc-400 flex justify-between w-full">
                         {step.name}
                         {/* <span className="text-sm text-zinc-400">{step.points} points</span> */}
-                        <Badge className='inline-flex gap-1' variant="blood" title="Finish the previous step to unlock">
+                        <Badge className='inline-flex gap-1 whitespace-nowrap' variant="blood" title="Finish the previous step to unlock">
                           <LockClosedIcon className="h-4 w-4" aria-hidden="true" />
                           Locked
                         </Badge>

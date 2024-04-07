@@ -327,7 +327,7 @@ export const PaidContests = () => {
             {/* <div className="mt-5 grid min-h-[18rem] gap-x-[40px] gap-y-0 rounded-lg border border-smoke-800 px-6 py-6 grid-auto-fit-[18.5rem] lg:px-4 lg:py-4 2xl:px-[26px] 2xl:py-6"> */}
             {/* <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-3xl"> */}
             <div className="">
-                <div className="flex items-end justify-between w-full">
+                <div className="flex items-end justify-between w-full flex-wrap">
                     <div>
                         <h2 className="text-base font-semibold leading-8 text-emerald-400">Paid contest</h2>
                         <p className="mt-2 text-2xl font-bold tracking-tight text-white xl:text-4xl">
@@ -361,7 +361,7 @@ export const PaidContests = () => {
                             <CarouselContent className="-ml-1">
                                 {trending.map((item, key) => (
                                     <>
-                                        <CarouselItem className={classNames("basis-1/2 lg:basis-1/3 xl:basis-1/3 2xl:basis-1/5 lg:pl-6 pl-0", key === 0 && "")}>
+                                        <CarouselItem className={classNames("basis-1/2 lg:basis-1/2 xl:basis-1/2 2xl:basis-1/5 lg:pl-6 pl-0", key === 0 && "")}>
                                             <div className="hardware-accelerate">
                                                 <RaffleEse {...item} />
                                             </div>

@@ -877,10 +877,10 @@ export default function ChallengesHeader() {
                         <UserProgressCard />
                     </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-6 sm:gap-12 xl:gap-16 mt-12 w-full">
+                <div className="flex flex-wrap items-center gap-8 sm:gap-12 xl:gap-16 mt-12 w-full">
                     <div className="space-y-3 min-h-[76px]">
-                        <p className="max-w-3xl text-lg text-zinc-300">Status</p>
-                        <Badge form="round" variant="blue">
+                        <p className="max-w-3xl text-sm lg:text-lg text-zinc-300">Status</p>
+                        <Badge form="round" variant="blue" size="sm">
                             In progress
                         </Badge>
                     </div>
@@ -888,8 +888,8 @@ export default function ChallengesHeader() {
                         <Tooltip>
                             <TooltipTrigger>
                                 <div className="space-y-3 min-h-[76px] text-left">
-                                    <p className="max-w-3xl text-lg text-zinc-300">S1 Ending in</p>
-                                    <Badge form="round" variant="lemon">
+                                    <p className="max-w-3xl text-sm lg:text-lg text-zinc-300">S1 Ending in</p>
+                                    <Badge form="round" variant="lemon" size="sm">
                                         TBU
                                     </Badge>
                                 </div>
@@ -903,7 +903,7 @@ export default function ChallengesHeader() {
                         <Tooltip>
                             <TooltipTrigger>
                                 <div className="space-y-3 min-h-[76px] text-left">
-                                    <p className="max-w-3xl text-lg text-zinc-300">Points</p>
+                                    <p className="max-w-3xl text-sm lg:text-lg text-zinc-300">Points</p>
                                     <p className="text-md text-zinc-100">1,000</p>
                                 </div>
                             </TooltipTrigger>
@@ -916,7 +916,7 @@ export default function ChallengesHeader() {
                         <Tooltip>
                             <TooltipTrigger>
                                 <div className="space-y-3 min-h-[76px] text-left">
-                                    <p className="max-w-3xl text-lg text-zinc-300">S1 XP points</p>
+                                    <p className="max-w-3xl text-sm lg:text-lg text-zinc-300">S1 XP points</p>
                                     <p className="text-md text-zinc-100">100,000</p>
                                 </div>
                             </TooltipTrigger>
@@ -926,7 +926,7 @@ export default function ChallengesHeader() {
                         </Tooltip>
                     </TooltipProvider>
                     <div className="space-y-3 min-h-[76px] min-w-[50%] md:min-w-[33%] w-full lg:w-auto">
-                        <p className="max-w-3xl text-lg text-zinc-300">S1 Progress</p>
+                        <p className="max-w-3xl text-sm lg:text-lg text-zinc-300">S1 Progress</p>
                         {/* <Badge form="round" variant="blood">100 000</Badge> */}
                         {/* <ProgressBar value={1} maxValue={9} size="default" color="emerald-400" labelOutside labelOutsideText={"8 more quests to go"} /> */}
                         <div className="!-mt-1">
