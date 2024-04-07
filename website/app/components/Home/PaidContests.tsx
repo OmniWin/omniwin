@@ -343,7 +343,7 @@ export const PaidContests = () => {
                 {display === "grid" && (
                     <div className={classNames("grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-6 gap-6 mt-8 xl:mt-12")}>
                         {trending.map((item, key) => (
-                            <div key={'paid'+key} className="w-[calc(33%-.45rem)] sm:w-auto inline-block">
+                            <div key={'paid'+key} className="">
                                 <RaffleEse {...item} />
                             </div>
                         ))}
@@ -355,7 +355,7 @@ export const PaidContests = () => {
                             className="mt-8 xl:mt-12"
                             opts={{
                                 // loop: true,
-                                dragFree: true,
+                                // dragFree: true,
                             }}
                         >
                             <CarouselContent className="-ml-1">

@@ -45,8 +45,8 @@ export default function RaffleMetaWin(raffle: RaffleCard) {
                     <CustomImageWithFallback
                         className="object-cover rounded-t-lg h-full w-full xl:min-h-64"
                         alt={"Raffle for " + raffle.nft_name + " to win it"}
-                        width={100} // Placeholder width for aspect ratio calculation
-                        height={100} // Placeholder height for aspect ratio calculation
+                        width={123} // Placeholder width for aspect ratio calculation
+                        height={123} // Placeholder height for aspect ratio calculation
                         src={`https://web3trust.app/nft/${raffle.nft_image}`}
                         sizes="100%"
                         style={{

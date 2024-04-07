@@ -353,7 +353,7 @@ export const Trending = () => {
                             className="mt-8 xl:mt-12"
                             opts={{
                                 // loop: true,
-                                dragFree: true,
+                                // dragFree: true,
                             }}
                         >
                             <CarouselContent className="-ml-1">

@@ -49,7 +49,7 @@ const CustomImageWithFallback: React.FC<CustomImageWithFallbackProps> = ({ src, 
     };
 
     return (
-        <div className={classNames("relative h-full w-full", containerClass)}>
+        <div className={classNames("relative h-full w-full", containerClass)} style={{height: isLoading ? (props.height ?? '100%') : '100%', width: isLoading ? (props.width ?? '100%') : '100%'}}>
             {/* {isLoading && loadingIndicator()} */}
 
             <Image {...props} src={imgSrc} alt={alt} onError={handleError} onLoad={() => setIsLoading(false)} />
