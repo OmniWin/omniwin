@@ -62,7 +62,7 @@ const WalletConnect = () => {
                         description: "An error occurred while signing in",
                         variant: "error",
                     });
-                    await disconnectWallet()
+                    await disconnectWallet();
                 }
             }
         },
@@ -90,7 +90,6 @@ const WalletConnect = () => {
         //     !userSettingsState.isWalletConnectorModalOpen && dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true));
         //     signWithEthereum();
         // }
-
         // if (userExists && !session && connector && address) {
         //     signWithEthereum();
         // }
@@ -145,12 +144,12 @@ const WalletConnect = () => {
 
     const disconnectWallet = async () => {
         // dispatch(userSettingsSlice.actions.setUsedReferralCode(''))
-        dispatch(userSettingsSlice.actions.setUser({}))
-        dispatch(userSettingsSlice.actions.setWalletStatusModalOpen(false))
-        dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(false))
+        dispatch(userSettingsSlice.actions.setUser({}));
+        dispatch(userSettingsSlice.actions.setWalletStatusModalOpen(false));
+        dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(false));
         await siweConfig.signOut();
         await disconnect();
-    }
+    };
 
     if (!isMounted) {
         return <div>Loading...</div>;
@@ -165,8 +164,7 @@ const WalletConnect = () => {
                     // className="gap-x-3 inline-flex items-center pr-1 pl-3 py-1 rounded-md text-zinc-100 text-sm border border-zinc-800 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
                     className="gap-x-3 inline-flex items-center pl-3 rounded-md text-zinc-100 text-sm border border-zinc-800 bg-zinc-900 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
                 >
-                    {balance && `${balance.formatted} ${balance.symbol}`}{" "}
-                    {/* <span className="inline-flex items-center rounded-2xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2"> */}
+                    {balance && `${balance.formatted} ${balance.symbol}`} {/* <span className="inline-flex items-center rounded-2xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2"> */}
                     {/* <span className="inline-flex items-center rounded-sm border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2"> */}
                     <span className="inline-flex items-center rounded-sm bg-gradient-to-tl from-zinc-800 to-zinc-800/30 py-2.5 px-2.5">
                         {/* Icon of selected wallet */}
@@ -238,7 +236,11 @@ const WalletConnect = () => {
                 // <Button variant="soft" onClick={() => dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true))}>
                 //     Connect Wallet
                 // </Button>
-                <ButtonWithMovingBorder onClick={() => dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true))} borderRadius="0.375rem" className={cn(buttonVariants({ variant: "soft", size: "default" }), 'bg-zinc-900')}>
+                <ButtonWithMovingBorder
+                    onClick={() => dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true))}
+                    borderRadius="0.375rem"
+                    className={cn(buttonVariants({ variant: "soft", size: "default" }), "bg-zinc-900")}
+                >
                     Connect Wallet
                 </ButtonWithMovingBorder>
             )}
@@ -250,7 +252,7 @@ const WalletConnect = () => {
                     // className="gap-x-3 inline-flex items-center pr-1 pl-3 py-1 rounded-md text-zinc-100 text-sm border border-zinc-800 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
                     className="gap-x-3 inline-flex items-center pl-3 rounded-md text-zinc-100 text-sm border border-zinc-800 bg-zinc-900 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
                 >
-                    {balance && `${balance.formatted} ${balance.symbol}`}{" "}
+                    {balance && `${Number(balance.formatted).toFixed(4)} ${balance.symbol}`}{" "}
                     {/* <span className="inline-flex items-center rounded-2xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2"> */}
                     {/* <span className="inline-flex items-center rounded-sm border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2"> */}
                     <span className="inline-flex items-center rounded-sm bg-gradient-to-tl from-zinc-800 to-zinc-800/30 py-2.5 px-2.5">
@@ -271,7 +273,7 @@ const WalletConnect = () => {
                     <div className="relative z-10 space-y-4">
                         <DialogHeader>
                             <DialogTitle className="text-white">
-                                {!address && 'Connect Wallet'}
+                                {!address && "Connect Wallet"}
                                 {address && !userSettingsState.usedReferralCode && !userExists && "Access by invitation"}
                                 {address && connector && userExists && !isLoading && <div className="text-center mb-8">Sign in</div>}
                                 {connector && isLoading && (userSettingsState.usedReferralCode || userExists) && <div className="text-center mb-8">{connector?.name} loading...</div>}
@@ -336,7 +338,7 @@ const WalletConnect = () => {
                         {/* Referral code form after used a connector */}
                         {address && !userSettingsState.usedReferralCode && !userExists && <AccessFormByInvitation />}
                         {/* Sign modal content */}
-                        {address && connector && userExists && (
+                        {address && connector && (userExists || (!userExists && userSettingsState.usedReferralCode)) && (
                             <>
                                 <div className="text-center">
                                     <div className="bg-zinc-800 p-4 animate-bounce inline-block rounded-full">
@@ -349,13 +351,15 @@ const WalletConnect = () => {
                                         </svg>
                                     </div>
                                 </div>
-                                {!isLoading && <>
+                                {!isLoading && (
+                                    <>
                                         <p className="text-lg text-zinc-200 text-center xl:px-20">Omniwin Dapp needs to connect to your wallet</p>
                                         <p className="text-zinc-400 text-sm mb-2 text-center xl:px-20">Sign this message to prove you own this wallet and proceed. Canceling will disconnect you.</p>
-                                    </>}
+                                    </>
+                                )}
                                 {isLoading && <p className="text-zinc-400 text-sm mb-2 text-center xl:px-20">Sign the message in your {connector.name} wallet to proceed.</p>}
 
-                                {!isLoading && 
+                                {!isLoading && (
                                     <div className="flex gap-6">
                                         <Button variant="outline" className="!mt-10 w-full" onClick={async () => await disconnectWallet()}>
                                             Cancel
@@ -363,7 +367,8 @@ const WalletConnect = () => {
                                         <Button variant="primary" className="!mt-10 w-full" onClick={async () => await signWithEthereum()}>
                                             Sign
                                         </Button>
-                                    </div>}
+                                    </div>
+                                )}
                             </>
                         )}
                     </div>
