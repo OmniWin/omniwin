@@ -37,6 +37,7 @@ const corsOptions = {
     "http://localhost:4356",
     "http://localhost",
     "https://omniwin.io",
+    "https://omniwin.io/",
   ],
   methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
   credentials: true,
