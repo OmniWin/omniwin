@@ -758,8 +758,6 @@ describe("Omniwin", function () {
             const raffleId = 0;
             await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
            
-
-            //TODO: create raffle using enableRaffle on sidechain
             const chainSelectors = [
                 {
                     ccnsReceiverAddress: omniwinSide.target, // This should be an Ethereum address
@@ -937,8 +935,6 @@ describe("Omniwin", function () {
             const prizeAmount = 1000; // Number of tokens to be used as the prize
             const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
 
-            console.log(calcFunctionSignature("CreateRaffleCCIP"));
-  
             // Define prices for entries into the raffle
             const prices = [
                 {
@@ -958,8 +954,6 @@ describe("Omniwin", function () {
             await erc20.transfer(otherAccount.address, amount);
 
             await erc20.connect(otherAccount).approve(omniwinSide.target, prizeAmount);
-
-            
            
             //allow main contract to receive from source chain
             const sourceChainSelector = routerConfig.ethereumSepolia.chainSelector;
@@ -978,8 +972,9 @@ describe("Omniwin", function () {
 
             //https://www.cryptoneur.xyz/en/gas-fees-calculator
             // Call createRaffle with the defined parameters
-            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
-            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
+            const gasLimitSyn = 1_000_000;  
+            const gasLimitSynAck = 400_000; 
+            const gasLimitForAck = 100_000; 
             const tx = await omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 prizeAmount,
@@ -987,7 +982,8 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimit,
+                gasLimitSyn,
+                gasLimitSynAck,
                 gasLimitForAck
             );
             
@@ -996,8 +992,11 @@ describe("Omniwin", function () {
             
             await expect(tx).to.emit(omniwinMain, 'AckRaffleCreationFromSidechain')
 
-            //Emitted event that sidechain received ACK and raffle from sidechain was moved from tempRaffles to raffles
             await expect(tx).to.emit(omniwinSide, 'RaffleCreated')
+            
+            await expect(tx).to.emit(omniwinMain, 'RaffleEnabledFromSidechain')
+
+            //Emitted event that sidechain received ACK and raffle from sidechain was moved from tempRaffles to raffles
 
             const raffleId = 0;
             const rafflesSide = await omniwinSide.raffles(raffleId)
@@ -1052,8 +1051,9 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
-            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
+            const gasLimitSyn = 1_000_000;  
+            const gasLimitSynAck = 400_000; 
+            const gasLimitForAck = 100_000; 
             const tx = await omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 tokenId,
@@ -1061,7 +1061,8 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimit,
+                gasLimitSyn,
+                gasLimitSynAck,
                 gasLimitForAck
             );
             
@@ -1120,8 +1121,9 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
-            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
+            const gasLimitSyn = 1_000_000;  
+            const gasLimitSynAck = 400_000; 
+            const gasLimitForAck = 100_000; 
             const tx = await omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 prizeAmount,
@@ -1129,7 +1131,8 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimit,
+                gasLimitSyn,
+                gasLimitSynAck,
                 gasLimitForAck,
                 {
                     value: prizeAmount
@@ -1151,7 +1154,7 @@ describe("Omniwin", function () {
             expect(rafflesSide.prizeNumber).to.equal(prizeAmount);
         });
 
-        //FAIL WITH PRIZE ON RAFFLE CREATION
+        //FAIL WITH PRIZE ON RAFFLE CREATION ON SIDECHAIN
         it("Should fail to create raffle from sidechain with ERC20 as prize", async function () {
             const { omniwinMain,omniwinSide,omniwinSide2,usdc, nft, erc20, owner, otherAccount } = await loadFixture(deployContract);
 
@@ -1199,8 +1202,9 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
-            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
+            const gasLimitSyn = 1_000_000;  
+            const gasLimitSynAck = 400_000; 
+            const gasLimitForAck = 100_000; 
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 prizeAmount,
@@ -1208,7 +1212,8 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimit,
+                gasLimitSyn,
+                gasLimitSynAck,
                 gasLimitForAck
             )).to.be.revertedWith("ERC20: transfer amount exceeds balance");
         });
@@ -1259,8 +1264,9 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
-            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
+            const gasLimitSyn = 1_000_000;  
+            const gasLimitSynAck = 400_000; 
+            const gasLimitForAck = 100_000; 
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 tokenId ,
@@ -1268,12 +1274,13 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimit,
+                gasLimitSyn,
+                gasLimitSynAck,
                 gasLimitForAck
             )).to.revertedWithCustomError(omniwinSide, "ContractNotApproved()");
         });
 
-        it("Should fail to create raffle from sidechain with ERC721 as prize (NotTheOwner)", async function () {
+        it("Should fail to create raffle from sidechain with ERC721 as prize (NotTheNFTOwner)", async function () {
             const { omniwinMain,omniwinSide,omniwinSide2,usdc, nft, erc20, owner, otherAccount } = await loadFixture(deployContract);
 
             const minimumFundsInWeis = ethers.parseEther("1");
@@ -1320,8 +1327,9 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
-            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
+            const gasLimitSyn = 1_000_000;  
+            const gasLimitSynAck = 400_000; 
+            const gasLimitForAck = 100_000; 
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 tokenId + 1,
@@ -1329,7 +1337,8 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimit,
+                gasLimitSyn,
+                gasLimitSynAck,
                 gasLimitForAck
             )).to.revertedWithCustomError(omniwinSide, "NotTheNFTOwner()");
         });
@@ -1373,9 +1382,9 @@ describe("Omniwin", function () {
 
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
-            const gasLimit = 800_000; // gas needed to: create temp raffle on sidechain, send msg to main contract, create raffle on main contract, send back ack to sidechain
-            const gasLimitForAck = 300_000; // gas that i let chainlink to use to send me back ack
-            // Call createRaffle with the defined parameters
+            const gasLimitSyn = 1_000_000;  
+            const gasLimitSynAck = 400_000; 
+            const gasLimitForAck = 100_000; 
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 prizeAmount,
@@ -1383,7 +1392,8 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimit,
+                gasLimitSyn,
+                gasLimitSynAck,
                 gasLimitForAck,
                 {
                     value: prizeAmount - BigInt(1)
@@ -1391,6 +1401,190 @@ describe("Omniwin", function () {
             )).to.revertedWithCustomError(omniwinSide, "ETHPrizeAmountMismatch()");
         });
 
+
+
+
+        //FAIL WITH PRIZE ON RAFFLE CREATION ON MAINCHAIN
+        it("Should fail to create raffle on main chain with ERC20 as prize", async function () {
+            const { omniwinMain,omniwinSide, nft, erc20, owner, otherAccount ,MockRouterClient} = await loadFixture(deployContract);
+
+            const minimumFundsInWeis = ethers.parseEther("1");
+            const assetType = 0; // ERC20 token, adjust based on enum order
+            const prizeAddress = erc20.target; // Token contract
+            const prizeAmount = 1000; // Number of tokens to be used as the prize
+            const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
+
+            // Step 1: Transfer tokens to `otherAccount` to be used as the prize
+            const amount = 100;
+            await erc20.transfer(otherAccount.address, amount);
+
+            // Step 2: `otherAccount` approves `omniwin` contract to spend its tokens
+            await erc20.connect(otherAccount).approve(omniwinMain.target, prizeAmount);
+
+            // Check allowance
+            const allowance = await erc20.allowance(otherAccount.address, omniwinMain.target);
+            expect(allowance).to.equal(prizeAmount);
+
+            // Check balance
+            const balance = await erc20.balanceOf(otherAccount.address);
+            expect(balance).to.equal(amount);
+
+            // Define prices for entries into the raffle
+            const prices = [
+                {
+                    id: 0,
+                    numEntries: 1,
+                    price: ethers.parseUnits("10", 6),
+                },
+                {
+                    id: 1,
+                    numEntries: 5,
+                    price: ethers.parseUnits("30", 6), // Slight discount for buying more
+                },
+            ];
+
+
+            // Call createRaffle with the defined parameters
+            await expect(omniwinMain.connect(otherAccount).createRaffle(
+                prizeAddress,
+                prizeAmount,
+                minimumFundsInWeis,
+                prices,
+                assetType,
+                deadlineDuration
+            )).to.be.revertedWith("ERC20: transfer amount exceeds balance");
+
+        });
+
+        it("Should fail to create raffle on main chain with ERC721 as prize (NotTheNFTOwner)", async function () {
+            const { omniwinMain,omniwinSide, nft, erc20, owner, otherAccount ,MockRouterClient} = await loadFixture(deployContract);
+
+            const minimumFundsInWeis = ethers.parseEther("1");
+            const assetType = 1; // ERC721 token, adjust based on enum order
+            const prizeAddress = nft.target; // Token contract
+            const tokenId = 1; // tokenId of the NFT
+            const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
+            // Step 1: Mint ERC721 token and transfer to `otherAccount` to be used as the prize
+            await nft.mintCollectionNFT(owner.address, tokenId);
+            await nft.mintCollectionNFT(owner.address, tokenId + 1);
+            expect(await nft.ownerOf(tokenId)).to.equal(owner.address);
+            await nft.transferFrom(owner.address, otherAccount.address, tokenId);
+            expect(await nft.ownerOf(tokenId)).to.equal(otherAccount.address);
+
+            // Step 2: `otherAccount` approves `omniwin` contract to spend its nft
+            await nft.connect(otherAccount).approve(omniwinMain.target, tokenId);
+
+            // Check balance
+            const balance = await nft.balanceOf(otherAccount.address);
+            expect(balance).to.equal(1);
+
+            // Define prices for entries into the raffle
+            const prices = [
+                {
+                    id: 0,
+                    numEntries: 1,
+                    price: ethers.parseUnits("10", 6),
+                },
+                {
+                    id: 1,
+                    numEntries: 5,
+                    price: ethers.parseUnits("30", 6), // Slight discount for buying more
+                },
+            ];
+
+            // Call createRaffle with the defined parameters
+            await expect(omniwinMain.connect(otherAccount).createRaffle(
+                prizeAddress,
+                tokenId + 1,
+                minimumFundsInWeis,
+                prices,
+                assetType,
+                deadlineDuration
+            )).to.be.revertedWithCustomError(omniwinMain, "NotTheNFTOwner");
+        });
+
+        it("Should fail to create raffle on main chain with ERC721 as prize (ContractNotApproved)", async function () {
+            const { omniwinMain,omniwinSide, nft, erc20, owner, otherAccount ,MockRouterClient} = await loadFixture(deployContract);
+
+            const minimumFundsInWeis = ethers.parseEther("1");
+            const assetType = 1; // ERC721 token, adjust based on enum order
+            const prizeAddress = nft.target; // Token contract
+            const tokenId = 1; // tokenId of the NFT
+            const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
+            // Step 1: Mint ERC721 token and transfer to `otherAccount` to be used as the prize
+            await nft.mintCollectionNFT(owner.address, tokenId);
+            expect(await nft.ownerOf(tokenId)).to.equal(owner.address);
+            await nft.transferFrom(owner.address, otherAccount.address, tokenId);
+            expect(await nft.ownerOf(tokenId)).to.equal(otherAccount.address);
+
+            // Step 2: `otherAccount` approves `omniwin` contract to spend its nft
+            // await nft.connect(otherAccount).approve(omniwinMain.target, tokenId);
+
+            // Check balance
+            const balance = await nft.balanceOf(otherAccount.address);
+            expect(balance).to.equal(1);
+
+            // Define prices for entries into the raffle
+            const prices = [
+                {
+                    id: 0,
+                    numEntries: 1,
+                    price: ethers.parseUnits("10", 6),
+                },
+                {
+                    id: 1,
+                    numEntries: 5,
+                    price: ethers.parseUnits("30", 6), // Slight discount for buying more
+                },
+            ];
+
+            // Call createRaffle with the defined parameters
+            await expect(omniwinMain.connect(otherAccount).createRaffle(
+                prizeAddress,
+                tokenId,
+                minimumFundsInWeis,
+                prices,
+                assetType,
+                deadlineDuration
+            )).to.be.revertedWithCustomError(omniwinMain, "ContractNotApproved");
+        });
+
+        it("Should fail to create raffle on main chain with ETH as prize", async function () {
+            const { omniwinMain,omniwinSide, nft, erc20, owner, otherAccount ,MockRouterClient} = await loadFixture(deployContract);
+
+            const minimumFundsInWeis = ethers.parseEther("1");
+            const assetType = 2; // ETH, adjust based on enum order
+            const prizeAddress = ethers.ZeroAddress; // ETH address
+            const prizeAmount = ethers.parseEther("1"); // Amount of ETH to be used as the prize
+            const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
+
+            // Define prices for entries into the raffle
+            const prices = [
+                {
+                    id: 0,
+                    numEntries: 1,
+                    price: ethers.parseUnits("10", 6),
+                },
+                {
+                    id: 1,
+                    numEntries: 5,
+                    price: ethers.parseUnits("30", 6), // Slight discount for buying more
+                },
+            ];
+
+            // Call createRaffle with the defined parameters
+            await expect(omniwinMain.connect(otherAccount).createRaffle(
+                prizeAddress,
+                prizeAmount,
+                minimumFundsInWeis,
+                prices,
+                assetType,
+                deadlineDuration,
+                {
+                    value: prizeAmount - BigInt(1)
+                }
+            )).to.be.revertedWithCustomError(omniwinMain, "ETHPrizeAmountMismatch");
+        });
 
     });
 
@@ -1580,325 +1774,7 @@ describe("Omniwin", function () {
 
     });
 
-
-
-
-    // it("Should claim full refund for all bought tickets", async function () {
-    //     const { omniwin, nft, erc20, owner, usdc, otherAccount } = await loadFixture(deployContract);
-
-    //     const raffleId = 0;
-    //     const minimumFundsInWeis = ethers.parseEther("100");
-    //     const entryType = 0; // Assuming 0 represents a specific entry type, adjust based on your enum
-    //     const assetType = 0; // ERC20 token, adjust based on enum order
-    //     const prizeAddress = erc20.target; // Token contract
-    //     const prizeAmount = 1000; // Number of tokens to be used as the prize
-    //     const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
-
-    //     // Step 1: Transfer tokens to `otherAccount` to be used as the prize
-    //     const amount = 10000;
-    //     await erc20.transfer(otherAccount.address, amount);
-
-    //     // Step 2: `otherAccount` approves `omniwin` contract to spend its tokens
-    //     await erc20.connect(otherAccount).approve(omniwin.target, prizeAmount);
-
-    //     // Define prices for entries into the raffle
-    //     const prices = [
-    //         {
-    //             numEntries: 1,
-    //             price: ethers.parseUnits("10", 6), // Convert $10 to smallest unit as BigInt
-    //         },
-    //         {
-    //             numEntries: 5,
-    //             price: ethers.parseUnits("100", 6), // Convert $100 to smallest unit as BigInt
-    //         },
-    //         {
-    //             numEntries: 250,
-    //             price: ethers.parseUnits("1000", 6), // Convert $1000 to smallest unit as BigInt
-    //         },
-    //     ];
-    //     // Call createRaffle with the defined parameters
-    //     const tx = await omniwin.connect(otherAccount).createRaffle(
-    //         prizeAddress,
-    //         prizeAmount,
-    //         minimumFundsInWeis,
-    //         prices,
-    //         entryType,
-    //         assetType,
-    //         deadlineDuration
-    //     );
-
-    //     //mint some USDC
-    //     const mintAmount = ethers.parseUnits("2000", 6);
-    //     await usdc.mint(otherAccount, mintAmount);
-
-    //     const initialBalance = await usdc.connect(otherAccount).balanceOf(otherAccount.address);
-    //     expect(initialBalance).to.be.equal(mintAmount);
-
-    //     //give allowance to omniwin
-    //     await usdc.connect(otherAccount).approve(omniwin.target, mintAmount);
-    //     expect(await usdc.allowance(otherAccount.address, omniwin.target)).to.be.equal(mintAmount);
-
-    //     // Buy entry type 1 (single entry)
-    //     const buyTx1 = await omniwin.connect(otherAccount).buyEntry(raffleId, 0, prices[0].price);
-    //     await buyTx1.wait();
-
-    //     // Buy entry type 2 (multiple entries)
-    //     const buyTx2 = await omniwin.connect(otherAccount).buyEntry(raffleId, 2, prices[2].price);
-    //     await buyTx2.wait();
-
-
-    //     //check bought tickets
-    //     const tickets = await omniwin.getRafflesEntryInfo(raffleId);
-    //     expect(tickets).to.exist;
-
-    //     // Wait for the deadline to pass
-    //     await time.increase(deadlineDuration + 1);
-
-    //     //check usdc balance of otherAccount
-    //     const balanceAfterTicketBuy = await usdc.connect(otherAccount).balanceOf(otherAccount.address);
-    //     expect(balanceAfterTicketBuy).to.be.equal(initialBalance - prices[0].price - prices[2].price);
-
-    //     await expect(tx).to.emit(omniwin, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
-
-    //     const totalTicketCost = prices[0].price + prices[2].price;
-
-    //     const expectedBalanceAfterRefund = balanceAfterTicketBuy + totalTicketCost;
-
-    //     // // claim refund
-    //     await omniwin.connect(otherAccount).claimRefund(raffleId)
-    //     const balanceAfterRefund = await usdc.connect(otherAccount).balanceOf(otherAccount.address);
-
-    //     expect(balanceAfterRefund).to.be.equal(expectedBalanceAfterRefund);
-    // });
-
-
-    // it("Should create raffle with ERC721 as prize", async function () {
-    //     const { omniwin, nft, erc20, owner, otherAccount } = await loadFixture(deployContract);
-
-    //     const minimumFundsInWeis = ethers.parseEther("1");
-    //     const entryType = 0; // Assuming 0 represents a specific entry type, adjust based on your enum
-    //     const assetType = 1; // ERC721 token, adjust based on enum order
-    //     const prizeAddress = nft.target; // Token contract
-    //     const tokenId = 1; // tokenId of the NFT
-    //     const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
-
-    //     // Step 1: Mint ERC721 token and transfer to `otherAccount` to be used as the prize
-    //     await nft.mintCollectionNFT(owner.address, tokenId);
-    //     expect(await nft.ownerOf(tokenId)).to.equal(owner.address);
-    //     await nft.transferFrom(owner.address, otherAccount.address, tokenId);
-
-
-    //     // Step 2: `otherAccount` approves `omniwin` contract to spend its tokens
-    //     await nft.connect(otherAccount).approve(omniwin.target, tokenId);
-
-    //     // Check balance
-    //     const balance = await nft.balanceOf(otherAccount.address);
-    //     expect(balance).to.equal(1);
-
-    //     // Define prices for entries into the raffle
-    //     const prices = [
-    //         {
-    //             id: 0,
-    //             numEntries: 1,
-    //             price: ethers.parseUnits("10", 6),
-    //         },
-    //         {
-    //             id: 1,
-    //             numEntries: 5,
-    //             price: ethers.parseUnits("100", 6), // Slight discount for buying more
-    //         },
-    //     ];
-
-    //     // Call createRaffle with the defined parameters
-    //     const tx = await omniwin.connect(otherAccount).createRaffle(
-    //         prizeAddress,
-    //         tokenId,
-    //         minimumFundsInWeis,
-    //         prices,
-    //         entryType,
-    //         assetType,
-    //         deadlineDuration
-    //     );
-
-    //     const raffleId = 0;
-    //     await expect(tx).to.emit(omniwin, "RaffleStarted").withArgs(raffleId, prizeAddress, tokenId, assetType);
-    // })
-
-    // it("Should claim full refund for all bought tickets and nft reclaim", async function () {
-    //     const { omniwin, nft, erc20, usdc, owner, otherAccount } = await loadFixture(deployContract);
-
-    //     const raffleId = 0;
-    //     const minimumFundsInWeis = ethers.parseEther("100");
-    //     const entryType = 0; // Assuming 0 represents a specific entry type, adjust based on your enum
-    //     const assetType = 1; // ERC721 token, adjust based on enum order
-    //     const prizeAddress = nft.target; // Token contract
-    //     const tokenId = 1; // tokenId of the NFT
-    //     const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
-
-    //     // Step 1: Mint ERC721 token and transfer to `otherAccount` to be used as the prize
-    //     await nft.mintCollectionNFT(owner.address, tokenId);
-    //     expect(await nft.ownerOf(tokenId)).to.equal(owner.address);
-    //     await nft.transferFrom(owner.address, otherAccount.address, tokenId);
-
-    //     //check nft balance of otherAccount
-    //     const balanceAfterNftTransfer = await nft.balanceOf(otherAccount.address);
-    //     expect(balanceAfterNftTransfer).to.equal(1);
-
-    //     // Check ownership of the NFT with tokenId
-    //     const ownerOfTokenId = await nft.ownerOf(tokenId);
-    //     expect(ownerOfTokenId).to.equal(otherAccount.address);
-
-    //     // Step 2: `otherAccount` approves `omniwin` contract to spend its nft
-    //     await nft.connect(otherAccount).approve(omniwin.target, tokenId);
-
-    //     // Define prices for entries into the raffle
-    //     const prices = [
-    //         {
-    //             numEntries: 1,
-    //             price: ethers.parseUnits("10", 6),
-    //         },
-    //         {
-    //             numEntries: 5,
-    //             price: ethers.parseUnits("100", 6), // Slight discount for buying more
-    //         },
-    //         {
-    //             numEntries: 250,
-    //             price: ethers.parseUnits("1000", 6), // Slight discount for buying more
-    //         },
-    //     ];
-
-    //     // Call createRaffle with the defined parameters
-    //     const tx = await omniwin.connect(otherAccount).createRaffle(
-    //         prizeAddress,
-    //         tokenId,
-    //         minimumFundsInWeis,
-    //         prices,
-    //         entryType,
-    //         assetType,
-    //         deadlineDuration
-    //     );
-
-    //     // Check ownership of the NFT with tokenId
-    //     const ownerOfTokenId2 = await nft.ownerOf(tokenId);
-    //     expect(ownerOfTokenId2).to.equal(omniwin.target);
-
-    //     const nftBalanceAfterRaffleCreation = await nft.balanceOf(otherAccount.address);
-    //     expect(nftBalanceAfterRaffleCreation).to.equal(0);
-
-    //     //mint some USDC
-    //     const mintAmount = ethers.parseUnits("2000", 6);
-    //     await usdc.mint(otherAccount, mintAmount);
-
-    //     const initialBalance = await usdc.connect(otherAccount).balanceOf(otherAccount.address);
-    //     expect(initialBalance).to.be.equal(mintAmount);
-
-    //     //give allowance to omniwin
-    //     await usdc.connect(otherAccount).approve(omniwin.target, mintAmount);
-    //     expect(await usdc.allowance(otherAccount.address, omniwin.target)).to.be.equal(mintAmount);
-
-    //     // Buy entry type 1
-    //     await omniwin.connect(otherAccount).buyEntry(raffleId, 0, prices[0].price);
-
-    //     // Buy entry type 2
-    //     await omniwin.connect(otherAccount).buyEntry(raffleId, 2, prices[2].price);
-
-    //     //check bought tickets
-    //     const tickets = await omniwin.getRafflesEntryInfo(raffleId);
-    //     expect(tickets).to.exist;
-
-    //     // Wait for the deadline to pass
-    //     await time.increase(deadlineDuration + 1);
-
-    //     //check usdc balance of otherAccount
-    //     const balanceAfterTicketBuy = await usdc.connect(otherAccount).balanceOf(otherAccount.address);
-    //     expect(balanceAfterTicketBuy).to.be.equal(initialBalance - prices[0].price - prices[2].price);
-
-    //     await expect(tx).to.emit(omniwin, "RaffleStarted").withArgs(raffleId, prizeAddress, tokenId, assetType);
-
-    //     const totalTicketCost = prices[0].price + prices[2].price;
-
-    //     const expectedBalanceAfterRefund = balanceAfterTicketBuy + totalTicketCost;
-
-    //     // claim refund for all tickets
-    //     await omniwin.connect(otherAccount).claimRefund(raffleId)
-
-    //     const balanceAfterRefund = await usdc.connect(otherAccount).balanceOf(otherAccount.address);
-    //     expect(balanceAfterRefund).to.be.equal(expectedBalanceAfterRefund);
-
-    //     //reclaim nft
-    //     await omniwin.connect(otherAccount).reclaimAssets(raffleId)
-
-    //     // Check NFT balance after reclaiming
-    //     const finalNftBalance = await nft.balanceOf(otherAccount.address);
-    //     expect(finalNftBalance).to.equal(1);
-
-    //     // Check ownership of the NFT with tokenId
-    //     const ownerOfTokenId3 = await nft.ownerOf(tokenId);
-    //     expect(ownerOfTokenId3).to.equal(otherAccount.address);
-
-    // });
-
-
-    // it("Should cancel raffle", async function () {
-    //     const { omniwin, nft, erc20, owner, otherAccount } = await loadFixture(deployContract);
-
-    //     const minimumFundsInWeis = ethers.parseEther("1");
-    //     const entryType = 0; // Assuming 0 represents a specific entry type, adjust based on your enum
-    //     const assetType = 1; // ERC721 token, adjust based on enum order
-    //     const prizeAddress = nft.target; // Token contract
-    //     const tokenId = 1; // tokenId of the NFT
-    //     const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
-
-    //     // Step 1: Mint ERC721 token and transfer to `otherAccount` to be used as the prize
-    //     await nft.mintCollectionNFT(owner.address, tokenId);
-    //     expect(await nft.ownerOf(tokenId)).to.equal(owner.address);
-    //     await nft.transferFrom(owner.address, otherAccount.address, tokenId);
-
-
-    //     // Step 2: `otherAccount` approves `omniwin` contract to spend its tokens
-    //     await nft.connect(otherAccount).approve(omniwin.target, tokenId);
-
-    //     // Check balance
-    //     const balance = await nft.balanceOf(otherAccount.address);
-    //     expect(balance).to.equal(1);
-
-    //     // Define prices for entries into the raffle
-    //     const prices = [
-    //         {
-    //             id: 0,
-    //             numEntries: 1,
-    //             price: ethers.parseEther("0.01"),
-    //         },
-    //         {
-    //             id: 1,
-    //             numEntries: 5,
-    //             price: ethers.parseEther("0.045"), // Slight discount for buying more
-    //         },
-    //     ];
-
-    //     // Call createRaffle with the defined parameters
-    //     const tx = await omniwin.connect(otherAccount).createRaffle(
-    //         prizeAddress,
-    //         tokenId,
-    //         minimumFundsInWeis,
-    //         prices,
-    //         entryType,
-    //         assetType,
-    //         deadlineDuration
-    //     );
-
-    //     const raffleId = 0;
-    //     await expect(tx).to.emit(omniwin, "RaffleStarted").withArgs(raffleId, prizeAddress, tokenId, assetType);
-
-    //     //cancel raffle
-    //     await omniwin.cancelRaffle(raffleId);
-
-    //     // Check ownership of the NFT with tokenId
-    //     const ownerOfTokenId = await nft.ownerOf(tokenId);
-    //     expect(ownerOfTokenId).to.equal(otherAccount.address);
-    // });
-
-    describe("Raffle vrf", function () {
+    describe.only("Raffle vrf", function () {
         beforeEach(async function () {
             // Load the initial setup fixture
             const { omniwinMain,omniwinSide, omniwinSide2, usdc, nft, erc20, owner, otherAccount,MockLinkToken ,MockRouterClient,vrfCoordinator} = await loadFixture(deployContract);
@@ -1927,12 +1803,13 @@ describe("Omniwin", function () {
             await omniwinMain.allowlistSender(omniwinSide2.target, true);
 
             //mint some USDC
-            const mintAmount = ethers.parseUnits("10000", 6);
+            const mintAmount = ethers.parseUnits("1000000", 6);
             await usdc.mint(otherAccount, mintAmount);
 
             //mint some Link
             const linkAmount = ethers.parseUnits("10000", 18);
             await MockLinkToken.transfer(omniwinMain.target, linkAmount);
+            await MockLinkToken.transfer(omniwinSide.target, linkAmount);
             
             // Step 1: Transfer tokens to `otherAccount` to be used as the prize
             const amount = 10000 * 10 ** 6;
@@ -1940,14 +1817,6 @@ describe("Omniwin", function () {
 
             // Step 2: `otherAccount` approves `omniwin` contract to spend its tokens
             await erc20.connect(otherAccount).approve(omniwinMain.target, prizeAmount);
-
-            // Check allowance
-            const allowance = await erc20.allowance(otherAccount.address, omniwinMain.target);
-            expect(allowance).to.equal(prizeAmount);
-
-            // Check balance
-            const balance = await erc20.balanceOf(otherAccount.address);
-            expect(balance).to.equal(amount);
 
             // Define prices for entries into the raffle
             const prices = [
@@ -1963,8 +1832,46 @@ describe("Omniwin", function () {
                 },
             ];
 
+            await erc20.connect(otherAccount).approve(omniwinSide.target, prizeAmount);
+
+            const gasLimitSyn = 1_000_000;  
+            const gasLimitSynAck = 400_000; 
+            const gasLimitForAck = 100_000; 
+            await omniwinSide.connect(otherAccount).CreateRaffleCCIP(
+                prizeAddress,
+                prizeAmount,
+                minimumFundsInWeis,
+                prices,
+                assetType,
+                deadlineDuration,
+                gasLimitSyn,
+                gasLimitSynAck,
+                gasLimitForAck
+            )
+
+
+            const prizeAddressNft = nft.target; // Token contract
+            const tokenId = 1; // tokenId of the NFT
+            const assetTypeNft = 1; // ERC721 token, adjust based on enum order
+
+            await nft.mintCollectionNFT(owner.address, tokenId);
+            await nft.transferFrom(owner.address, otherAccount.address, tokenId);
+            await nft.connect(otherAccount).approve(omniwinSide2.target, tokenId);
+
+            await omniwinSide2.connect(otherAccount).CreateRaffleCCIP(
+                prizeAddressNft,
+                tokenId,
+                minimumFundsInWeis,
+                prices,
+                assetTypeNft,
+                deadlineDuration,
+                gasLimitSyn,
+                gasLimitSynAck,
+                gasLimitForAck
+            )
+
             // Call createRaffle with the defined parameters
-            const tx = await omniwinMain.connect(otherAccount).createRaffle(
+            const tx  = await omniwinMain.connect(otherAccount).createRaffle(
                 prizeAddress,
                 prizeAmount,
                 minimumFundsInWeis,
@@ -1973,6 +1880,11 @@ describe("Omniwin", function () {
                 deadlineDuration
             );
 
+            await tx.wait(); // Wait for the transaction to be mined
+            // Fetch the transaction receipt to access the event logs
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
 
             //enable raffle on sidechain
             const chainSelectors = [
@@ -1991,11 +1903,10 @@ describe("Omniwin", function () {
             ];
 
             // Enable raffle on sidechain
-            const tx2 = await omniwinMain.connect(otherAccount).enableCreateRafffleOnSidechain(0, chainSelectors[0]);
-            const tx3 = await omniwinMain.connect(otherAccount).enableCreateRafffleOnSidechain(0, chainSelectors[1]);
+            await omniwinMain.connect(otherAccount).enableCreateRafffleOnSidechain(raffleId, chainSelectors[0]);
+            await omniwinMain.connect(otherAccount).enableCreateRafffleOnSidechain(raffleId, chainSelectors[1]);
 
 
-            const raffleId = 0
             const priceIndex = 0;
               // A. Buy tickets on main chain
             //give allowance to omniwin for first buy
@@ -2056,7 +1967,7 @@ describe("Omniwin", function () {
 
         it("Pick a winner", async function () {
             const { omniwinMain, omniwinSide,omniwinSide2,usdc, erc20, otherAccount,vrfCoordinator } = this.testContext;
-            const raffleId = 0;
+            const raffleId = 2;
 
             console.log("account: ",otherAccount.address);
             console.log("omniwinMain: ",omniwinMain.target);
@@ -2093,7 +2004,8 @@ describe("Omniwin", function () {
                     chainSelector: routerConfig.polygonMumbai.chainSelector
                 }
             ] 
-            //After fulfillRandomWords has been called => winner has been set in the raffle
+
+            // After fulfillRandomWords has been called => winner has been set in the raffle
             const tx2 = await omniwinMain.sendPrizeDistributionMessages(raffleId, allSupportedChains)
             await expect(tx2).to.emit(omniwinMain, "FeeTransferredToPlatform")
 

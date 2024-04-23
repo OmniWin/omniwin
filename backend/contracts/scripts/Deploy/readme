@@ -1,0 +1,7 @@
+1. npx hardhat run deployMain.ts --network bscTestnet
+
+npx hardhat verify --constructor-args argsMain.js 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426 --network bscTestnet
+
+2. npx hardhat run deploySide.ts --network baseTestnet
+
+npx hardhat verify --constructor-args argsSide.js 0x2EB28E70C519b885799C1e262d0020Df616E73F8 --network baseTestnet
