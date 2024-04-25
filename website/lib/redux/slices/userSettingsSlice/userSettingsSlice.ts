@@ -9,6 +9,7 @@ interface UserSettingsState {
   user: object;
   isWalletConnectorModalOpen: boolean;
   isWalletStatusModalOpen: boolean;
+  isCreateRaffleModalOpen: boolean;
   usedReferralCode: string;
 }
 
@@ -20,6 +21,7 @@ const initialState: UserSettingsState = {
   user: {},
   isWalletConnectorModalOpen: false,
   isWalletStatusModalOpen: false,
+  isCreateRaffleModalOpen: false,
   usedReferralCode: '',
 };
 
@@ -53,12 +55,16 @@ export const userSettingsSlice = createSlice({
     setWalletStatusModalOpen: (state, action: PayloadAction<boolean>) => {
       state.isWalletStatusModalOpen = action.payload;
       localStorage.setItem('userSettings', JSON.stringify(state));
+    },
+    setCreateRaffleModalOpen: (state, action: PayloadAction<boolean>) => {
+      state.isCreateRaffleModalOpen = action.payload;
+      localStorage.setItem('userSettings', JSON.stringify(state));
     }
   },
 });
 
 export const {
-  setCardStyle, setCardDisplay, setUser, setWalletConnectorModalOpen, setUsedReferralCode, setWalletStatusModalOpen
+  setCardStyle, setCardDisplay, setUser, setWalletConnectorModalOpen, setUsedReferralCode, setWalletStatusModalOpen, setCreateRaffleModalOpen
 } = userSettingsSlice.actions;
 
 export default userSettingsSlice.reducer;

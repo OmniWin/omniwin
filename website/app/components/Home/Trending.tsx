@@ -375,7 +375,7 @@ export const Trending = () => {
                                             "lg:pl-3 pl-0",
                                             key === 0 && "",
                                             !sidebarStates.isChatOpen && "basis-1/3 lg:basis-1/4 xl:basis-1/6 2xl:basis-[10%]",
-                                            sidebarStates.isChatOpen && "basis-1/3 lg:basis-1/3 xl:basis-1/4 2xl:basis-[14%]"
+                                            sidebarStates.isChatOpen && "basis-1/3 lg:basis-1/3 xl:basis-1/3 2xl:basis-[14%]"
                                         )}
                                     >
                                         <div className="hardware-accelerate">
