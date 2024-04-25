@@ -315,10 +315,13 @@ import RaffleMetaWin from "../Raffle/RaffleMetaWin";
 import { classNames } from "@/app/utils";
 
 import { useState, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
+import { selectChatOpenState, selectSidebarOpenState } from "@/lib/redux/slices/sidebarSlice/selectors";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 export const Trending = () => {
     const [display, setDisplay] = useState("carousel");
+    const sidebarStates = useSelector(selectChatOpenState);
 
     return (
         <>
@@ -339,9 +342,15 @@ export const Trending = () => {
 
             <div className="relative">
                 {display === "grid" && (
-                    <div className={classNames("relative flex flex-wrap sm:grid sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-x-3 gap-y-4 lg:gap-y-3 mt-8 xl:mt-12")}>
+                    <div
+                        className={classNames(
+                            "relative flex flex-wrap sm:grid gap-x-3 gap-y-4 lg:gap-y-3 mt-8 xl:mt-12",
+                            !sidebarStates.isChatOpen && "sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8",
+                            sidebarStates.isChatOpen && "sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-7"
+                        )}
+                    >
                         {trending.map((item, key) => (
-                            <div key={'trending'+key} className="w-[calc(33%-.45rem)] sm:w-auto inline-block">
+                            <div key={"trending" + key} className="w-[calc(33%-.45rem)] sm:w-auto inline-block">
                                 <RaffleMetaWin {...item} />
                             </div>
                         ))}
@@ -351,14 +360,24 @@ export const Trending = () => {
                     <>
                         <Carousel
                             className="mt-8 xl:mt-12"
-                            opts={{
-                                // loop: true,
-                                // dragFree: true,
-                            }}
+                            opts={
+                                {
+                                    // loop: true,
+                                    // dragFree: true,
+                                }
+                            }
                         >
                             <CarouselContent className="-ml-1">
                                 {trending.map((item, key) => (
-                                    <CarouselItem key={'trendingCarousel'+key} className={classNames("basis-1/3 lg:basis-1/4 xl:basis-1/6 2xl:basis-[10%] lg:pl-3 pl-0", key === 0 && "")}>
+                                    <CarouselItem
+                                        key={"trendingCarousel" + key}
+                                        className={classNames(
+                                            "lg:pl-3 pl-0",
+                                            key === 0 && "",
+                                            !sidebarStates.isChatOpen && "basis-1/3 lg:basis-1/4 xl:basis-1/6 2xl:basis-[10%]",
+                                            sidebarStates.isChatOpen && "basis-1/3 lg:basis-1/3 xl:basis-1/4 2xl:basis-[14%]"
+                                        )}
+                                    >
                                         <div className="hardware-accelerate">
                                             <RaffleMetaWin {...item} />
                                         </div>

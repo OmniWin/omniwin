@@ -157,7 +157,7 @@ const config: Config = {
             },
         },
     },
-    plugins: [require("@tailwindcss/forms"), addVariablesForColors],
+    plugins: [require("@tailwindcss/forms"), require("tailwindcss-animate"), addVariablesForColors],
 };
 // This plugin adds each Tailwind color as a global CSS variable, e.g. var(--gray-200).
 function addVariablesForColors({ addBase, theme }: any) {
