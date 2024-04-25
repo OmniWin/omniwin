@@ -26,18 +26,18 @@ async function callContractMethod() {
   const minimumFundsInWeis = ethers.parseEther("1");
   const assetType = 0; // ERC20 token, adjust based on enum order
   const prizeAddress = config.usdcContract; // Token contract
-  const prizeAmount = ethers.parseUnits("10", 1); // Number of tokens to be used as the prize
+  const prizeAmount = ethers.parseUnits("1", 6); // Number of tokens to be used as the prize
   const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
   const prices = [
     {
       id: 0,
       numEntries: 1,
-      price: ethers.parseUnits("10", 1),
+      price: ethers.parseUnits("1", 6),
     },
     {
       id: 1,
       numEntries: 5,
-      price: ethers.parseUnits("30", 2), // Slight discount for buying more
+      price: ethers.parseUnits("3", 6), // Slight discount for buying more
     },
   ];
 
