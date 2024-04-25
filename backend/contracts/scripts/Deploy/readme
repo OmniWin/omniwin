@@ -1,7 +1,61 @@
-1. npx hardhat run deployMain.ts --network bscTestnet
+In this Readme, i chose BSC as main and BASE as side
 
-npx hardhat verify --constructor-args argsMain.js 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426 --network bscTestnet
+# Omniwin
+
+Step 1:
+Have a subscription to chainlink VRF: vrf.chain.link and add consumer contract (main contract) to the chainlink VRF
+
+Step 2:
+
+1. npx hardhat run deployMain.ts --network bscTestnet
+   Contract deployed to: 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426
+   npx hardhat verify --constructor-args argsMain.js 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426 --network bscTestnet
 
 2. npx hardhat run deploySide.ts --network baseTestnet
+   Contract deployed to: 0x2EB28E70C519b885799C1e262d0020Df616E73F8
+   npx hardhat verify --constructor-args argsSide.js 0x2EB28E70C519b885799C1e262d0020Df616E73F8 --network baseTestnet
 
-npx hardhat verify --constructor-args argsSide.js 0x2EB28E70C519b885799C1e262d0020Df616E73F8 --network baseTestnet
+3. npx hardhat run deployUSDC.ts --network baseTestnet
+   Contract deployed to: 0x01FB2FcC10b3560BE02F3b8DF79d97f565458936
+
+4. npx hardhat run deployUSDC.ts --network bscTestnet
+   Contract deployed to: 0x74f397E96ed21749B21203D73282E5610fc479e4
+
+5. Set USDC in contract using tasks
+   npx hardhat deployUSDC --network baseTestnet --contract 0x2EB28E70C519b885799C1e262d0020Df616E73F8 --usdc 0x01FB2FcC10b3560BE02F3b8DF79d97f565458936
+   npx hardhat deployUSDC --network bscTestnet --contract 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426 --usdc 0x74f397E96ed21749B21203D73282E5610fc479e4
+
+6. Set mainchain raffle address to side contract
+   BSC SELECTOR: 13264668187771770619
+   npx hardhat setMainChainRaffleToSidechain --network baseTestnet --contract 0x2EB28E70C519b885799C1e262d0020Df616E73F8 --raffle 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426
+
+   //For sidechain we tell what is the selector of the mainchain
+   npx hardhat setMainChainSelectorToSidechain --network baseTestnet --contract 0x2EB28E70C519b885799C1e262d0020Df616E73F8 --selector 13264668187771770619
+
+7. Allow main contract to send message to destination chain
+   BASECHAIN SELECTOR: 10344971235874465080
+   npx hardhat allowDestinationChain --network bscTestnet --contract 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426 --selector 10344971235874465080 --allow true
+   allowlistDestinationChain(destinationChainSelector, true);
+
+8. Allow side contract to receive message from source chain
+   BSC SELECTOR: 13264668187771770619
+   npx hardhat allowlistSourceChain --network baseTestnet --contract 0x2EB28E70C519b885799C1e262d0020Df616E73F8 --selector 13264668187771770619 --allow true
+   await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
+
+9. Allow main contract to be able to send message to side contract
+   npx hardhat allowlistSender --network baseTestnet --contract 0x2EB28E70C519b885799C1e262d0020Df616E73F8 --externalContract 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426 --allow true
+   await omniwinSide.allowlistSender(omniwinMain.target, true);
+
+10. Mint USDC
+    npx hardhat mintUSDC --network baseTestnet --contract 0x01FB2FcC10b3560BE02F3b8DF79d97f565458936 --amount 1000000000 --to 0xAb6606E5B5c35DB516D67E36fbAF049B1C38409F
+    npx hardhat mintUSDC --network bscTestnet --contract 0x74f397E96ed21749B21203D73282E5610fc479e4 --amount 1000000000 --to 0xAb6606E5B5c35DB516D67E36fbAF049B1C38409F
+
+Extra:
+Deploy NFT contract
+npx hardhat run deployNFT.ts --network bscTestnet
+Contract deployed to: 0x5Cf20A073A80cD1700fED1A1F68CFad013004e0b
+
+npx hardhat run deployNFT.ts --network baseTestnet
+Contract deployed to: 0x0D246993AbC469df48727eC7fCD2c56D1DF9BaCC
+
+# Omniwin Main
