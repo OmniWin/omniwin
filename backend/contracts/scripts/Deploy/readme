@@ -5,6 +5,8 @@ In this Readme, i chose BSC as main and BASE as side
 Step 1:
 Have a subscription to chainlink VRF: vrf.chain.link and add consumer contract (main contract) to the chainlink VRF
 
+Add LINK to all deployed contracts to have for CCIP fees
+
 Step 2:
 
 1. npx hardhat run deployMain.ts --network bscTestnet
@@ -37,14 +39,22 @@ Step 2:
    npx hardhat allowDestinationChain --network bscTestnet --contract 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426 --selector 10344971235874465080 --allow true
    allowlistDestinationChain(destinationChainSelector, true);
 
-8. Allow side contract to receive message from source chain
+8. Allow side contract to receive message from main contract selector
    BSC SELECTOR: 13264668187771770619
    npx hardhat allowlistSourceChain --network baseTestnet --contract 0x2EB28E70C519b885799C1e262d0020Df616E73F8 --selector 13264668187771770619 --allow true
    await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
-9. Allow main contract to be able to send message to side contract
-   npx hardhat allowlistSender --network baseTestnet --contract 0x2EB28E70C519b885799C1e262d0020Df616E73F8 --externalContract 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426 --allow true
+9. Allow side contract to be able receive message from main contract
+   npx hardhat allowlistSender --network baseTestnet --contract 0x2EB28E70C519b885799C1e262d0020Df616E73F8 --externalcontract 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426 --allow true
    await omniwinSide.allowlistSender(omniwinMain.target, true);
+
+10. Allow main contract to receive message from side contract selector
+    npx hardhat allowlistSourceChain --network bscTestnet --contract 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426 --selector 10344971235874465080 --allow true
+    await omniwinMain.allowlistSourceChain(omniwinSide.target, true);
+
+11. Allow main contract to receive message from side contract
+   npx hardhat allowlistSender --network bscTestnet --contract 0x15E30D5c9Ed5d134C8FCD06120D5b6AB7e093426 --externalcontract 0x2EB28E70C519b885799C1e262d0020Df616E73F8 --allow true
+   await omniwinMain.allowlistSender(omniwinSide.target, true);
 
 10. Mint USDC
     npx hardhat mintUSDC --network baseTestnet --contract 0x01FB2FcC10b3560BE02F3b8DF79d97f565458936 --amount 1000000000 --to 0xAb6606E5B5c35DB516D67E36fbAF049B1C38409F

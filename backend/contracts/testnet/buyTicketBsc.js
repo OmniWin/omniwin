@@ -11,39 +11,27 @@ const provider = new ethers.JsonRpcProvider(
 const privateKey = accounts.bscTestnetPrivateKey;
 const contractAddress = config.bscContract;
 
-// Setup provider and wallet
 const wallet = new ethers.Wallet(privateKey, provider);
 
-// Connect to the contract
 const contract = new ethers.Contract(contractAddress, abi.abi, wallet);
 
-// Example function call: myMethod with parameter
 async function callContractMethod() {
   const raffleId = 2;
-  const chainSelectors = {
-    ccnsReceiverAddress: config.baseContract,
-    chainSelector: config.baseSelector,
+  const priceId = 0;
+  const usdcAmount = ethers.parseUnits("1", 6);
+
+  //allow contract to spend USDC
+  const usdcContract = new ethers.Contract(
+    config.usdcContractBsc,
+    usdcAbi.abi,
+    wallet
+  );
+
+  const approveTx = await usdcContract.approve(contractAddress, usdcAmount);
+
+  const tx = await contract.buyEntry(raffleId, priceId, usdcAmount, {
     gasLimit: 300_000,
-    strict: false,
-  };
-
-  console.log(
-    "Enabling raffle on sidechain with chain selectors:",
-    chainSelectors
-  );
-
-  //read allowlistedDestinationChains public mapping
-  const allowlistedDestinationChains =
-    await contract.allowlistedDestinationChains(config.baseSelector);
-
-  console.log("allowlistedDestinationChains:", allowlistedDestinationChains);
-  const tx = await contract.enableCreateRafffleOnSidechain(
-    raffleId,
-    chainSelectors,
-    {
-      gasLimit: 200_000,
-    }
-  );
+  });
   await tx.wait();
   console.log("Transaction successful:", tx);
 }
