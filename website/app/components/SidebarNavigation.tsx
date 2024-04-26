@@ -36,6 +36,7 @@ import { selectSidebarOpenState, selectSidebarToggleState } from "@/lib/redux/sl
 import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
 import ClaimFaucetModal from "./Wallet/ClaimFaucetModal";
 import { Button } from "@/components/ui/button";
+import CreateRaffleModal from "./Raffle/CreateRaffleModal";
 
 interface NavigationItemChildren {
     name: string;
@@ -295,6 +296,9 @@ export const SidebarNavigation = () => {
 
         const storedIsSidebarToggle = JSON.parse(localStorage.getItem("toggleSidebar") || "false");
         dispatch(sidebarSlice.actions.setSidebarToggleState(storedIsSidebarToggle));
+
+        const isCreateRaffleModalOpen = JSON.parse(localStorage.getItem("isCreateRaffleModalOpen") || "false");
+        dispatch(userSettingsSlice.actions.setCreateRaffleModalOpen(isCreateRaffleModalOpen));
     }, [dispatch]);
 
     useEffect(() => {
@@ -602,6 +606,11 @@ export const SidebarNavigation = () => {
                                     ))}
                                     <li>
                                         <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                dispatch(userSettingsSlice.actions.setCreateRaffleModalOpen(true));
+                                            }}
                                             className={classNames(
                                                 "w-full group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-zinc-200 hover:bg-zinc-800 hover:text-white pl-6 !py-3"
                                                 // sidebarToggleState.toggleSidebar ? "pl-3" : ""
@@ -656,6 +665,7 @@ export const SidebarNavigation = () => {
                     </nav>
                 </div>
             </div>
+            <CreateRaffleModal />
         </>
     );
 };

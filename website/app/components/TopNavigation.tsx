@@ -16,8 +16,6 @@ import { ChevronDownIcon, MagnifyingGlassIcon } from "@heroicons/react/20/solid"
 import { Search } from "./Search";
 import WalletConnect from "./Wallet/WalletConnect";
 
-import { useDispatch, sidebarSlice } from "@/lib/redux";
-
 import { useState, useEffect } from "react";
 // import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { useAccount } from "wagmi";

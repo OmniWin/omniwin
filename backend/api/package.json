@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@api/opensea": "file:.api/apis/opensea",
     "@fastify/cookie": "^9.3.1",
     "@fastify/cors": "^9.0.0",
     "@fastify/jwt": "^7.2.4",
