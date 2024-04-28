@@ -35,7 +35,7 @@ import { useSelector, useDispatch, sidebarSlice, userSettingsSlice } from "@/lib
 import { selectSidebarOpenState, selectSidebarToggleState } from "@/lib/redux/slices/sidebarSlice/selectors";
 import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
 import ClaimFaucetModal from "./Wallet/ClaimFaucetModal";
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 interface NavigationItemChildren {
     name: string;
@@ -267,24 +267,27 @@ export const SidebarNavigation = () => {
     const sidebarToggleState = useSelector(selectSidebarToggleState);
     const userSettingsState = useSelector(selectUserSettingsState);
 
-    const groupedSidebarIconsByNames: { [key: string]: { children: { [key: string]: JSX.Element }, icon: JSX.Element } } = navigationIcons.reduce((acc: { [key: string]: { children: { [key: string]: JSX.Element }, icon: JSX.Element } }, item) => {
-        if (item.children) {
-            const children = item.children.reduce((acc: { [key: string]: JSX.Element }, child) => {
-                acc[child.name] = child.icon;
-                return acc;
-            }, {})
-            acc[item.name] = {
-                children,
-                icon: item.icon
-            };
-        } else {
-            acc[item.name] = {
-                children: {},
-                icon: item.icon
-            };
-        }
-        return acc;
-    }, {});
+    const groupedSidebarIconsByNames: { [key: string]: { children: { [key: string]: JSX.Element }; icon: JSX.Element } } = navigationIcons.reduce(
+        (acc: { [key: string]: { children: { [key: string]: JSX.Element }; icon: JSX.Element } }, item) => {
+            if (item.children) {
+                const children = item.children.reduce((acc: { [key: string]: JSX.Element }, child) => {
+                    acc[child.name] = child.icon;
+                    return acc;
+                }, {});
+                acc[item.name] = {
+                    children,
+                    icon: item.icon,
+                };
+            } else {
+                acc[item.name] = {
+                    children: {},
+                    icon: item.icon,
+                };
+            }
+            return acc;
+        },
+        {}
+    );
 
     useEffect(() => {
         const storedIsSidebarOpen = JSON.parse(localStorage.getItem("toggleSidebar") || "false");
@@ -299,10 +302,11 @@ export const SidebarNavigation = () => {
             navigation.map((navItem: NavigationItem) => ({
                 ...navItem,
                 current: navItem.href === path,
-                children: navItem?.children?.map((child: NavigationItemChildren) => ({
-                    ...child,
-                    current: child.href === path,
-                })) || null,
+                children:
+                    navItem?.children?.map((child: NavigationItemChildren) => ({
+                        ...child,
+                        current: child.href === path,
+                    })) || null,
             }))
         );
     }, [path]);
@@ -312,7 +316,7 @@ export const SidebarNavigation = () => {
             if (item.children) {
                 const isActiveChild = item.children.some((child) => child.current && child.needsSession);
                 if (isActiveChild) {
-                    acc = true
+                    acc = true;
                 }
             }
             return acc;
@@ -349,9 +353,9 @@ export const SidebarNavigation = () => {
             e.preventDefault();
             e.stopPropagation();
             dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true));
-            return false
+            return false;
         }
-    }
+    };
 
     return (
         <>
@@ -492,7 +496,11 @@ export const SidebarNavigation = () => {
                     </Link>
                 </div>
                 {/* <div className={`group flex grow flex-col bg-zinc-950 pb-4 relative transition-all duration-300 ${sidebarOpenState.toggleSidebar ? "px-4 w-[64px] hover:!w-72" : "pl-4 pr-4 lg:w-72"}`}> */}
-                <div className={`group flex grow flex-col bg-zinc-900 mb-3 pt-4 ml-3 hover:bg-gradient-to-br hover:from-zinc-800/5 hover:to-zinc-800/20 rounded-lg pb-4 relative transition-all duration-300 ${sidebarOpenState.toggleSidebar ? "px-4 w-[90px] hover:!w-72" : "pl-4 pr-4 lg:w-72"}`}>
+                <div
+                    className={`group flex grow flex-col bg-zinc-900 mb-3 pt-4 ml-3 hover:bg-gradient-to-br hover:from-zinc-800/5 hover:to-zinc-800/20 rounded-lg pb-4 relative transition-all duration-300 ${
+                        sidebarOpenState.toggleSidebar ? "px-4 w-[90px] hover:!w-72" : "pl-4 pr-4 lg:w-72"
+                    }`}
+                >
                     <nav className="flex flex-1 flex-col sidebar relative">
                         {/* <div className="md:opacity-100 w-4 transition-opacity duration-300 absolute -right-6 top-1/2 transform -translate-y-1/2">
                             <button
@@ -525,7 +533,7 @@ export const SidebarNavigation = () => {
                                                     </span>
                                                 </Link>
                                             ) : (
-                                                <Disclosure as="div" defaultOpen={item.children.some((child) => child.current)} key={'collapse'+item?.name + item.current}>
+                                                <Disclosure as="div" defaultOpen={item.children.some((child) => child.current)} key={"collapse" + item?.name + item.current}>
                                                     {({ open }) => (
                                                         <>
                                                             <Disclosure.Button
@@ -538,7 +546,12 @@ export const SidebarNavigation = () => {
                                                                 {/* <item.icon className="h-6 w-6 shrink-0" aria-hidden="true" /> */}
                                                                 {groupedSidebarIconsByNames[item.name].icon}
                                                                 {/* {sidebarToggleState.toggleSidebar ? "" : item.name} */}
-                                                                <span className={classNames(sidebarToggleState.toggleSidebar && "w-0 opacity-0 group-hover:w-auto group-hover:opacity-100", "transition-all duration-300 ease-out")}>
+                                                                <span
+                                                                    className={classNames(
+                                                                        sidebarToggleState.toggleSidebar && "w-0 opacity-0 group-hover:w-auto group-hover:opacity-100",
+                                                                        "transition-all duration-300 ease-out"
+                                                                    )}
+                                                                >
                                                                     {item.name}
                                                                 </span>
                                                                 <ChevronRightIcon
@@ -556,7 +569,7 @@ export const SidebarNavigation = () => {
                                                                         <li key={subItem.name}>
                                                                             <Link
                                                                                 // as={Link}
-                                                                                onClick={(e) => subItem?.needsSession ? checkIfSessionExists(e) : () => {}}
+                                                                                onClick={(e) => (subItem?.needsSession ? checkIfSessionExists(e) : () => {})}
                                                                                 href={subItem.href}
                                                                                 className={classNames(
                                                                                     // subItem.current ? "text-jade-400" : "text-zinc-400/90 hover:bg-zinc-800 hover:text-white",

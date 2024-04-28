@@ -5,21 +5,21 @@ import { SidebarNavigation } from "./SidebarNavigation";
 import { TopNavigation } from "./TopNavigation";
 import { MobileNavigation } from "./MobileNavigation";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faXTwitter, faDiscord, faTelegram, faInstagram } from '@fortawesome/free-brands-svg-icons'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXTwitter, faDiscord, faTelegram, faInstagram } from "@fortawesome/free-brands-svg-icons";
 
 /* Core */
 import { useSelector } from "@/lib/redux";
-import { selectSidebarToggleState } from "@/lib/redux/slices/sidebarSlice/selectors";
+import { selectSidebarToggleState, selectChatOpenState } from "@/lib/redux/slices/sidebarSlice/selectors";
 import React, { useRef } from "react";
 import Link from "next/link";
 
 import { useState } from "react";
-
-
+import { ChatSidebar } from "./Chat/ChatSidebar";
 
 export default function MainLayout(props: React.PropsWithChildren) {
     const sidebarToggleState = useSelector(selectSidebarToggleState);
+    const chatSidebarState = useSelector(selectChatOpenState);
     const mainRef = useRef(null); // Reference to the main tag
 
     return (
@@ -27,10 +27,10 @@ export default function MainLayout(props: React.PropsWithChildren) {
             <SidebarNavigation />
             {/* <div className="lg:pl-72"> */}
             {/* <div className={`${sidebarToggleState.toggleSidebar ? "lg:pl-8" : "lg:pl-64"} transition-all duration-300`}> */}
-            <div className={`${sidebarToggleState.toggleSidebar ? "lg:pl-[5.5rem]" : "lg:pl-72"} transition-all duration-300`}>
+            <div className={`${sidebarToggleState.toggleSidebar ? "lg:pl-[5.5rem]" : "lg:pl-72"} transition-all duration-300 ${chatSidebarState.isChatOpen ? "xl:pr-[395px]" : ""}`}>
                 <TopNavigation />
                 <main className="relative mx-2 sm:mx-6 lg:mx-8 bg-zinc-900 rounded-lg overflow-hidden">
-                    <div ref={mainRef} className="h-full relative py-3 pb-24 md:py-12 md:pb-20 px-3 md:px-12 overflow-y-auto no-scrollbar min-h-[calc(100dvh-64px-1rem)] max-h-[calc(100dvh-64px-.75rem)]">
+                    <div ref={mainRef} className="h-full relative py-3 pb-24 md:py-12 md:pb-20 px-3 md:px-6 2xl:px-12 overflow-y-auto no-scrollbar min-h-[calc(100dvh-64px-1rem)] max-h-[calc(100dvh-64px-.75rem)]">
                         {props.children}
                     </div>
                     <div className="absolute bottom-0 left-0 z-20 w-full flex flex-wrap items-center justify-center gap-4 bg-gradient-to-b from-zinc-800 to-zinc-900 p-2 text-zinc-400 text-xs rounded-b-lg">
@@ -66,8 +66,10 @@ export default function MainLayout(props: React.PropsWithChildren) {
                         </div>
                     </div>
                 </main>
-                <MobileNavigation mainRef={mainRef} />
+                {!chatSidebarState.isChatOpen && <MobileNavigation mainRef={mainRef} />}
             </div>
+
+            <ChatSidebar />
         </>
     );
 }

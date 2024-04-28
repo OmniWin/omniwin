@@ -162,7 +162,7 @@ const config: Config = {
             },
         },
     },
-    plugins: [require("@tailwindcss/forms"), addVariablesForColors, plugin(function ({ matchUtilities, theme }: any) {
+    plugins: [require("@tailwindcss/forms"), require("tailwindcss-animate"), addVariablesForColors, plugin(function ({ matchUtilities, theme }: any) {
         matchUtilities(
           {
             'text-shadow': (value: any) => ({
