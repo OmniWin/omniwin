@@ -243,7 +243,10 @@ describe("Omniwin", function () {
                 deadlineDuration
             );
 
-            const raffleId = 0;
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
+
             await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
 
             //contract should own the prize
@@ -307,7 +310,10 @@ describe("Omniwin", function () {
                 deadlineDuration
             );
 
-            const raffleId = 0;
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
+
             await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, tokenId, assetType);
 
             // contract should own the prize
@@ -351,7 +357,10 @@ describe("Omniwin", function () {
                 }
             );
 
-            const raffleId = 0;
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
+
             await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
 
             // contract should own the prize
@@ -419,7 +428,10 @@ describe("Omniwin", function () {
                 deadlineDuration
             );
 
-            const raffleId = 0;
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
+
             await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
            
 
@@ -427,8 +439,7 @@ describe("Omniwin", function () {
                 {
                     ccnsReceiverAddress: omniwinSide.target, // This should be an Ethereum address
                     chainSelector: routerConfig.bnbChainTestnet.chainSelector, // This should be a numerical chain identifier
-                    gasLimit: 300_000,
-                    strict: false
+                    gasLimit: 300_000
                 }
 
             // Enable raffle on sidechain
@@ -502,7 +513,10 @@ describe("Omniwin", function () {
                 deadlineDuration
             );
 
-            const raffleId = 0;
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
+            
             await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
            
 
@@ -612,7 +626,11 @@ describe("Omniwin", function () {
                 deadlineDuration
             );
 
-            const raffleId = 0;
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
+
+            
             await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
            
 
@@ -620,8 +638,7 @@ describe("Omniwin", function () {
                 {
                     ccnsReceiverAddress: omniwinSide.target, // This should be an Ethereum address
                     chainSelector: routerConfig.bnbChainTestnet.chainSelector, // This should be a numerical chain identifier
-                    gasLimit: 300_000,
-                    strict: false
+                    gasLimit: 300_000
                 }
             ];
 
@@ -688,8 +705,10 @@ describe("Omniwin", function () {
                 assetType,
                 deadlineDuration
             );
-
-            const raffleId = 0;
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
+            
             await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
            
 
@@ -697,8 +716,7 @@ describe("Omniwin", function () {
                 {
                     ccnsReceiverAddress: omniwinSide.target, // This should be an Ethereum address
                     chainSelector: routerConfig.bnbChainTestnet.chainSelector, // This should be a numerical chain identifier
-                    gasLimit: 300_000,
-                    strict: false
+                    gasLimit: 300_000
                 }
             ];
 
@@ -755,7 +773,10 @@ describe("Omniwin", function () {
                 deadlineDuration
             );
 
-            const raffleId = 0;
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
+            
             await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
            
             const chainSelectors = [
@@ -972,9 +993,7 @@ describe("Omniwin", function () {
 
             //https://www.cryptoneur.xyz/en/gas-fees-calculator
             // Call createRaffle with the defined parameters
-            const gasLimitSyn = 1_000_000;  
-            const gasLimitSynAck = 400_000; 
-            const gasLimitForAck = 100_000; 
+            const gasLimit = 300_000;
             const tx = await omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 prizeAmount,
@@ -982,23 +1001,21 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimitSyn,
-                gasLimitSynAck,
-                gasLimitForAck
+                gasLimit
             );
+
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
             
             //Emitted event to start creation of raffle on main chain
             await expect(tx).to.emit(omniwinSide, "CreateRaffleCCIPEvent")
             
-            await expect(tx).to.emit(omniwinMain, 'AckRaffleCreationFromSidechain')
+            await expect(tx).to.emit(omniwinMain, 'RaffleCreatedFromSidechain')
 
-            await expect(tx).to.emit(omniwinSide, 'RaffleCreated')
-            
-            await expect(tx).to.emit(omniwinMain, 'RaffleEnabledFromSidechain')
+            await expect(tx).to.emit(omniwinMain, 'RaffleStarted')
 
-            //Emitted event that sidechain received ACK and raffle from sidechain was moved from tempRaffles to raffles
 
-            const raffleId = 0;
             const rafflesSide = await omniwinSide.raffles(raffleId)
             expect(rafflesSide).to.exist;
 
@@ -1051,9 +1068,7 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimitSyn = 1_000_000;  
-            const gasLimitSynAck = 400_000; 
-            const gasLimitForAck = 100_000; 
+            const gasLimit = 300_000;  
             const tx = await omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 tokenId,
@@ -1061,20 +1076,22 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimitSyn,
-                gasLimitSynAck,
-                gasLimitForAck
+                gasLimit
             );
+
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
             
             //Emitted event to start creation of raffle on main chain
             await expect(tx).to.emit(omniwinSide, "CreateRaffleCCIPEvent")
             
-            await expect(tx).to.emit(omniwinMain, 'AckRaffleCreationFromSidechain')
+            await expect(tx).to.emit(omniwinMain, 'RaffleCreatedFromSidechain')
 
             //Emitted event that sidechain received ACK and raffle from sidechain was moved from tempRaffles to raffles
-            await expect(tx).to.emit(omniwinSide, 'RaffleCreated')
+            await expect(tx).to.emit(omniwinMain, 'RaffleStarted')
 
-            const raffleId = 0;
+            
             const rafflesSide = await omniwinSide.raffles(raffleId)
             expect(rafflesSide).to.exist;
 
@@ -1121,9 +1138,7 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimitSyn = 1_000_000;  
-            const gasLimitSynAck = 400_000; 
-            const gasLimitForAck = 100_000; 
+            const gasLimit = 300_000;  
             const tx = await omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 prizeAmount,
@@ -1131,23 +1146,24 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimitSyn,
-                gasLimitSynAck,
-                gasLimitForAck,
+                gasLimit,
                 {
                     value: prizeAmount
                 }
             );
+
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
             
             //Emitted event to start creation of raffle on main chain
             await expect(tx).to.emit(omniwinSide, "CreateRaffleCCIPEvent")
             
-            await expect(tx).to.emit(omniwinMain, 'AckRaffleCreationFromSidechain')
+            await expect(tx).to.emit(omniwinMain, 'RaffleCreatedFromSidechain')
 
             //Emitted event that sidechain received ACK and raffle from sidechain was moved from tempRaffles to raffles
-            await expect(tx).to.emit(omniwinSide, 'RaffleCreated')
+            await expect(tx).to.emit(omniwinMain, 'RaffleStarted')
 
-            const raffleId = 0;
             const rafflesSide = await omniwinSide.raffles(raffleId)
             expect(rafflesSide).to.exist;
 
@@ -1202,9 +1218,7 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimitSyn = 1_000_000;  
-            const gasLimitSynAck = 400_000; 
-            const gasLimitForAck = 100_000; 
+            const gasLimit = 300_000; 
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 prizeAmount,
@@ -1212,9 +1226,7 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimitSyn,
-                gasLimitSynAck,
-                gasLimitForAck
+                gasLimit
             )).to.be.revertedWith("ERC20: transfer amount exceeds balance");
         });
        
@@ -1264,9 +1276,7 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimitSyn = 1_000_000;  
-            const gasLimitSynAck = 400_000; 
-            const gasLimitForAck = 100_000; 
+            const gasLimit = 300_000;
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 tokenId ,
@@ -1274,9 +1284,7 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimitSyn,
-                gasLimitSynAck,
-                gasLimitForAck
+                gasLimit
             )).to.revertedWithCustomError(omniwinSide, "ContractNotApproved()");
         });
 
@@ -1327,9 +1335,7 @@ describe("Omniwin", function () {
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
             // Call createRaffle with the defined parameters
-            const gasLimitSyn = 1_000_000;  
-            const gasLimitSynAck = 400_000; 
-            const gasLimitForAck = 100_000; 
+            const gasLimit = 300_000;  
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 tokenId + 1,
@@ -1337,9 +1343,7 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimitSyn,
-                gasLimitSynAck,
-                gasLimitForAck
+                gasLimit
             )).to.revertedWithCustomError(omniwinSide, "NotTheNFTOwner()");
         });
 
@@ -1382,9 +1386,7 @@ describe("Omniwin", function () {
 
             await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
 
-            const gasLimitSyn = 1_000_000;  
-            const gasLimitSynAck = 400_000; 
-            const gasLimitForAck = 100_000; 
+            const gasLimit = 300_000;  
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 prizeAmount,
@@ -1392,9 +1394,7 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimitSyn,
-                gasLimitSynAck,
-                gasLimitForAck,
+                gasLimit,
                 {
                     value: prizeAmount - BigInt(1)
                 }
@@ -1655,6 +1655,10 @@ describe("Omniwin", function () {
                 deadlineDuration
             );
 
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const raffleId = eventEmittedLogs?.args?.raffleId
+
 
             //enable raffle on sidechain
             const chainSelectors = [
@@ -1667,16 +1671,16 @@ describe("Omniwin", function () {
             ];
 
             // Enable raffle on sidechain
-            const tx2 = await omniwinMain.connect(otherAccount).enableCreateRafffleOnSidechain(0, chainSelectors[0]);
+            const tx2 = await omniwinMain.connect(otherAccount).enableCreateRafffleOnSidechain(raffleId, chainSelectors[0]);
 
             
             // Extend this object with more properties as needed by tests
-            this.testContext = { omniwinMain, omniwinSide,usdc, erc20, otherAccount };
+            this.testContext = { omniwinMain, omniwinSide,usdc, erc20, otherAccount, raffleId,owner };
         });
 
         it("Should allow buying tickets on main chain", async function () {
-            const { omniwinMain,usdc, omniwinSide, erc20, otherAccount } = this.testContext;
-            const raffleId = 0;
+            const { omniwinMain,usdc, omniwinSide, erc20, otherAccount,raffleId } = this.testContext;
+
             const priceIndex = 0;
             const prices = await omniwinMain.pricesList(raffleId, priceIndex);
             const price = prices.price;
@@ -1719,8 +1723,8 @@ describe("Omniwin", function () {
         });
 
         it("Should allow buying tickets on both main and side chains", async function () {
-            const { omniwinMain,usdc, omniwinSide, erc20, otherAccount } = this.testContext;
-            const raffleId = 0;
+            const { omniwinMain,usdc, omniwinSide, erc20, otherAccount, raffleId } = this.testContext;
+
             const priceIndex = 0;
             const prices = await omniwinMain.pricesList(raffleId, priceIndex);
             const price = prices.price;
@@ -1772,9 +1776,140 @@ describe("Omniwin", function () {
             expect(funding[2]).to.be.equal(totalFunding);
         });
 
+
+        it.only("Should claim refund bought tickets on main chain", async function () {
+            const { omniwinMain,usdc, omniwinSide, erc20, otherAccount, raffleId,owner } = this.testContext;
+
+            //mint some USDC
+            const mintAmount = ethers.parseUnits("2000", 6);
+            await usdc.mint(otherAccount, mintAmount);
+
+            // A. Buy tickets on main chain
+
+            // Buy entry type 1
+            const priceIndex = 0;
+            const prices = await omniwinMain.pricesList(raffleId, priceIndex);
+            const price = prices.price;
+                
+            //give allowance to omniwin for first buy
+            await usdc.connect(otherAccount).approve(omniwinMain.target, price);
+            expect(await usdc.allowance(otherAccount.address, omniwinMain.target)).to.be.equal(price);
+
+            //TODO:  not sure why i need price beside priceIndex (i knot the price from priceIndex....)
+            const buyTx1 = await omniwinMain.connect(otherAccount).buyEntry(raffleId, priceIndex, price);
+            await buyTx1.wait();
+
+            // Buy entry type 2
+            const priceIndex2 = 1;
+            const prices2 = await omniwinMain.pricesList(raffleId, priceIndex2);
+            const price2 = prices2.price;
+
+            //give allowance to omniwin for second buy
+            await usdc.connect(otherAccount).approve(omniwinMain.target, price2);
+            expect(await usdc.allowance(otherAccount.address, omniwinMain.target)).to.be.equal(price2);
+
+            const buyTx2 = await omniwinMain.connect(otherAccount).buyEntry(raffleId, priceIndex2, price2);
+            await buyTx2.wait();
+
+
+            // Buy entry type 3
+            //give allowance to omniwin for first buy
+            await usdc.approve(omniwinMain.target, price);
+            //check allowance of ownern not of otheraccount
+            expect(await usdc.allowance(owner.address, omniwinMain.target)).to.be.equal(price);
+
+            const buyTx3 = await omniwinMain.buyEntry(raffleId, priceIndex, price);
+            await buyTx3.wait();
+
+            //check bought tickets
+            const tickets = await omniwinMain.entriesList(raffleId,1);
+            expect(tickets).to.exist;
+
+            //pass time to make sure raffle is over
+            await ethers.provider.send("evm_increaseTime", [60 * 60 * 24 * 7]);
+
+            //balance of other account before refund
+            const balanceBefore = await usdc.balanceOf(otherAccount.address);
+
+            // B. Claim refund on main chain
+            const refundTx = await omniwinMain.connect(otherAccount).claimRefundBoughtTickets(raffleId);
+            await refundTx.wait();
+
+            //check balance after refund
+            const balanceAfter = await usdc.balanceOf(otherAccount.address);
+
+            //check balance
+            expect(balanceAfter).to.be.equal(balanceBefore + price + price2);
+        });
+
+        it.only("Should claim refund bought tickets on side chain", async function () {
+            const { omniwinMain,usdc, omniwinSide, erc20, otherAccount, raffleId,owner } = this.testContext;
+
+            //mint some USDC
+            const mintAmount = ethers.parseUnits("2000", 6);
+            await usdc.mint(otherAccount, mintAmount);
+            const gasLimit = 350_000;
+
+            // A. Buy tickets on main chain
+
+            // Buy entry type 1
+            const priceIndex = 0;
+            const prices = await omniwinSide.pricesList(raffleId, priceIndex);
+            const price = prices.price;
+                
+            //give allowance to omniwin for first buy
+            await usdc.connect(otherAccount).approve(omniwinSide.target, price);
+            expect(await usdc.allowance(otherAccount.address, omniwinSide.target)).to.be.equal(price);
+
+            //TODO:  not sure why i need price beside priceIndex (i knot the price from priceIndex....)
+            const buyTx1 = await omniwinSide.connect(otherAccount).buyEntry(raffleId, priceIndex, price,gasLimit);
+            await buyTx1.wait();
+
+            // Buy entry type 2
+            const priceIndex2 = 1;
+            const prices2 = await omniwinSide.pricesList(raffleId, priceIndex2);
+            const price2 = prices2.price;
+
+            //give allowance to omniwin for second buy
+            await usdc.connect(otherAccount).approve(omniwinSide.target, price2);
+            expect(await usdc.allowance(otherAccount.address, omniwinSide.target)).to.be.equal(price2);
+
+            const buyTx2 = await omniwinSide.connect(otherAccount).buyEntry(raffleId, priceIndex2, price2,gasLimit);
+            await buyTx2.wait();
+
+
+            // Buy entry type 3
+            //give allowance to omniwin for first buy
+            await usdc.approve(omniwinSide.target, price);
+            //check allowance of ownern not of otheraccount
+            expect(await usdc.allowance(owner.address, omniwinSide.target)).to.be.equal(price);
+
+            const buyTx3 = await omniwinSide.buyEntry(raffleId, priceIndex, price,gasLimit);
+            await buyTx3.wait();
+
+            //check bought tickets
+            const tickets = await omniwinSide.entriesList(raffleId,1);
+            expect(tickets).to.exist;
+
+            //pass time to make sure raffle is over
+            await ethers.provider.send("evm_increaseTime", [60 * 60 * 24 * 7]);
+
+            //balance of other account before refund
+            const balanceBefore = await usdc.balanceOf(otherAccount.address);
+
+            // B. Claim refund on main chain
+            const refundTx = await omniwinSide.connect(otherAccount).claimRefundBoughtTickets(raffleId);
+            await refundTx.wait();
+
+            //check balance after refund
+            const balanceAfter = await usdc.balanceOf(otherAccount.address);
+
+            //check balance
+            expect(balanceAfter).to.be.equal(balanceBefore + price + price2);
+        });
     });
 
-    describe.only("Raffle vrf", function () {
+    describe("Raffle vrf", function () {
         beforeEach(async function () {
             // Load the initial setup fixture
             const { omniwinMain,omniwinSide, omniwinSide2, usdc, nft, erc20, owner, otherAccount,MockLinkToken ,MockRouterClient,vrfCoordinator} = await loadFixture(deployContract);
@@ -1834,9 +1969,7 @@ describe("Omniwin", function () {
 
             await erc20.connect(otherAccount).approve(omniwinSide.target, prizeAmount);
 
-            const gasLimitSyn = 1_000_000;  
-            const gasLimitSynAck = 400_000; 
-            const gasLimitForAck = 100_000; 
+            const gasLimit = 300_000;  
             await omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
                 prizeAmount,
@@ -1844,9 +1977,7 @@ describe("Omniwin", function () {
                 prices,
                 assetType,
                 deadlineDuration,
-                gasLimitSyn,
-                gasLimitSynAck,
-                gasLimitForAck
+                gasLimit
             )
 
 
@@ -1865,9 +1996,7 @@ describe("Omniwin", function () {
                 prices,
                 assetTypeNft,
                 deadlineDuration,
-                gasLimitSyn,
-                gasLimitSynAck,
-                gasLimitForAck
+                gasLimit
             )
 
             // Call createRaffle with the defined parameters
@@ -1891,14 +2020,12 @@ describe("Omniwin", function () {
                 {
                     ccnsReceiverAddress: omniwinSide.target, // This should be an Ethereum address
                     chainSelector: routerConfig.bnbChainTestnet.chainSelector, // This should be a numerical chain identifier
-                    gasLimit: 350_000,
-                    strict: false
+                    gasLimit: 350_000
                 },
                 {
                     ccnsReceiverAddress: omniwinSide2.target, // This should be an Ethereum address
                     chainSelector: routerConfig.polygonMumbai.chainSelector, // This should be a numerical chain identifier
-                    gasLimit: 350_000,
-                    strict: false
+                    gasLimit: 350_000
                 }
             ];
 
@@ -1939,7 +2066,6 @@ describe("Omniwin", function () {
             expect(await usdc.allowance(otherAccount.address, omniwinSide.target)).to.be.equal(prices[priceIndex].price);
 
             // Buy entry type 1
-            const gasLimit = 300_000;
             const buyTx1Side = await omniwinSide.connect(otherAccount).buyEntry(raffleId, priceIndex, prices[priceIndex].price,gasLimit);
             await buyTx1Side.wait();
 
@@ -1962,12 +2088,12 @@ describe("Omniwin", function () {
             expect(funding[2]).to.be.equal(totalFunding);
             
             // Extend this object with more properties as needed by tests
-            this.testContext = { omniwinMain, omniwinSide, omniwinSide2,usdc, erc20, otherAccount,vrfCoordinator };
+            this.testContext = { omniwinMain, omniwinSide, omniwinSide2,usdc, erc20, otherAccount,vrfCoordinator,raffleId };
         });
 
         it("Pick a winner", async function () {
-            const { omniwinMain, omniwinSide,omniwinSide2,usdc, erc20, otherAccount,vrfCoordinator } = this.testContext;
-            const raffleId = 2;
+            const { omniwinMain, omniwinSide,omniwinSide2,usdc, erc20, otherAccount,vrfCoordinator,raffleId } = this.testContext;
+
 
             console.log("account: ",otherAccount.address);
             console.log("omniwinMain: ",omniwinMain.target);
@@ -1994,13 +2120,11 @@ describe("Omniwin", function () {
                 {
                     ccnsReceiverAddress: omniwinSide.target,
                     gasLimit: 300_000,
-                    strict: false,
                     chainSelector: routerConfig.bnbChainTestnet.chainSelector
                 },
                 { 
                     ccnsReceiverAddress: omniwinSide2.target,
                     gasLimit: 300_000,
-                    strict: false,
                     chainSelector: routerConfig.polygonMumbai.chainSelector
                 }
             ] 

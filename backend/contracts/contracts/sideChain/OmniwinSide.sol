@@ -34,11 +34,12 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     }
 
     enum STATUS {
-        PENDING, // the raffle is pending to be created - waiting for ack from main chain
         ACCEPTED, // the seller stakes the nft for the raffle
         CANCELLED, // the raffle is cancelled
         CLOSING_REQUESTED, // the operator sets a winner
-        ENDED // the raffle is finished, and NFT and funds were transferred
+        ENDED, // the raffle is finished, and NFT and funds were transferred
+        FAILED,
+        SUCCES
     }
 
     enum MessageStatus {
@@ -48,40 +49,42 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     }
 
     enum MESSAGE_TYPE {
-        CREATE_RAFFLE_FROM_SIDECHAIN_SYN,
-        CREATE_RAFFLE_ACK,
-        CREATE_RAFFLE_SYN_ACK,
+        CREATE_RAFFLE_FROM_SIDECHAIN,
         BUY_ENTRY,
         CREATE_RAFFLE_FROM_MAINCHAIN,
         PRIZE_DISTRIBUTION,
-        MONEY_NOT_RAISED
+        FAILED_RAFFLE,
+        MONEY_NOT_RAISED,
+        IS_REFUNDABLE,
+        IS_RAFFLE_CREATED
     }
 
     event MessageSent(bytes32 messageId);
 
-    event RaffleCreatedFromMainChain(uint256 indexed raffleId);
+    event RaffleCreatedFromMainChain(bytes32 indexed raffleId);
 
     event RaffleCreatedAck(
-        uint256 indexed raffleId,
+        bytes32 indexed raffleId,
         address indexed nftAddress,
         uint256 indexed nftId,
         ASSET_TYPE assetType
     );
 
     event CreateRaffleCCIPEvent(
-        bytes32 messageId,
+        bytes32 raffleKey,
         address prizeAddress,
         uint256 prizeNumber,
         ASSET_TYPE assetType
     );
 
     event EntrySold(
-        uint256 indexed raffleId,
+        bytes32 indexed raffleId,
         address indexed buyer,
         uint256 numEntries,
         uint256 usdAmount,
         uint256 amountRaised,
-        uint256 entriesLength
+        uint256 entriesLength,
+        bytes32 messageId
     );
 
     struct EntryInfoStruct {
@@ -91,22 +94,44 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     }
 
     event RefundBoughtTickets(
-        uint256 indexed raffleId,
+        bytes32 indexed raffleId,
         uint256 amountInWeis,
         address indexed player
     );
 
     event CashClaimed(
-        uint256 indexed raffleId,
+        bytes32 indexed raffleId,
         address indexed seller,
         uint256 amountInWeis
     );
 
-    event ClaimPrize(uint256 indexed raffleId, address indexed winner);
+    event ClaimPrize(bytes32 indexed raffleId, address indexed winner);
 
-    event WinnerSet(uint256 indexed raffleId, address indexed winner);
+    event WinnerSet(bytes32 indexed raffleId, address indexed winner);
 
-    event RaffleMoneyNotRaised(uint256 indexed raffleId);
+    event RaffleMoneyNotRaised(bytes32 indexed raffleId);
+
+    event MessageSentIsRefundable(
+        bytes32 indexed raffleId,
+        bytes32 indexed messageId
+    );
+
+    event BoughTicketRefunded(
+        bytes32 indexed raffleId,
+        bytes32 indexed messageId
+    );
+
+    event CheckRaffleCreation(
+        bytes32 indexed raffleId,
+        bytes32 indexed messageId
+    );
+
+    event RaffleFailedOnMain(
+        bytes32 indexed raffleId,
+        bytes32 indexed messageId
+    );
+
+    event RaffleCreatedOnMainChain(bytes32 indexed raffleId);
 
     error CreateRaffleError(string errorType);
     error NoPrices();
@@ -117,6 +142,10 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     error NotTheWinner();
     error PrizeNotHere();
     error AlreadyClaimed();
+    error NotTheBuyer();
+    error RefundNotAvailable();
+    error AckNotReceived();
+    error AckAlreadyReceived();
     error FailedToSendCashForSeller();
     error NumEntriesZeroError();
     error FailedToSendEthPrize();
@@ -125,7 +154,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     error AllowanceError();
     error TransferFailed();
     error ETHPrizeAmountMismatch();
-    error RaffleDeadlinePassed(uint256 raffleId);
+    error RaffleDeadlinePassed(bytes32 raffleId);
     error IncorrectUSDCAmount(uint256 providedAmount, uint256 expectedPrice);
     error USDCAallowanceTooLow();
     error USDCTransferFailed();
@@ -134,12 +163,14 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     error RaffleAlreadyProcessed();
     error FailedToSendERC721Prize();
     error FailedToSendERC20Prize();
-    error WinnerAlreadySet(uint256 raffleId);
+    error WinnerAlreadySet();
     error RaffleNotCancelled();
+    error RaffleNotFailed();
     error NoRefundAvailable();
     error FailedToSendRefund(address player, uint256 amount);
     error FailedToSendUnclaimedFundsToPlatform();
     error FailedToSendPlatformFee();
+    error TryAgainLater();
 
     // Every raffle has a funding structure.
     struct FundingStructure {
@@ -169,23 +200,16 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         address seller; // address of the seller of the NFT
         ASSET_TYPE assetType; // type of the asset. Can be ERC20, ERC721, ETH
         uint256 deadline; // deadline to set a winner
+        uint256 created; // timestamp of the creation of the raffle
     }
 
-    struct MessageCCIPStatus {
-        MessageStatus status; // Status of the message
+    struct BuyTicketCCIP {
+        address player; // wallet address of the player
         uint256 timestamp; // Stores the timestamp of when the message was sent
         uint256 priceStructureId; // id of the price structure
-    }
-
-    struct RaffleStructTemp {
-        uint256 prizeNumber; // number (can be a percentage, an id, an amount, etc. depending on the competition)
-        address prizeAddress; // address of the prize
-        address winner; // address of thed winner of the raffle. Address(0) if no winner yet
-        address seller; // address of the seller of the NFT
-        ASSET_TYPE assetType; // type of the asset. Can be ERC20, ERC721, ETH
-        uint256 deadline; // deadline to set a winner
-        MessageStatus msgStatus; // status of the message
-        uint48 timestamp; // timestamp of the message
+        bool isRefundable; // if the message is refundable
+        bool isRefunded; // if the message has been refunded
+        MessageStatus status; // status of the message
     }
 
     // In order to calculate the winner, in this struct is saved for each bought the data
@@ -210,15 +234,14 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     error SourceChainNotAllowlisted(uint64 sourceChainSelector); // Used when the source chain has not been allowlisted by the contract owner.
     error SenderNotAllowlisted(address sender); // Used when the sender has not been allowlisted by the contract owner.
 
-    mapping(uint256 => FundingStructure) public fundingList;
-    mapping(uint256 => EntryInfoStruct) public rafflesEntryInfo;
-    mapping(uint256 => mapping(address => bool)) public hasClaimedRefund;
-    mapping(uint256 => EntriesBought[]) public entriesList;
-    mapping(uint256 => PriceStructure[]) public pricesList;
+    mapping(bytes32 => FundingStructure) public fundingList;
+    mapping(bytes32 => EntryInfoStruct) public rafflesEntryInfo;
+    mapping(bytes32 => mapping(address => bool)) public hasClaimedRefund;
+    mapping(bytes32 => EntriesBought[]) public entriesList;
+    mapping(bytes32 => PriceStructure[]) public pricesList;
     mapping(bytes32 => PriceStructure[]) public tempPricesList;
-    mapping(uint256 => RaffleStruct) public raffles;
-    mapping(bytes32 => RaffleStructTemp) public tempRaffles;
-    mapping(bytes32 => MessageCCIPStatus) public entries;
+    mapping(bytes32 => RaffleStruct) public raffles;
+    mapping(bytes32 => mapping(bytes32 => BuyTicketCCIP)) public entries;
 
     constructor(address _router, address _link) CCIPReceiver(_router) {
         router = _router;
@@ -291,9 +314,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         PriceStructure[] calldata _prices,
         ASSET_TYPE _assetType,
         uint256 _deadlineDuration,
-        uint256 gasLimitSyn,
-        uint256 gasLimitSynAck,
-        uint256 gasLimitAck
+        uint256 gasLimit
     ) external payable returns (bytes32) {
         require(
             _deadlineDuration <= maxDeadlineDuration,
@@ -318,46 +339,48 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
             _assetType
         );
 
-        //TODO: bring back here _sendMessageCreateRaffleSideChain, and replace testMessageId with messageId
-        // bytes32 messageId = 0x894cccafe7a46ef3ce0297f766eb759c3aa439ab77472626d2ba98088308cee4;
-        //send message to create raffle from sidechain
-        bytes32 messageId = sendMessage(
-            abi.encode(
-                MESSAGE_TYPE.CREATE_RAFFLE_FROM_SIDECHAIN_SYN,
-                _minimumFundsInWei,
-                _prices,
-                _deadlineDuration,
-                msg.sender,
-                gasLimitSynAck,
-                gasLimitAck
-            ),
-            gasLimitSyn
+        // Generate a unique key
+        bytes32 raffleKey = keccak256(
+            abi.encodePacked(msg.sender, block.timestamp)
         );
+        require(raffles[raffleKey].deadline == 0, "Raffle already exists!");
 
-        tempRaffles[messageId] = RaffleStructTemp({
+        raffles[raffleKey] = RaffleStruct({
             prizeNumber: _prizeNumber,
             prizeAddress: _prizeAddress,
             winner: address(0),
             seller: msg.sender,
             assetType: _assetType,
             deadline: 0,
-            msgStatus: MessageStatus.SENT,
-            timestamp: uint48(block.timestamp)
+            created: block.timestamp
         });
 
         for (uint256 i = 0; i < _prices.length; ++i) {
-            tempPricesList[messageId].push(_prices[i]);
+            pricesList[raffleKey].push(_prices[i]);
         }
+
+        //send message to create raffle from sidechain
+        sendMessage(
+            abi.encode(
+                MESSAGE_TYPE.CREATE_RAFFLE_FROM_SIDECHAIN,
+                _minimumFundsInWei,
+                _prices,
+                _deadlineDuration,
+                msg.sender,
+                raffleKey
+            ),
+            gasLimit
+        );
 
         // console.log("create raffle ccip event");
         emit CreateRaffleCCIPEvent(
-            messageId,
+            raffleKey,
             _prizeAddress,
             _prizeNumber,
             _assetType
         );
 
-        return messageId;
+        return raffleKey;
     }
 
     //set mainChainSelector
@@ -386,10 +409,6 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     {
         uint8 messageType = abi.decode(any2EvmMessage.data, (uint8));
 
-        if (messageType == uint8(MESSAGE_TYPE.CREATE_RAFFLE_SYN_ACK)) {
-            _handleCreateRaffleSynAck(any2EvmMessage);
-        }
-
         if (messageType == uint8(MESSAGE_TYPE.CREATE_RAFFLE_FROM_MAINCHAIN)) {
             handleCreateRaffleFromMainChain(any2EvmMessage);
         }
@@ -401,19 +420,86 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         if (messageType == uint8(MESSAGE_TYPE.MONEY_NOT_RAISED)) {
             _handleFailedRaffle(any2EvmMessage);
         }
+
+        if (messageType == uint8(MESSAGE_TYPE.IS_REFUNDABLE)) {
+            _handleIsRefundable(any2EvmMessage);
+        }
+
+        if (messageType == uint8(MESSAGE_TYPE.IS_RAFFLE_CREATED)) {
+            _handleIsRaffleCreated(any2EvmMessage);
+        }
+    }
+
+    function _handleIsRaffleCreated(
+        Client.Any2EVMMessage memory message
+    ) internal {
+        bytes32 messageIdSourceChain = message.messageId;
+
+        (uint8 messageType, bytes32 raffleId, bool isRaffleCreated) = abi
+            .decode(message.data, (uint8, bytes32, bool));
+
+        EntryInfoStruct storage entryInfo = rafflesEntryInfo[raffleId];
+
+        if (!isRaffleCreated) {
+            entryInfo.status = STATUS.FAILED;
+            emit RaffleFailedOnMain(raffleId, messageIdSourceChain);
+        } else {
+            emit RaffleCreatedOnMainChain(raffleId);
+        }
+    }
+
+    function _handleIsRefundable(
+        Client.Any2EVMMessage memory message
+    ) internal {
+        (
+            uint8 messageType,
+            bytes32 raffleId,
+            bool isRefundable,
+            bytes32 messageId,
+            address player
+        ) = abi.decode(message.data, (uint8, bytes32, bool, bytes32, address));
+
+        BuyTicketCCIP storage entry = entries[raffleId][messageId];
+
+        entry.isRefundable = isRefundable;
+
+        // Calculate refund amount based on the tickets bought by player
+        uint256 refundAmount = pricesList[raffleId][
+            entries[raffleId][messageId].priceStructureId
+        ].price;
+
+        if (refundAmount <= 0) {
+            revert NoRefundAvailable();
+        }
+
+        // Refund the user
+        bool refundSent = IERC20(usdcContractAddress).transfer(
+            player,
+            refundAmount
+        );
+
+        if (!refundSent) {
+            revert FailedToSendRefund(player, refundAmount);
+        }
+
+        entries[raffleId][messageId].isRefunded = true;
+
+        entry.status = MessageStatus.PROCESSEDONDESTINATION;
+
+        emit BoughTicketRefunded(raffleId, messageId);
     }
 
     function _handleFailedRaffle(
         Client.Any2EVMMessage memory message
     ) internal {
-        (uint8 messageType, uint256 raffleId) = abi.decode(
+        (uint8 messageType, bytes32 raffleId) = abi.decode(
             message.data,
-            (uint8, uint256)
+            (uint8, bytes32)
         );
 
         EntryInfoStruct storage entryInfo = rafflesEntryInfo[raffleId];
 
-        entryInfo.status = STATUS.CANCELLED;
+        entryInfo.status = STATUS.FAILED;
 
         emit RaffleMoneyNotRaised(raffleId);
     }
@@ -423,13 +509,13 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     ) internal {
         (
             uint8 messageType,
-            uint256 raffleId,
+            bytes32 raffleId,
             address winner,
             address seller,
             uint256 amountForSeller
         ) = abi.decode(
                 message.data,
-                (uint8, uint256, address, address, uint256)
+                (uint8, bytes32, address, address, uint256)
             );
 
         RaffleStruct storage raffle = raffles[raffleId];
@@ -443,7 +529,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     }
 
     //winner claim cash raised
-    function claimCash(uint256 _raffleId) external nonReentrant {
+    function claimCash(bytes32 _raffleId) external nonReentrant {
         RaffleStruct storage raffle = raffles[_raffleId];
 
         IERC20 usdc = IERC20(usdcContractAddress);
@@ -490,7 +576,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         );
     }
 
-    function claimPrize(uint256 _raffleId) external nonReentrant {
+    function claimPrize(bytes32 _raffleId) external nonReentrant {
         RaffleStruct storage raffle = raffles[_raffleId];
 
         //TODO: refactor this to a function
@@ -519,67 +605,6 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         emit ClaimPrize(_raffleId, msg.sender);
     }
 
-    function _handleCreateRaffleSynAck(
-        Client.Any2EVMMessage memory message
-    ) internal {
-        (
-            uint8 messageType,
-            bytes32 messageId,
-            uint256 raffleId,
-            uint256 deadline,
-            uint256 gasLimitAck
-        ) = abi.decode(
-                message.data,
-                (uint8, bytes32, uint256, uint256, uint256)
-            );
-
-        RaffleStructTemp memory tempRaffle = tempRaffles[messageId];
-        PriceStructure[] memory prices = tempPricesList[messageId];
-
-        raffles[raffleId] = RaffleStruct({
-            prizeNumber: tempRaffle.prizeNumber,
-            prizeAddress: tempRaffle.prizeAddress,
-            winner: address(0),
-            seller: tempRaffle.seller,
-            assetType: tempRaffle.assetType,
-            deadline: deadline
-        });
-
-        for (uint256 i = 0; i < prices.length; ++i) {
-            pricesList[raffleId].push(prices[i]);
-        }
-
-        saveEntryInfo(raffleId);
-
-        fundingList[raffleId] = FundingStructure({
-            minimumFundsInWeis: 0,
-            platformFeeCollected: false,
-            prizeClaimed: false,
-            cashClaimed: false,
-            amountForSeller: 0
-        });
-
-        tempRaffles[messageId].msgStatus = MessageStatus.PROCESSEDONDESTINATION;
-
-        bytes memory data = abi.encode(
-            MESSAGE_TYPE.CREATE_RAFFLE_ACK,
-            raffleId
-        );
-
-        console.log(
-            "sidechain syn ack, send ack to main chain with raffleId: ",
-            raffleId
-        );
-        sendMessage(data, gasLimitAck);
-
-        emit RaffleCreatedAck(
-            raffleId,
-            tempRaffle.prizeAddress,
-            tempRaffle.prizeNumber,
-            tempRaffle.assetType
-        );
-    }
-
     function handleCreateRaffleFromMainChain(
         Client.Any2EVMMessage memory message
     ) internal {
@@ -587,10 +612,10 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
             uint8 messageType,
             PriceStructure[] memory prices,
             uint256 deadline,
-            uint256 raffleId
+            bytes32 raffleId
         ) = abi.decode(
                 message.data,
-                (uint8, PriceStructure[], uint256, uint256)
+                (uint8, PriceStructure[], uint256, bytes32)
             );
 
         if (raffles[raffleId].deadline != 0) {
@@ -603,7 +628,8 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
             winner: address(0),
             seller: address(0),
             assetType: ASSET_TYPE.CCIP,
-            deadline: deadline
+            deadline: deadline,
+            created: block.timestamp
         });
 
         for (uint256 i = 0; i < prices.length; ++i) {
@@ -626,7 +652,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     function transferAsset(
         address from,
         address to,
-        uint256 raffleId
+        bytes32 raffleId
     ) internal {
         RaffleStruct storage raffle = raffles[raffleId];
 
@@ -684,7 +710,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         }
     }
 
-    function saveEntryInfo(uint256 raffleId) internal {
+    function saveEntryInfo(bytes32 raffleId) internal {
         EntryInfoStruct memory entryInfo = EntryInfoStruct({
             status: STATUS.ACCEPTED,
             amountRaised: 0,
@@ -702,7 +728,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
      * @param _usdcAmount amount of usdc to buy the entry
      */
     function buyEntry(
-        uint256 _raffleId,
+        bytes32 _raffleId,
         uint48 _id,
         uint256 _usdcAmount,
         uint256 gasLimit
@@ -745,6 +771,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
             currentEntriesLength: uint48(entriesLength + numEntries),
             priceStructureId: _id
         });
+
         entriesList[_raffleId].push(entryBought);
 
         // update raffle variables
@@ -759,11 +786,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         bytes32 messageId = sendMessage(data, gasLimit);
 
         //hold for refund
-        entries[messageId] = MessageCCIPStatus({
-            status: MessageStatus.SENT,
-            timestamp: block.timestamp,
-            priceStructureId: _id
-        });
+        saveEntriesMessage(_raffleId, messageId, _id);
 
         emit EntrySold(
             _raffleId,
@@ -771,72 +794,90 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
             numEntries,
             _usdcAmount,
             entryInfo.amountRaised,
-            entriesLength
+            entriesLength,
+            messageId
         );
+    }
+
+    function saveEntriesMessage(
+        bytes32 _raffleId,
+        bytes32 _messageId,
+        uint48 _priceStructureId
+    ) internal {
+        entries[_raffleId][_messageId] = BuyTicketCCIP({
+            player: msg.sender,
+            timestamp: block.timestamp,
+            priceStructureId: _priceStructureId,
+            isRefundable: false,
+            isRefunded: false,
+            status: MessageStatus.NOTSENT
+        });
     }
 
     /**
      * Refund the prize if the raffle has not been acked by the main chain
+     * TODO
      */
-    function refundPrize(bytes32 messageId) external nonReentrant {
-        RaffleStructTemp storage tempRaffle = tempRaffles[messageId];
+    function reclaimAsset(bytes32 raffleId) external nonReentrant {
+        RaffleStruct storage raffle = raffles[raffleId];
 
-        if (tempRaffle.seller != msg.sender) {
+        if (rafflesEntryInfo[raffleId].status != STATUS.FAILED) {
+            revert RaffleNotFailed();
+        }
+
+        if (raffle.seller != msg.sender) {
             revert CallerNotSeller();
         }
 
-        //if ack not received in 24 hours, refund the prize
-        if (block.timestamp < tempRaffle.timestamp + 24 hours) {
-            revert ClaimPeriodNotAvailable();
+        if (raffles[raffleId].winner != address(0)) {
+            revert WinnerAlreadySet();
         }
 
-        if (tempRaffle.msgStatus != MessageStatus.SENT) {
-            revert RaffleAlreadyProcessed();
-        }
-
-        if (tempRaffle.assetType == ASSET_TYPE.ERC721) {
-            IERC721(tempRaffle.prizeAddress).transferFrom(
+        if (raffle.assetType == ASSET_TYPE.ERC721) {
+            IERC721(raffle.prizeAddress).transferFrom(
                 address(this),
-                tempRaffle.seller,
-                tempRaffle.prizeNumber
+                raffle.seller,
+                raffle.prizeNumber
             );
 
             if (
-                IERC721(tempRaffle.prizeAddress).ownerOf(
-                    tempRaffle.prizeNumber
-                ) != msg.sender
+                IERC721(raffle.prizeAddress).ownerOf(raffle.prizeNumber) !=
+                msg.sender
             ) {
                 revert FailedToSendERC721Prize();
             }
-        } else if (tempRaffle.assetType == ASSET_TYPE.ERC20) {
-            IERC20 _asset = IERC20(tempRaffle.prizeAddress);
-            _asset.transfer(tempRaffle.seller, tempRaffle.prizeNumber);
+        } else if (raffle.assetType == ASSET_TYPE.ERC20) {
+            IERC20 _asset = IERC20(raffle.prizeAddress);
+            _asset.transfer(raffle.seller, raffle.prizeNumber);
 
             if (
-                !IERC20(tempRaffle.prizeAddress).transfer(
-                    tempRaffle.seller,
-                    tempRaffle.prizeNumber
+                !IERC20(raffle.prizeAddress).transfer(
+                    raffle.seller,
+                    raffle.prizeNumber
                 )
             ) {
                 revert FailedToSendERC20Prize();
             }
-        } else if (tempRaffle.assetType == ASSET_TYPE.ETH) {
-            (bool sent, ) = payable(tempRaffle.seller).call{
-                value: tempRaffle.prizeNumber
+        } else if (raffle.assetType == ASSET_TYPE.ETH) {
+            (bool sent, ) = payable(raffle.seller).call{
+                value: raffle.prizeNumber
             }("");
 
             if (!sent) {
                 revert FailedToSendEthPrize();
             }
         }
-
-        delete tempRaffles[messageId];
     }
 
     function calculateRefund(
-        uint256 _raffleId,
+        bytes32 _raffleId,
         address _player
     ) internal view returns (uint256) {
+        // Ensure there's a check here to prevent out-of-bounds access
+        if (entriesList[_raffleId].length == 0) {
+            return 0;
+        }
+
         uint256 refundAmount = 0;
         uint256 entriesLength = entriesList[_raffleId].length;
 
@@ -850,19 +891,18 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         return refundAmount;
     }
 
-    function claimRefundBoughtTickets(uint256 raffleId) external nonReentrant {
+    function claimRefundBoughtTickets(bytes32 raffleId) external nonReentrant {
         if (raffles[raffleId].winner != address(0)) {
-            revert WinnerAlreadySet(raffleId);
+            revert WinnerAlreadySet();
         }
 
         //check raffle status
-        if (rafflesEntryInfo[raffleId].status != STATUS.CANCELLED) {
-            revert RaffleNotCancelled();
+        if (rafflesEntryInfo[raffleId].status != STATUS.FAILED) {
+            revert RaffleNotFailed();
         }
 
-        // Ensure there's a check here to prevent out-of-bounds access
-        if (entriesList[raffleId].length == 0) {
-            return;
+        if (hasClaimedRefund[raffleId][msg.sender]) {
+            revert AlreadyClaimed();
         }
 
         // Calculate refund amount based on the tickets bought by msg.sender
@@ -885,6 +925,80 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         hasClaimedRefund[raffleId][msg.sender] = true;
 
         emit RefundBoughtTickets(raffleId, refundAmount, msg.sender);
+    }
+
+    /**
+     * Initiate claim refund for the following case:
+     * 1. Raffle was a success
+     * 2. User bought a ticket but message failed on main chain so it was not registered
+     */
+    function claimRefundBoughtTicketCCIP(
+        bytes32 _raffleId,
+        bytes32 _messageId,
+        uint256 gasLimit,
+        uint256 gasLimitAck
+    ) external nonReentrant {
+        if (entries[_raffleId][_messageId].isRefunded) {
+            revert AlreadyClaimed();
+        }
+
+        if (entries[_raffleId][_messageId].player != msg.sender) {
+            revert NotTheBuyer();
+        }
+
+        if (raffles[_raffleId].deadline < block.timestamp) {
+            revert ClaimPeriodNotAvailable();
+        }
+
+        if (entries[_raffleId][_messageId].status == MessageStatus.NOTSENT) {
+            //send message to main chain to check if the message is refundable
+            bytes memory data = abi.encode(
+                MESSAGE_TYPE.IS_REFUNDABLE,
+                _raffleId,
+                _messageId,
+                gasLimitAck,
+                msg.sender
+            );
+
+            bytes32 messageId = sendMessage(data, gasLimit);
+
+            entries[_raffleId][_messageId].status = MessageStatus.SENT;
+
+            emit MessageSentIsRefundable(_raffleId, messageId);
+
+            return;
+        }
+    }
+
+    /*
+     * check if raffle has been created on the main chain
+     */
+    function checkRaffleCreationOnMainChain(
+        bytes32 _raffleId,
+        uint256 gasLimit,
+        uint256 gasLimitAck
+    ) external {
+        //if 3days have not passed, try again later
+        if (raffles[_raffleId].created + 3 days < block.timestamp) {
+            revert TryAgainLater();
+        }
+
+        bytes memory data = abi.encode(
+            MESSAGE_TYPE.IS_RAFFLE_CREATED,
+            _raffleId,
+            gasLimitAck
+        );
+
+        bytes32 messageId = sendMessage(data, gasLimit);
+
+        emit CheckRaffleCreation(_raffleId, messageId);
+    }
+
+    //set raffle status to failed
+    function setRaffleFailed(bytes32 _raffleId) external {
+        if (!isOwner()) revert NotTheOwner();
+
+        rafflesEntryInfo[_raffleId].status = STATUS.FAILED;
     }
 
     function setUSDCTokenAddress(address _usdcContractAddress) external {
