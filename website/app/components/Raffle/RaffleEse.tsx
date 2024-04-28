@@ -1,6 +1,6 @@
-import Link from 'next/link'
+import Link from "next/link";
 
-import CustomImageWithFallback from '@/app/components/CustomImageWithFallback'
+import CustomImageWithFallback from "@/app/components/CustomImageWithFallback";
 
 import { HeartIcon, PlusIcon, CheckBadgeIcon } from "@heroicons/react/20/solid";
 import { TicketIcon, ClockIcon } from "@heroicons/react/24/outline";
@@ -18,7 +18,7 @@ export default function RaffleEse(raffle: RaffleCard) {
             {/* <img className="object-cover inset-0 rounded-lg h-full w-full min-h-[inherit]" alt="img" src={'https://web3trust.app/nft/'+ raffle.nft_image} /> */}
             <CustomImageWithFallback
                 className="object-cover inset-0 rounded-lg h-full w-full min-h-[inherit]"
-                containerClass='min-h-[inherit]'
+                containerClass="min-h-[inherit]"
                 alt={"Raffle for " + raffle.nft_name + " to win it"}
                 width={100} // Placeholder width for aspect ratio calculation
                 height={100} // Placeholder height for aspect ratio calculation
@@ -33,13 +33,13 @@ export default function RaffleEse(raffle: RaffleCard) {
             {/* <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/60 to-transparent group-hover:opacity-100 transition-opacity duration-700"></div> */}
             <div className="absolute left-0 top-0 z-10 w-full max-w-full flex justify-between px-3">
                 <div className="inline-flex items-center gap-2 my-5 px-2 py-1.5 rounded-3xl bg-smoke-900/20 group-hover:bg-smoke-900/90 transition-colors duration-700">
-                    <div className="flex flex-row items-center gap-1 text-xs xl:text-sm">
+                    <div className="flex flex-row items-center text-xs xl:text-sm">
                         {/* <CheckBadgeIcon className="inline-block h-5 w-5 text-sky-500" /> */}
                         <div className="relative inline-block">
                             <CheckBadgeIcon className="inline-block h-4 lg:h-5 w-4 lg:w-5 text-[#1475e1] z-10 relative" />
-                            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 inset-0 rounded-full bg-white h-3 w-3"></div>
+                            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 inset-0 rounded-full bg-white h-2 w-2"></div>
                         </div>
-                        <p className="text-white font-bold truncate select-text max-w-36">{raffle.nft_name}</p>
+                        <p className="text-white font-bold truncate select-text max-w-36 text-shadow-sm px-1">{raffle.nft_name}</p>
                         {/* <p className="text-white font-bold truncate select-text max-w-20">{raffle.nft_name}</p> */}
                         {/* <p className="text-white font-bold truncate select-text max-w-14">#{raffle.id}</p> */}
                     </div>
