@@ -4,209 +4,245 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = "mysql://root:327TFg8qGjnrBi@localhost:3306/omniwin"
 }
 
-model Nft {
-  id_nft         Int         @id @default(autoincrement())
-  id_lot         Int         @unique
-  total_tickets  Int         @default(0)
-  bonus_tickets  Int         @default(0)
-  tickets_bought Int         @default(0)
-  ticket_price   BigInt
-  transactions   Int         @default(0)
-  end_timestamp  Int
-  fee            Int         @default(600)
-  closed         Boolean     @default(false)
-  buyout         Boolean     @default(false)
-  asset_claimed  Boolean     @default(false)
-  tokens_claimed Boolean     @default(false)
-  owner          String
-  signer         String?
-  token          String
-  token_id       String
-  amount         String
-  asset_type     AssetType
-  data           String
-  network        NetworkType
-  count_views    Int         @default(0)
-  trending_score Int         @default(0)
-  created_at     DateTime    @default(now())
-  updated_at     DateTime    @default(now()) @updatedAt
+model Raffles {
+  id                    Int                     @id
+  chainId               Int                     @map("chain_id")
+  status                RaffleStatus
+  assetType             String                  @map("asset_type")
+  prizeAddress          String                  @map("prize_address")
+  prizeNumber           Float                   @map("prize_number")
+  blockTimestamp        DateTime                @map("block_timestamp")
+  ownerAddress          String                  @map("owner_address")
+  minFundsToRaise       Int                     @map("min_funds_to_raise")
+  countViews            Int                     @map("count_views")
+  winnerAddress         String?                 @map("winner_address")
+  claimedPrize          Boolean                 @map("claimed_prize")
+  tickets               Tickets[]
+  blockchainEvents      BlockchainEvents[]
+  sidechainEnabledRaffles SidechainEnabledRaffles[] 
+  raffleMetadataId      RaffleMetadata?
+  priceList             PriceList?
 
-  @@index([token, token_id], map: "token_tokenID")
+  @@map("raffles")
 }
 
-model NftMetadata {
-  id_nftMetadata  Int               @id @default(autoincrement())
-  id_nft          Int               @unique
-  id_lot          Int
-  name            String?
-  description     String?           @db.VarChar(2000)
-  json            Json?
-  image_url       String?
-  image_local     String?
-  status          NFTMetadataStatus
-  created_at      DateTime          @default(now())
-  updated_at      DateTime          @default(now()) @updatedAt
-  collection_name String?
+model SidechainEnabledRaffles {
+  id                  Int   @id @default(autoincrement())
+  raffleId            Int                                   @map("raffle_id")
+  chainId             Int                                   @map("chain_id")
+  status              SidechainRaffleStatus
+  raffle              Raffles @relation(fields: [raffleId], references: [id])
 
-  @@index([id_nft], map: "id_nft")
+  @@unique([raffleId, chainId])
+  @@map("sidechain_enabled_raffles")
+}
+
+model BlockchainEvents {
+  id                  String    @id
+  raffleId            Int                           @map("raffle_id")
+  name                String
+  json                Json      @default("{}")
+  statusParsing       String                        @map("status_parsing")
+  statusMessage       String?                       @map("status_message")
+  createdAt           DateTime                      @map("created_at")
+  raffle              Raffles   @relation(fields: [raffleId], references: [id])
+
+  @@map("blockchain_events")
+}
+
+model RaffleMetadata {
+  id                  Int       @id @default(autoincrement())                     @map("id")
+  raffleId            Int       @unique                                           @map("raffle_id")
+  raffle              Raffles   @relation(fields: [raffleId], references: [id])
+  json                Json?     @default("{}")
+  name                String?
+  description         String?
+  imageUrl            String?                                                     @map("image_url")
+  imageCid            String?                                                     @map("image_cid")
+  status              String
+  collectionName      String?                                                     @map("collection_name")
+  statusMessage       String?                                                     @map("status_message")
+
+  @@map("raffle_metadata")
+}
+
+model PriceList {
+  id                  Int       @id @default(autoincrement())       @map("id")
+  raffleId            Int       @unique                             @map("raffle_id")
+  raffle              Raffles   @relation(fields: [raffleId], references: [id])
+  eventId             Int                                           @map("event_id")
+  prices              Json
+
+  @@map("price_list")
 }
 
 model Tickets {
-  id_ticket        Int         @id @default(autoincrement())
-  id_lot           Int
-  unique_id        String      @unique
-  recipient        String
-  total_tickets    Int
-  amount           BigInt
-  bonus            Int
-  created_at       DateTime    @default(now())
-  updated_at       DateTime    @default(now()) @updatedAt
-  tokens_spent     BigInt
-  block            Int         @default(0)
-  transaction_hash String      @default("")
-  network          NetworkType @default(GOERLI)
+  tx                  String    @id
+  eventId             String            @map("event_id")
+  chainId             Int               @map("chain_id")
+  raffleId            Int               @map("raffle_id")
+  buyerAddress        String            @map("buyer_address")
+  numberOfEntries     Int               @map("number_of_entries")
+  valueOfTickets      Int               @map("value_of_tickets")
+  totalEntriesBought  Int               @map("total_entries_bought")
+  totalRaisedAmount   Int               @map("total_raised_amount")
+  claimed             Boolean           @map("claimed")
+  blockNumber         Int               @map("block_number")
+  blockTimestamp      DateTime          @map("block_timestamp")
+  hasArrived          Boolean           @map("has_arrived")
+  raffle              Raffles?  @relation(fields: [raffleId], references: [id])
 
-  @@index([recipient], map: "recipient")
+  @@map("tickets")
 }
 
 model User {
-  id_user             Int       @id @default(autoincrement())
-  address             String    @unique
-  created_at          DateTime  @default(now())
-  updated_at          DateTime  @default(now()) @updatedAt
-  email               String?   @unique
-  username            String?   @unique
-  description         String?   @db.VarChar(600)
-  issued_at           DateTime?
-  chainId             Int
-  avatar              String?   @default("")
-  telegram            Json?     @default("{}")
-  twitter             Json?     @default("{}")
-  discord             Json?     @default("{}")
-  referral_code       String?   @unique
-  Season_Leaderboard  Season_Leaderboard[]
-  User_Quests         User_Quests[]
-  User_Quest_Steps    User_Quest_Steps[]
-  Referral            Referral[]
+  id                 Int       @id @default(autoincrement())
+  chainId            Int                                        @map("chain_id")
+  username           String?   @unique
+  email              String?   @unique
+  address            String    @unique
+  description        String?   @db.VarChar(600)
+  avatar             String?   @default("")
+  telegram           Json?     @default("{}")
+  twitter            Json?     @default("{}")
+  discord            Json?     @default("{}")
+  referralCode       String?   @unique @map("referral_code")
+  issuedAt           DateTime?                                  @map("issued_at")
+  createdAt          DateTime  @default(now())                  @map("created_at")
+  updatedAt          DateTime  @default(now()) @updatedAt       @map("updated_at")
+  referral           Referral[]
+  seasonLeaderboard  SeasonLeaderboard[] 
+  userQuests         UserQuests[] 
+  userQuestSteps     UserQuestSteps[] 
 
   @@index([username])
   @@index([email])
+  @@map("users")
 }
 
 model Referral {
-  id                Int      @id @default(autoincrement())
-  referred_user_id  Int
-  referral_code     String
-  created_at        DateTime @default(now())
-  User              User     @relation(fields: [referred_user_id], references: [id_user])
+  id              Int      @id @default(autoincrement())
+  referredUserId  Int                                       @map("referred_user_id")
+  referralCode    String                                    @map("refferal_code")
+  createdAt       DateTime @default(now())                  @map("created_at")
+  user            User     @relation(fields: [referredUserId], references: [id])
+
+  @@map("referrals")
 }
 
 model Favorites {
-  id_favorite Int      @id @default(autoincrement())
-  id_lot      Int
-  id_user     String
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now()) @updatedAt
+  id           Int      @id @default(autoincrement())
+  lotId        Int                                      @map("lot_id")
+  userId       String                                   @map("user_id")
+  createdAt    DateTime @default(now())                 @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt      @map("updated_at")
 
-  @@unique([id_lot, id_user], map: "id_lot_id_user")
-  @@index([id_lot], map: "id_lot")
-  @@index([id_user], map: "id_user")
+  @@unique([lotId, userId], map: "lot_id_lot_user")
+  @@index([lotId], name: "id_lot")
+  @@index([userId], name: "id_user")
+  @@map("favorites")
 }
 
 model Season {
-  id                  Int         @id @default(autoincrement())
+  id                  Int         @id @default(autoincrement())   @map("id")
   name                String
-  sub_title           String?
-  description         String?      @db.Text
-  start_date          DateTime?
-  end_date            DateTime?
-  xp_limit            Int
-  created_at          DateTime    @default(now())
-  updated_at          DateTime    @default(now()) @updatedAt
-  Quest               Quest[]
-  Season_Leaderboard  Season_Leaderboard[]
+  subTitle            String?                                     @map("sub_title")
+  description         String?     @db.Text
+  xpLimit             Int                                         @map("xp_limit")
+  startDate           DateTime?                                   @map("start_date")
+  endDate             DateTime?                                   @map("end_date")
+  createdAt           DateTime    @default(now())                 @map("created_at")
+  updatedAt           DateTime    @default(now()) @updatedAt      @map("updated_at")
+  quests              Quest[]
+  seasonLeaderboards  SeasonLeaderboard[]
 
   @@index([name])
+  @@map("seasons")
 }
 
-model Season_Leaderboard {
-  id               Int         @id @default(autoincrement())
-  season_id        Int
-  user_id          Int
-  xp_points        Int
-  created_at       DateTime    @default(now())
-  updated_at       DateTime    @default(now()) @updatedAt
-  Season           Season      @relation(fields: [season_id], references: [id])
-  User             User        @relation(fields: [user_id], references: [id_user])
+model SeasonLeaderboard {
+  id               Int         @id @default(autoincrement())    @map("id")
+  seasonId         Int                                          @map("season_id")
+  userId           Int                                          @map("user_id")
+  xpPoints         Int                                          @map("xp_points")
+  createdAt        DateTime    @default(now())                  @map("created_at")
+  updatedAt        DateTime    @default(now()) @updatedAt       @map("updated_at")
+  season           Season      @relation(fields: [seasonId], references: [id])
+  user             User        @relation(fields: [userId], references: [id])
 
-  @@unique([season_id, user_id], map: "season_id_user_id")
-  @@index([season_id])
-  @@index([user_id])
+  @@unique([seasonId, userId], map: "season_id_user_id")
+  @@index([seasonId])
+  @@index([userId])
+  @@map("season_leaderboard")
 }
 
 model Quest {
-  quest_id         Int                 @id @default(autoincrement())
-  season_id        Int
+  id               Int                 @id @default(autoincrement())      @map("id")
+  seasonId         Int                                                    @map("season_id")
   name             String
-  description      String?              @db.Text
-  xp_reward        Int
-  Season           Season               @relation(fields: [season_id], references: [id])
-  Step             Step[]
-  created_at       DateTime             @default(now())
-  updated_at       DateTime             @default(now()) @updatedAt
-  User_Quests      User_Quests[]
-  User_Quest_Steps User_Quest_Steps[]
+  description      String?             @db.Text
+  xpReward         Int                                                    @map("xp_reward")
+  createdAt        DateTime            @default(now())                    @map("created_at")
+  updatedAt        DateTime            @default(now()) @updatedAt         @map("updated_at")
+  steps            Step[]
+  userQuests       UserQuests[]
+  userQuestSteps   UserQuestSteps[]
+  season           Season              @relation(fields: [seasonId], references: [id])
 
-  @@index([season_id])
+  @@index([seasonId])
+  @@map("quests")
 }
 
 model Step {
-  step_id          Int         @id @default(autoincrement())
-  quest_id         Int
+  id               Int         @id @default(autoincrement())      @map("id")
+  questId          Int                                            @map("quest_id")
   description      String?     @db.Text
-  xp_points        Int
-  created_at       DateTime    @default(now())
-  updated_at       DateTime    @default(now()) @updatedAt
-  Quest            Quest       @relation(fields: [quest_id], references: [quest_id])
-  User_Quest_Steps User_Quest_Steps[]
+  xpPoints         Int                                            @map("xp_points")
+  createdAt        DateTime    @default(now())                    @map("created_at")
+  updatedAt        DateTime    @default(now()) @updatedAt         @map("updated_at")
+  quest            Quest       @relation(fields: [questId], references: [id])
+  userQuestSteps   UserQuestSteps[]
 
-  @@index([quest_id])
+  @@index([questId])
+  @@map("steps")
 }
 
-model User_Quests {
-  user_id          Int
-  quest_id         Int
-  status           Int
-  created_at       DateTime    @default(now())
-  updated_at       DateTime    @default(now()) @updatedAt
-  User             User        @relation(fields: [user_id], references: [id_user])
-  Quest            Quest       @relation(fields: [quest_id], references: [quest_id])
+model UserQuests {
+  userId          Int
+  questId         Int
+  status          Int
+  createdAt       DateTime    @default(now())                   @map("created_at")
+  updatedAt       DateTime    @default(now()) @updatedAt        @map("updated_at")
+  user            User        @relation(fields: [userId], references: [id])
+  quest           Quest       @relation(fields: [questId], references: [id])
 
-  @@id([user_id, quest_id])
-  @@index([user_id])
-  @@index([quest_id])
-  @@unique([user_id, quest_id], map: "user_id_quest_id")
+  @@id([userId, questId])
+  @@index([userId])
+  @@index([questId])
+  @@unique([userId, questId], map: "user_id_quest_id")
+  @@map("user_quests")
 }
 
-model User_Quest_Steps {
-  user_id          Int
-  quest_id         Int
-  step_id          Int
+model UserQuestSteps {
+  userId           Int
+  questId          Int
+  stepId           Int
   status           Int
-  created_at       DateTime    @default(now())
-  updated_at       DateTime    @default(now()) @updatedAt
-  User             User        @relation(fields: [user_id], references: [id_user])
-  Quest            Quest       @relation(fields: [quest_id], references: [quest_id])
-  Step             Step        @relation(fields: [step_id], references: [step_id])
+  createdAt        DateTime    @default(now())                  @map("created_at")
+  updatedAt        DateTime    @default(now()) @updatedAt       @map("updated_at")
+  user             User        @relation(fields: [userId], references: [id])
+  quest            Quest       @relation(fields: [questId], references: [id])
+  step             Step        @relation(fields: [stepId], references: [id])
 
-  @@id([user_id, quest_id])
-  @@index([user_id])
-  @@index([quest_id])
-  @@index([step_id])
-  @@unique([user_id, quest_id, step_id], map: "user_id_quest_id_step_id")
+  @@id([userId, questId])
+  @@index([userId])
+  @@index([questId])
+  @@index([stepId])
+  @@unique([userId, questId, stepId], map: "user_id_quest_id_step_id")
+  @@map("user_quest_steps")
 }
 
 enum NFTMetadataStatus {
@@ -237,4 +273,23 @@ enum AssetType {
 enum NetworkType {
   ETHEREUM
   GOERLI
+}
+
+enum SidechainRaffleStatus {
+  PENDING               @map("pending")                 // First event sent from main when the user wants to activate on another chain
+  CREATED               @map("created")                 // Sent when the event is created on the sidechain
+  PENDING_TIME_EXCEEDED @map("pending_time_exceeded")   // Set by a cron job if it has stayed in pending for X time
+  MONEY_NOT_RAISED      @map("money_not_raised")        // Minimum amount of money not raised → can claim
+  WINNER_SET            @map("winner_set")              // Can only claim money after this
+}
+
+enum StatusParsing {
+  SUCCES               @map("succes")                
+  FAILED               @map("failed")     
+}
+
+enum RaffleStatus {
+  MONEY_RAISED      @map("money_raised")        // Money has been successfully raised
+  MONEY_NOT_RAISED  @map("money_not_raised")    // Minimum amount of money not raised, can claim
+  WINNER_SET        @map("winner_set")          // Winner has been set, can claim money
 }
