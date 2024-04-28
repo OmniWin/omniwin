@@ -66,7 +66,7 @@ export default function RaffleDefault(raffle: RaffleCard) {
                             <CheckBadgeIcon className="inline-block h-6 xl:h-5 w-6 xl:w-5 text-[#1475e1] z-10 relative" />
                             <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 inset-0 rounded-full bg-white h-3 w-3"></div>
                         </div>
-                        <p className="text-smoke-300 font-bold truncate select-text max-w-36 xl:max-w-24 leading-none xl:leading-tight">
+                        <p className="text-smoke-300 font-bold truncate select-text max-w-32 xl:max-w-24 leading-none xl:leading-tight">
                             {/* <span className="text-smoke-300 font-bold truncate select-text max-w-14 block xl:hidden text-[11px] leading-none">#{raffle.id}</span> */}
                             {raffle.nft_name}
                         </p>
@@ -75,7 +75,7 @@ export default function RaffleDefault(raffle: RaffleCard) {
                     </div>
                     <div
                         className={classNames(
-                            "text-xs inline-flex items-center gap-2 px-2 py-1 rounded-3xl text-smoke-900 font-bold h-full",
+                            "text-[10px] leading-3 inline-flex items-center gap-1 xl:gap-2 px-2 py-1 rounded-3xl text-smoke-900 font-bold h-full",
                             // bg-lemon-400/90 group-hover:bg-lemon-400
                             // timeLeft.hasEnded && "bg-jade-400",
                             timeLeft.hasEnded && "bg-blood-400",
@@ -91,7 +91,8 @@ export default function RaffleDefault(raffle: RaffleCard) {
                             <>
                                 <ClockIcon className="inline-block h-[14px] w-[14px] xl:h-[18px] xl:w-[18px]" />
                                 <span>
-                                    {timeLeft.diff} {timeLeft.unit} left
+                                    {timeLeft.diff}
+                                    <span className="inline xl:hidden">{timeLeft.unit[0]}</span> <span className="hidden xl:inline">{timeLeft.unit}</span> <span className="hidden xl:inline">left</span>
                                 </span>
                             </>
                         )}

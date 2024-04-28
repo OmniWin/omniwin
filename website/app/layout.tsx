@@ -49,7 +49,6 @@ export default async function RootLayout(props: React.PropsWithChildren) {
                     <body className={inter.className}>
                         <SessionProvider session={session} refetchInterval={0}>
                             <Web3Modal>
-                                {/* <MainLayout>{pageProps.children}</MainLayout> */}
                                 <MainLayout>{props.children}</MainLayout>
                                 <Toaster />
                             </Web3Modal>

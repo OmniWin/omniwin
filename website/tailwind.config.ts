@@ -4,6 +4,7 @@ const colors = require("tailwindcss/colors");
 const {
   default: flattenColorPalette,
 } = require("tailwindcss/lib/util/flattenColorPalette");
+const plugin = require('tailwindcss/plugin')
 
 const config: Config = {
     darkMode: "class",
@@ -15,6 +16,10 @@ const config: Config = {
             screens: {
                 "2xl": "1400px",
             },
+        },
+        textShadow: {
+            sm: "black 1px 1px 0.1em, black 0px 0px 0.1em, black 0px 0px 0.1em",
+            DEFAULT: "black 1px 1px 0.2em, black 0px 0px 0.2em, black 0px 0px 0.2em"
         },
         extend: {
             fontFamily: {
@@ -157,7 +162,17 @@ const config: Config = {
             },
         },
     },
-    plugins: [require("@tailwindcss/forms"), addVariablesForColors],
+    plugins: [require("@tailwindcss/forms"), addVariablesForColors, plugin(function ({ matchUtilities, theme }: any) {
+        matchUtilities(
+          {
+            'text-shadow': (value: any) => ({
+              textShadow: value,
+            }),
+          },
+          { values: theme('textShadow') }
+        )
+      })
+    ],
 };
 // This plugin adds each Tailwind color as a global CSS variable, e.g. var(--gray-200).
 function addVariablesForColors({ addBase, theme }: any) {

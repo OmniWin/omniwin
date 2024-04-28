@@ -10,6 +10,20 @@ import {
   type TypedUseSelectorHook,
 } from "react-redux";
 
+const preloadedState = () => {
+  const userSettingsData = localStorage.getItem('userSettings');
+  const isSidebarOpenData = localStorage.getItem('isSidebarOpen');
+  const toggleSidebarData = localStorage.getItem('toggleSidebar');
+
+  return {
+    userSettings: userSettingsData ? JSON.parse(userSettingsData) : undefined,
+    sidebar: {
+      isSidebarOpen: isSidebarOpenData ? JSON.parse(isSidebarOpenData) : false, // Default to false if not found
+      toggleSidebar: toggleSidebarData ? JSON.parse(toggleSidebarData) : false, // Default to false if not found
+    }
+  };
+};
+
 /* Instruments */
 import { reducer } from "./rootReducer";
 import { middleware } from "./middleware";
@@ -19,6 +33,7 @@ export const reduxStore = configureStore({
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware().concat(middleware);
   },
+  preloadedState: preloadedState() // This will set your initial state based on localStorage
 });
 export const useDispatch = () => useReduxDispatch<ReduxDispatch>();
 export const useSelector: TypedUseSelectorHook<ReduxState> = useReduxSelector;
