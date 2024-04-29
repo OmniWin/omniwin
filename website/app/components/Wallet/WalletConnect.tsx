@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import MetaMaskIcon from "../Icons/MetaMask";
 import WalletConnectIcon from "../Icons/WalletConnect";
 import CoinbaseWalletIcon from "../Icons/Coinbase";
+import RabbyIcon from "../Icons/Rabby";
 import AccessFormByInvitation from "../User/AccessFormByInvitation";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 
@@ -121,7 +122,7 @@ const WalletConnect = () => {
     }, [isError, status]);
 
     // Define the connectors you want to use by their names or IDs
-    const allowedConnectors = ["MetaMask", "Coinbase Wallet", "WalletConnect", "Rabby"];
+    const allowedConnectors = ["MetaMask", "Coinbase Wallet", "WalletConnect", "Rabby Wallet"];
 
     // Filter the connectors to only include the ones you want
     const filteredConnectors = connectors.filter((connector) => allowedConnectors.includes(connector.name));
@@ -172,6 +173,7 @@ const WalletConnect = () => {
                             {connector?.name === "MetaMask" && <MetaMaskIcon className="w-5 h-5" />}
                             {connector?.name === "Coinbase Wallet" && <CoinbaseWalletIcon className="w-5 h-5" />}
                             {connector?.name === "WalletConnect" && <WalletConnectIcon className="w-6 h-6 -m-.5" />}
+                            {connector?.name === "Rabby Wallet" && <RabbyIcon className="w-5 h-5" />}
                         </span>
                         {/* <span>{userSettingsState?.user?.username ?? shortenAddress(address)}</span> */}
                         <span>{userSettingsState?.user?.username ? "" : shortenAddress(address)}</span>
@@ -187,6 +189,7 @@ const WalletConnect = () => {
                                 {connector?.name === "MetaMask" && <MetaMaskIcon className="w-24 h-24" />}
                                 {connector?.name === "Coinbase Wallet" && <CoinbaseWalletIcon className="w-24 h-24" />}
                                 {connector?.name === "WalletConnect" && <WalletConnectIcon className="w-28 h-2w-28 -m-5" />}
+                                {connector?.name === "Rabby Wallet" && <RabbyIcon className="w-24 h-24" />}
                             </div>
 
                             <div className="text-center">
@@ -261,6 +264,7 @@ const WalletConnect = () => {
                             {connector?.name === "MetaMask" && <MetaMaskIcon className="w-5 h-5" />}
                             {connector?.name === "Coinbase Wallet" && <CoinbaseWalletIcon className="w-5 h-5" />}
                             {connector?.name === "WalletConnect" && <WalletConnectIcon className="w-6 h-6 -m-.5" />}
+                            {connector?.name === "Rabby Wallet" && <RabbyIcon className="w-5 h-5" />}
                         </span>
                         <span>{shortenAddress(address)}</span>
                     </span>
@@ -305,6 +309,9 @@ const WalletConnect = () => {
                                                 break;
                                             case "WalletConnect":
                                                 icon = <WalletConnectIcon className="w-12 h-12 -m-2" />;
+                                                break;
+                                            case "Rabby Wallet":
+                                                icon = <RabbyIcon className="w-8 h-8" />;
                                                 break;
                                             default:
                                                 icon = null;

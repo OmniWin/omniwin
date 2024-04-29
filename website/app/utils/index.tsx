@@ -1,6 +1,8 @@
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds, format } from "date-fns";
 import { EventDetails } from "@/app/types";
-export * from './getExplorerLink';
+export * from "./getExplorerLink";
+import USDT from "@/public/images/coins/USDT.svg";
+import USDC from "@/public/images/coins/USDC.svg";
 
 export const classNames = (...args: any[]) => {
     return args.filter(Boolean).join(" ");
@@ -123,9 +125,7 @@ export function share(platform: SocialPlatform | "default", options: ShareOption
 
 export async function copyToClipboard(text: string) {
     navigator.clipboard.writeText(text).then(
-        () => {
-            
-        },
+        () => {},
         (err) => {
             console.error("Failed to copy to clipboard:", err);
         }
@@ -163,7 +163,6 @@ export const countdownRederer = ({ days, hours, minutes, seconds, completed }: C
         );
     }
 };
-
 
 function formatICSDate(date: Date): string {
     // Format date to YYYYMMDDTHHmm00Z (UTC time for .ics)
@@ -211,79 +210,130 @@ export const tiers = [
         description: "Tier 1 description",
         image: "/images/tier/1.png",
         gradientColor: "bg-gradient-to-r from-[#e52a5f38] to-transparent",
-        color: '#e52a5f',
-        lowOpacityColor: '#e52a5f1a',
+        color: "#e52a5f",
+        lowOpacityColor: "#e52a5f1a",
     },
     {
         name: "Tier 2",
         description: "Tier 2 description",
         image: "/images/tier/2.png",
         gradientColor: "bg-gradient-to-r from-[#fba21342] to-transparent",
-        color: '#fba213',
-        lowOpacityColor: '#fba2131a',
+        color: "#fba213",
+        lowOpacityColor: "#fba2131a",
     },
     {
         name: "Tier 3",
         description: "Tier 3 description",
         image: "/images/tier/3.png",
         gradientColor: "bg-gradient-to-r from-[#c41b1e38] to-transparent",
-        color: '#c41b1e',
-        lowOpacityColor: '#c41b1e1a',
+        color: "#c41b1e",
+        lowOpacityColor: "#c41b1e1a",
     },
     {
         name: "Tier 4",
         description: "Tier 4 description",
         image: "/images/tier/4.png",
         gradientColor: "bg-gradient-to-r from-[#e536e541] to-transparent",
-        color: '#e536e5',
-        lowOpacityColor: '#e536e51a',
+        color: "#e536e5",
+        lowOpacityColor: "#e536e51a",
     },
     {
         name: "Tier 5",
         description: "Tier 5 description",
         image: "/images/tier/5.png",
         gradientColor: "bg-gradient-to-r from-[#01d8e33a] to-transparent",
-        color: '#01d8e3',
-        lowOpacityColor: '#01d8e31a',
+        color: "#01d8e3",
+        lowOpacityColor: "#01d8e31a",
     },
     {
         name: "Tier 6",
         description: "Tier 6 description",
         image: "/images/tier/6.png",
         gradientColor: "bg-gradient-to-r from-[#51a6323d] to-transparent",
-        color: '#51a632',
-        lowOpacityColor: '#51a6321a',
+        color: "#51a632",
+        lowOpacityColor: "#51a6321a",
     },
     {
         name: "Tier 7",
         description: "Tier 7 description",
         image: "/images/tier/7.png",
         gradientColor: "bg-gradient-to-r from-[#5768e833] to-transparent",
-        color: '#5768e8',
-        lowOpacityColor: '#5768e81a',
+        color: "#5768e8",
+        lowOpacityColor: "#5768e81a",
     },
     {
         name: "Tier 8",
         description: "Tier 8 description",
         image: "/images/tier/8.png",
         gradientColor: "bg-gradient-to-r from-[#caa64b42] to-transparent",
-        color: '#caa64b',
-        lowOpacityColor: '#caa64b1a',
+        color: "#caa64b",
+        lowOpacityColor: "#caa64b1a",
     },
     {
         name: "Tier 9",
         description: "Tier 9 description",
         image: "/images/tier/9.png",
         gradientColor: "bg-gradient-to-r from-[#8d8d8d4f] to-transparent",
-        color: '#8d8d8d',
-        lowOpacityColor: '#8d8d8d1a',
+        color: "#8d8d8d",
+        lowOpacityColor: "#8d8d8d1a",
     },
     {
         name: "Tier 10",
         description: "Tier 10 description",
         image: "/images/tier/10.png",
         gradientColor: "bg-gradient-to-r from-[#f68b623b] to-transparent",
-        color: '#f68b62',
-        lowOpacityColor: '#f68b621a',
+        color: "#f68b62",
+        lowOpacityColor: "#f68b621a",
     },
 ];
+
+export const tokensContracts = {
+    ethereum: [
+        {
+            name: "USDC",
+            symbol: "USDC",
+            contract: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+            testnetContract: "0x8e0b7e6062272B5eF4524250bFFF8e5Bd3497757",
+            image: USDC,
+        },
+        {
+            name: "USDT",
+            symbol: "USDT",
+            contract: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+            testnetContract: "0x13512979ade267ab5100878e2e0f485b568328a4",
+            image: USDT,
+        },
+    ],
+    bsc: [
+        {
+            name: "USDC",
+            symbol: "USDC",
+            contract: "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+            testnetContract: "",
+            image: USDC,
+        },
+        {
+            name: "USDT",
+            symbol: "USDT",
+            contract: "0x55d398326f99059ff775485246999027b3197955",
+            testnetContract: "",
+            image: USDT,
+        },
+    ],
+    matic: [
+        {
+            name: "USDC",
+            symbol: "USDC",
+            contract: "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+            testnetContract: "",
+            image: USDC,
+        },
+        {
+            name: "USDT",
+            symbol: "USDT",
+            contract: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+            testnetContract: "",
+            image: USDT,
+        },
+    ],
+};

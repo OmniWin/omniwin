@@ -14,13 +14,24 @@ const preloadedState = () => {
   const userSettingsData = localStorage.getItem('userSettings');
   const isSidebarOpenData = localStorage.getItem('isSidebarOpen');
   const toggleSidebarData = localStorage.getItem('toggleSidebar');
+  const isChatOpen = localStorage.getItem('isChatOpen');
+  const user = localStorage.getItem('user');
+  const isWalletConnectorModalOpen = localStorage.getItem('isWalletConnectorModalOpen');
+  const isWalletStatusModalOpen = localStorage.getItem('isWalletStatusModalOpen');
+  const isCreateRaffleModalOpen = localStorage.getItem('isCreateRaffleModalOpen');
+  const usedReferralCode = localStorage.getItem('usedReferralCode');
+
 
   return {
     userSettings: userSettingsData ? JSON.parse(userSettingsData) : undefined,
-    sidebar: {
-      isSidebarOpen: isSidebarOpenData ? JSON.parse(isSidebarOpenData) : false, // Default to false if not found
-      toggleSidebar: toggleSidebarData ? JSON.parse(toggleSidebarData) : false, // Default to false if not found
-    }
+    user: user ? JSON.parse(user) : undefined,
+    isWalletConnectorModalOpen: isWalletConnectorModalOpen ? JSON.parse(isWalletConnectorModalOpen) : false,
+    isWalletStatusModalOpen: isWalletStatusModalOpen ? JSON.parse(isWalletStatusModalOpen) : false,
+    isCreateRaffleModalOpen: isCreateRaffleModalOpen ? JSON.parse(isCreateRaffleModalOpen) : false,
+    usedReferralCode: usedReferralCode ? JSON.parse(usedReferralCode) : '',
+    // isSidebarOpen: isSidebarOpenData ? JSON.parse(isSidebarOpenData) : false, // Default to false if not found
+    toggleSidebar: toggleSidebarData ? JSON.parse(toggleSidebarData) : false, // Default to false if not found
+    isChatOpen: isChatOpen ? JSON.parse(isChatOpen) : false, // Default to false if not found
   };
 };
 
@@ -33,7 +44,7 @@ export const reduxStore = configureStore({
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware().concat(middleware);
   },
-  preloadedState: preloadedState() // This will set your initial state based on localStorage
+  // preloadedS tate: preloadedState() // This will set your initial state based on localStorage
 });
 export const useDispatch = () => useReduxDispatch<ReduxDispatch>();
 export const useSelector: TypedUseSelectorHook<ReduxState> = useReduxSelector;

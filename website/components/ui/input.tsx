@@ -56,6 +56,7 @@ const inputVariants = cva(
 );
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">, VariantProps<typeof inputVariants> {
+    parentClassName?: string;
     className?: string;
     icon?: React.ReactNode; // Generalizing to ReactNode for flexibility
     iconSize?: string; // New prop for icon size
@@ -63,14 +64,14 @@ export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
     size?: "sm" | "md" | "lg";
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, variant, size, icon, iconSize = "h-5 w-5", label, id, ...props }, ref) => {
-    const parentClasses = cn({
+const Input = React.forwardRef<HTMLInputElement, InputProps>(({ parentClassName, className, variant, size, icon, iconSize = "h-5 w-5", label, id, ...props }, ref) => {
+    const pClasses = cn({
         "flex flex-col": true,
         "rounded-md px-3 pb-1.5 pt-2.5 shadow-sm ring-1 ring-inset ring-gray-700 focus-within:ring-2 dark:ring-zinc-800 dark:focus-within:ring-zinc-700": variant === "insetLabel",
     });
 
     return (
-        <div className={cn(parentClasses)}>
+        <div className={cn(pClasses, parentClassName)}>
             {label && variant !== "overlappingLabel" && (
                 <label htmlFor={id} className="block text-sm font-medium text-zinc-300">
                     {label}
@@ -92,7 +93,5 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, varia
         </div>
     );
 });
-
-Input.displayName = "Input";
 
 export { Input, inputVariants };

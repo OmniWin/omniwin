@@ -10,14 +10,20 @@ import ETH from "@/public/images/coins/ETH.svg";
 import MATIC from "@/public/images/coins/MATIC.svg";
 import USDT from "@/public/images/coins/USDT.svg";
 import USDC from "@/public/images/coins/USDC.svg";
+import { Calendar as CalendarIcon } from "lucide-react";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
-import { classNames } from "@/app/utils";
+import { classNames, tokensContracts } from "@/app/utils";
 import { useSelector, useDispatch, userSettingsSlice } from "@/lib/redux";
 import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
 
@@ -25,6 +31,14 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import CustomImageWithFallback from "../CustomImageWithFallback";
 import { Input } from "@/components/ui/input";
+import { useAccount, useNetwork, useBalance } from "wagmi";
+// import { ethers } from 'ethers';
+import { AlertError } from "../Ui/AlertError";
+import { useToast } from "@/components/ui/use-toast";
+
+import useOwnerOf from "@/app/hooks/useOwnerOf";
+import useBalanceOf from "@/app/hooks/useBalanceOf";
+import useDecimalsOf from "@/app/hooks/useDecimalsOf";
 
 export default function CreateRaffleModal() {
     const [steps, setSteps] = useState([
@@ -36,8 +50,16 @@ export default function CreateRaffleModal() {
     const dispatch = useDispatch();
     const userStoreStates = useSelector(selectUserSettingsState);
 
+    const { address, connector } = useAccount();
+    const { chain } = useNetwork();
+    // TODO: Reput address
+    // const { data: balance } = useBalance({ address });
+    const { data: balance } = useBalance({ address: "0xE0bb5f1167Bd3e7D7986459c19261C0aFa2db41e" });
+
+    const { toast } = useToast();
+
     const [raffleType, setRaffleType] = useState<string | null>(null);
-    const [chain, setChain] = useState<string | null>(null);
+    const [formChain, setFormChain] = useState<string>("ethereum");
     const [nfts, setNfts] = useState<any[]>([]);
     const [nft, setNft] = useState<any | null>(null);
     const [tokens, setTokens] = useState<any[]>([
@@ -58,8 +80,56 @@ export default function CreateRaffleModal() {
         },
     ]);
     const [token, setToken] = useState<any | null>(null);
+    const [tokenAmount, setTokenAmount] = useState<string | null>(null);
+    const [minFunds, setMinFunds] = useState<number | string | null>(null);
+    const [priceList, setPriceList] = useState<number[]>([]);
+    const [deadline, setDeadline] = useState<number | string | null>(null);
+    const [isTokenAndAmountConfirmed, setIsTokenAndAmountConfirmed] = useState<boolean | null>(null);
+
+    const [isOwner, setIsOwner] = useState(false);
+    const { data: ownerAddress, refetch, isError: isErrorOwnershipCheck, isLoading } = useOwnerOf(nft?.contract, nft?.identifier);
+    // TODO: Reput address
+    // const { data: balance, refetch: refetchBalance, isError: isErrorBalance, isLoading: isLoadingBalance } = useBalanceOf(token?.address, address);
+    const { data: balanceToken, refetch: refetchBalance, isError: isErrorBalance, isLoading: isLoadingBalance } = useBalanceOf(token?.contract, "0xE0bb5f1167Bd3e7D7986459c19261C0aFa2db41e");
+    const { data: decimals, refetch: refetchDecimals, isError: isErrorDecimals, isLoading: isLoadingDecimals, error: decimalError } = useDecimalsOf(token?.contract);
 
     const currentStep = steps.find((step) => step.status === "current");
+
+    const confirmTokenAndAmountHandler = () => {
+        if (token?.contract) {
+            refetchBalance(); // Trigger a fetch with the new inputs
+            refetchDecimals(); // Trigger a fetch with the new inputs
+            // Check if the user has enough balance
+            const amount = parseFloat(tokenAmount ?? "") * Math.pow(10, decimals ?? 18);
+            console.log(balanceToken, tokenAmount, amount, BigInt(amount), connector, chain);
+            if (balanceToken && tokenAmount && balanceToken < BigInt(amount)) {
+                setIsTokenAndAmountConfirmed(false);
+                toast({
+                    title: "Error",
+                    description: "You don't have enough balance to create this raffle.",
+                    variant: "error",
+                    duration: 3000,
+                });
+                return;
+            }
+        } else {
+            // Check if the user has enough balance
+            const amount = parseFloat(tokenAmount ?? "") * Math.pow(10, 18);
+            console.log(balance, tokenAmount, amount, BigInt(amount), connector, chain);
+            if (balance && tokenAmount && balance?.value < BigInt(amount)) {
+                setIsTokenAndAmountConfirmed(false);
+                toast({
+                    title: "Error",
+                    description: "You don't have enough balance to create this raffle.",
+                    variant: "error",
+                    duration: 3000,
+                });
+                return;
+            }
+        }
+
+        setIsTokenAndAmountConfirmed(true);
+    };
 
     // If raffle type is selected, show the next step
     if (raffleType) {
@@ -68,7 +138,7 @@ export default function CreateRaffleModal() {
     }
 
     // If nft or token is selected, show the next step
-    if (nft || token) {
+    if ((nft && isOwner && !isErrorOwnershipCheck) || (token && tokenAmount && isTokenAndAmountConfirmed)) {
         steps[1].status = "complete";
         steps[2].status = "current";
     }
@@ -81,8 +151,21 @@ export default function CreateRaffleModal() {
             return;
         }
 
-        setRaffleType(null);
-        setChain(null);
+        if (currentStep?.id === "02" || stepIndex === 0) {
+            setRaffleType(null);
+            // setFormChain(null);
+            // setNfts([]);
+        }
+
+        if (currentStep?.id === "03" || stepIndex === 0) {
+            setTokenAmount(null);
+            setToken(null);
+            setNft(null);
+            setDeadline(null);
+            setPriceList([]);
+            setMinFunds(null);
+            setIsTokenAndAmountConfirmed(null);
+        }
 
         steps.forEach((step, index) => {
             if (index < stepIndex) {
@@ -98,12 +181,12 @@ export default function CreateRaffleModal() {
     };
 
     const fetchUserNftsCollection = async () => {
-        if (!chain) {
+        if (!formChain) {
             return;
         }
         try {
             const domain = process.env.NEXT_PUBLIC_API_URL;
-            const response = await fetch(`${domain}/v1/user/wallet/nfts?chain=${chain}`, {
+            const response = await fetch(`${domain}/v1/user/wallet/nfts?chain=${formChain}`, {
                 method: "GET",
                 credentials: "include",
             });
@@ -116,10 +199,65 @@ export default function CreateRaffleModal() {
         }
     };
 
+    const checkOwnership = async () => {
+        if (!nft.contract || !nft.identifier) {
+            toast({
+                title: "Error",
+                description: "Please enter both a valid NFT Contract Address and a Token ID.",
+                variant: "error",
+                duration: 3000,
+            });
+            return;
+        }
+        refetch(); // Trigger a fetch with the new inputs
+    };
+
     // If the chain is changed, fetch the nfts from the selected chain
     useEffect(() => {
-        if (raffleType === "nft" && chain) fetchUserNftsCollection();
-    }, [chain]);
+        fetchUserNftsCollection();
+        setNft(null);
+        setToken(null);
+        setTokenAmount(null);
+
+        if (formChain) {
+            setTokens([
+                {
+                    name: formChain.toUpperCase(),
+                    image: formChain === "ethereum" ? ETH : formChain === "matic" ? MATIC : BNB,
+                },
+                ...(tokensContracts[formChain as keyof typeof tokensContracts] || []),
+            ]);
+        }
+    }, [formChain]);
+
+    // If the nft is selected, check ownership
+    useEffect(() => {
+        if (nft) checkOwnership();
+    }, [nft]);
+
+    // If the token is selected, check balance
+    useEffect(() => {
+        refetchBalance(); // Trigger a fetch with the new inputs
+        setIsTokenAndAmountConfirmed(null);
+    }, [token, tokenAmount]);
+
+    useEffect(() => {
+        if (raffleType === "nft" && nft) {
+            //TODO: Reput the check
+            // if (ownerAddress === address) {
+            if (ownerAddress === "0xE0bb5f1167Bd3e7D7986459c19261C0aFa2db41e") {
+                setIsOwner(true);
+            } else {
+                setIsOwner(false);
+                toast({
+                    title: "Error",
+                    description: "You are not the owner of this NFT.",
+                    variant: "error",
+                    duration: 3000,
+                });
+            }
+        }
+    }, [ownerAddress]);
 
     return (
         <>
@@ -292,7 +430,7 @@ export default function CreateRaffleModal() {
                                 <div>
                                     <div className="flex items-center justify-between">
                                         <p className="text-sm font-medium text-zinc-200">{raffleType === "nft" ? "NFT" : "Token"} List</p>
-                                        <Select onValueChange={(value) => setChain(value)}>
+                                        <Select value={formChain} onValueChange={(value: any) => setFormChain(value)}>
                                             <SelectTrigger className="w-[180px]">
                                                 <SelectValue placeholder="Select Chain" />
                                             </SelectTrigger>
@@ -342,8 +480,13 @@ export default function CreateRaffleModal() {
                                             </SelectContent>
                                         </Select>
                                     </div>
+                                    {nft && !isOwner && (
+                                        <div className="my-3">
+                                            <AlertError title="Error" description={isErrorOwnershipCheck ? "Please enter a valid NFT Contract Address and a Token ID." : "You are not the owner of this NFT."} />
+                                        </div>
+                                    )}
                                     {raffleType === "nft" && (
-                                        <div className="grid grid-cols-2 lg:grid-cols-3 items-center gap-4 max-h-72 lg:max-h-96 overflow-auto mt-4">
+                                        <div className="grid grid-cols-2 lg:grid-cols-3 items-center gap-4 max-h-64 lg:max-h-72 xl:max-h-96 overflow-auto mt-4 no-scrollbar">
                                             {nfts.map((nft, index) => (
                                                 <article
                                                     key={`nft${index}`}
@@ -353,7 +496,7 @@ export default function CreateRaffleModal() {
                                                     <div className="absolute inset-0 -z-10">
                                                         <CustomImageWithFallback
                                                             src={nft.image_url}
-                                                            alt={nft.name}
+                                                            alt={nft.name ?? "-"}
                                                             width={100}
                                                             height={100}
                                                             className="h-full w-full object-cover min-h-[inherit]"
@@ -385,42 +528,129 @@ export default function CreateRaffleModal() {
                                         </div>
                                     )}
                                     {raffleType === "token" && (
-                                        <div className="grid grid-cols-2 lg:grid-cols-4 items-center gap-4 max-h-72 lg:max-h-96 overflow-auto mt-4">
-                                            {tokens.map((token, index) => (
-                                                <Card onClick={() => setToken(token)} className="hover:!border-emerald-400 cursor-pointer">
-                                                    <CardContent className="flex flex-col items-center justify-center group px-0">
-                                                        <CardHeader className="text-zinc-400 px-0 group-hover:text-emerald-400">{token.name}</CardHeader>
-                                                        <CustomImageWithFallback
-                                                            className="!w-auto !max-h-[48px]"
-                                                            containerClass="!inline-block !w-[48px] !h-[48px]"
-                                                            width={48}
-                                                            height={48}
-                                                            sizes="100%"
-                                                            src={token.image}
-                                                            alt={token.name}
+                                        <>
+                                            <div className="grid grid-cols-2 lg:grid-cols-4 items-center gap-4 max-h-72 lg:max-h-96 overflow-auto mt-4">
+                                                {tokens.map((mapToken, index) => (
+                                                    <Card
+                                                        onClick={() => setToken(mapToken)}
+                                                        key={`token${index}${mapToken.image}`}
+                                                        className={classNames(
+                                                            `hover:!border-emerald-400 cursor-pointer`,
+                                                            token && token.name === mapToken.name && "!border-emerald-400",
+                                                            token && token.name !== mapToken.name && "opacity-40"
+                                                        )}
+                                                    >
+                                                        <CardContent className="flex flex-col items-center justify-center group px-0">
+                                                            <CardHeader className="text-zinc-400 px-0 group-hover:text-emerald-400">{mapToken.name}</CardHeader>
+                                                            <CustomImageWithFallback
+                                                                key={`img${index}${mapToken.image}${Math.random()}`}
+                                                                className="!w-auto !max-h-[48px]"
+                                                                containerClass="!inline-block !w-[48px] !h-[48px]"
+                                                                width={48}
+                                                                height={48}
+                                                                sizes="100%"
+                                                                src={mapToken.image}
+                                                                alt={mapToken.name}
+                                                            />
+                                                        </CardContent>
+                                                    </Card>
+                                                ))}
+                                                <Card
+                                                    className={classNames(
+                                                        `hover:!border-emerald-400 cursor-pointer`,
+                                                        token && token.name === "Custom Token" && "!border-emerald-400",
+                                                        token && token.name !== "Custom Token" && "opacity-40"
+                                                    )}
+                                                >
+                                                    <CardContent className="flex flex-col items-center justify-center group">
+                                                        <CardHeader className="text-zinc-400 px-0 group-hover:text-emerald-400">CUSTOM TOKEN</CardHeader>
+
+                                                        <Input
+                                                            variant="backgroundBottomBorder"
+                                                            size="lg"
+                                                            label=""
+                                                            id="customToken"
+                                                            type="text"
+                                                            autoComplete="off"
+                                                            placeholder="0xa2b4c5d6e7f8..."
+                                                            className="!text-sm rounded-lg focus:border-emerald-400"
+                                                            onChange={(e) => setToken({ name: "Custom Token", image: null, address: e.target.value })}
                                                         />
                                                     </CardContent>
                                                 </Card>
-                                            ))}
-                                            <Card className="hover:!border-emerald-400 cursor-pointer">
-                                                <CardContent className="flex flex-col items-center justify-center group">
-                                                    <CardHeader className="text-zinc-400 px-0 group-hover:text-emerald-400">CUSTOM TOKEN</CardHeader>
-
+                                            </div>
+                                            <div className="mt-4 grid grid-cols-6 items-center gap-2 w-full">
+                                                <div className="col-span-5">
                                                     <Input
-                                                        variant="backgroundBottomBorder"
+                                                        variant="insetLabel"
                                                         size="lg"
-                                                        label=""
-                                                        id="customToken"
-                                                        type="text"
+                                                        label="Amount"
+                                                        id="tokenAmount"
+                                                        type="number"
                                                         autoComplete="off"
-                                                        placeholder="0xa2b4c5d6e7f8..."
-                                                        className="!text-sm rounded-lg focus:border-emerald-400"
+                                                        placeholder="1000"
+                                                        className={classNames("[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none")}
+                                                        parentClassName={classNames(isTokenAndAmountConfirmed === false && "border-blood-600 !ring-blood-600")}
+                                                        onChange={(e) => setTokenAmount(e.target.value)}
                                                     />
-                                                </CardContent>
-                                            </Card>
-                                        </div>
+                                                </div>
+                                                <Button
+                                                    variant="soft"
+                                                    onClick={() => {
+                                                        confirmTokenAndAmountHandler();
+                                                    }}
+                                                    className="col-span-1 h-full"
+                                                >
+                                                    Confirm
+                                                </Button>
+                                            </div>
+                                            {isTokenAndAmountConfirmed === false && <p className="mt-2 text-sm text-blood-600">You don't have enough balance to create this raffle.</p>}
+                                        </>
                                     )}
                                 </div>
+                            )}
+                            {currentStep?.id === "03" && (
+                                <>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <Input
+                                                variant="insetLabel"
+                                                size="lg"
+                                                label="Minimum funds"
+                                                id="minFunds"
+                                                type="number"
+                                                autoComplete="off"
+                                                className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                onChange={(e) => setMinFunds(e.target.value)}
+                                            />
+                                            {/* {errors.username && <p className="mt-2 text-sm text-red-600">{errors.username.message}</p>} */}
+                                        </div>
+                                        <div>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button variant={"outline"} className={cn("w-[280px] justify-start text-left font-normal", !deadline && "text-muted-foreground")}>
+                                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                                        {deadline ? format(deadline, "PPP") : <span>Pick a date</span>}
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0">
+                                                    <Calendar mode="single" selected={deadline} onSelect={setDeadline} initialFocus />
+                                                </PopoverContent>
+                                            </Popover>
+                                            {/* <Input
+                                                variant="insetLabel"
+                                                size="lg"
+                                                label="Deadline"
+                                                id="deadline"
+                                                type="datetime-local"
+                                                autoComplete="off"
+                                                className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                onChange={(e) => setDeadline(e.target.value)}
+                                            /> */}
+                                            {/* {errors.username && <p className="mt-2 text-sm text-red-600">{errors.username.message}</p>} */}
+                                        </div>
+                                    </div>
+                                </>
                             )}
                         </div>
                     </div>
