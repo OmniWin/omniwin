@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "ethers": "^6.12.1",
+    "p-queue": "^8.0.1"
+  }
+}
