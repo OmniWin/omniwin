@@ -14,16 +14,15 @@ import { fetchUserSettingsData } from "@/app/services/userSettingsService";
 export default function SettingsPage() {
     const [userData, setUserData] = useState(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const data = await fetchUserSettingsData();
-            setUserData(data);
-            console.log("SettingsPage", userData);
-        };
+    const fetchData = async () => {
+        const data = await fetchUserSettingsData();
+        setUserData(data);
+        console.log("SettingsPage", userData);
+    };
 
+    useEffect(() => {
         fetchData();
     }, []);
-
 
     return (
         <>

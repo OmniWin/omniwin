@@ -9,22 +9,22 @@ import PromoBanner from "./components/Home/PromoBanner";
 export default function IndexPage() {
     // return <Counter />;
     return (
-      <>
-        <div className="flex flex-col gap-y-20">
-            <PromoBanner />
-            <section>
-                <Trending />
-            </section>
-            {/* <section>
+        <>
+            <div className="flex flex-col gap-y-20">
+                <PromoBanner />
+                <section>
+                    <Trending />
+                </section>
+                {/* <section>
                 <FeaturedList />
             </section> */}
-            <section>
-                <PaidContests />
-            </section>
-            {/* <section>
+                <section>
+                    <PaidContests />
+                </section>
+                {/* <section>
                 <RaffleList />
             </section> */}
-        </div>
-      </>
+            </div>
+        </>
     );
 }

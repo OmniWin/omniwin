@@ -314,6 +314,8 @@ const trending: RaffleCard[] = [
 import { classNames } from "@/app/utils";
 
 import { useState, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
+import { selectChatOpenState } from "@/lib/redux/slices/sidebarSlice/selectors";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 import CardSettings from "../Raffle/CardSettings";
@@ -321,6 +323,7 @@ import RaffleEse from "../Raffle/RaffleEse";
 
 export const PaidContests = () => {
     const [display, setDisplay] = useState("carousel");
+    const sidebarStates = useSelector(selectChatOpenState);
 
     return (
         <>
@@ -341,9 +344,15 @@ export const PaidContests = () => {
             </div>
             <div className="relative">
                 {display === "grid" && (
-                    <div className={classNames("grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-6 gap-6 mt-8 xl:mt-12")}>
+                    <div
+                        className={classNames(
+                            "grid gap-6 mt-8 xl:mt-12 sm:grid-cols-2 lg:grid-cols-2",
+                            !sidebarStates.isChatOpen && " xl:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-6",
+                            sidebarStates.isChatOpen && "xl:grid-cols-2 2xl:grid-cols-3 4xl:grid-cols-5 !gap-4"
+                        )}
+                    >
                         {trending.map((item, key) => (
-                            <div key={'paid'+key} className="">
+                            <div key={"paid" + key} className="">
                                 <RaffleEse {...item} />
                             </div>
                         ))}
@@ -353,14 +362,24 @@ export const PaidContests = () => {
                     <>
                         <Carousel
                             className="mt-8 xl:mt-12"
-                            opts={{
-                                // loop: true,
-                                // dragFree: true,
-                            }}
+                            opts={
+                                {
+                                    // loop: true,
+                                    // dragFree: true,
+                                }
+                            }
                         >
                             <CarouselContent className="-ml-1">
                                 {trending.map((item, key) => (
-                                    <CarouselItem key={'paidCarousel'+key} className={classNames("lg:basis-1/2 xl:basis-1/3 2xl:basis-1/5 lg:pl-3 pl-2", key === 0 && "")}>
+                                    <CarouselItem
+                                        key={"paidCarousel" + key}
+                                        className={classNames(
+                                            "lg:basis-1/2 lg:pl-3 pl-2",
+                                            key === 0 && "",
+                                            !sidebarStates.isChatOpen && "xl:basis-1/3 2xl:basis-1/5",
+                                            sidebarStates.isChatOpen && "xl:basis-1/2 2xl:basis-1/5"
+                                        )}
+                                    >
                                         <div className="hardware-accelerate">
                                             <RaffleEse {...item} />
                                         </div>

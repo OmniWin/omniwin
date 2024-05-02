@@ -1,4 +1,5 @@
 import CustomImageWithFallback from "@/app/components/CustomImageWithFallback";
+import { Button } from "@/components/ui/button";
 
 import image1 from "@/public/images/banner/1.jpg";
 import image2 from "@/public/images/banner/2.jpg";
@@ -7,6 +8,7 @@ import image4 from "@/public/images/banner/4.jpg";
 import image5 from "@/public/images/banner/5.jpg";
 import image6 from "@/public/images/banner/6.jpg";
 import image7 from "@/public/images/banner/7.jpg";
+import Link from "next/link";
 
 export default function PromoBanner() {
     return (
@@ -114,9 +116,16 @@ export default function PromoBanner() {
                                 </div>
                             </div>
 
-                            <a href="#" className="inline-block rounded-md border border-transparent bg-emerald-600 px-8 py-3 text-center font-medium text-white hover:bg-emerald-700">
+                            <Button variant="primary" size="xl">
                                 Create raffle
-                            </a>
+                            </Button>
+                            <div className="block md:inline-block mt-2 ">
+                                <Link href="/raffles">
+                                    <Button variant="soft" size="xl" className="md:ml-3">
+                                        Explore
+                                    </Button>
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
