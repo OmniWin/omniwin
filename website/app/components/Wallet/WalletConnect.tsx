@@ -164,7 +164,8 @@ const WalletConnect = () => {
                     // className="gap-x-3 inline-flex items-center pr-1 pl-3 py-1 rounded-md text-zinc-100 text-sm border border-zinc-800 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
                     className="gap-x-3 inline-flex items-center pl-3 rounded-md text-zinc-100 text-sm border border-zinc-800 bg-zinc-900 shadow-xl hover:bg-zinc-800/50 group transition-all ease-in-out duration-300 relative"
                 >
-                    {balance && `${balance.formatted} ${balance.symbol}`} {/* <span className="inline-flex items-center rounded-2xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2"> */}
+                    {balance && `${Number(balance.formatted).toFixed(4)} ${balance.symbol}`}{" "}
+                    {/* <span className="inline-flex items-center rounded-2xl border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2"> */}
                     {/* <span className="inline-flex items-center rounded-sm border border-zinc-800 bg-gradient-to-tl from-zinc-900 to-zinc-800/30 py-1 px-2"> */}
                     <span className="inline-flex items-center rounded-sm bg-gradient-to-tl from-zinc-800 to-zinc-800/30 py-2.5 px-2.5">
                         {/* Icon of selected wallet */}

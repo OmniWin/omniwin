@@ -18,7 +18,7 @@ import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { classNames } from "@/app/utils";
+import { classNames, shortenAddress } from "@/app/utils";
 
 export default function UserHeader() {
     // const dispatch = useDispatch();
@@ -57,37 +57,31 @@ export default function UserHeader() {
                                     <div className="flex items-center justify-center space-y-3 flex-col text-zinc-400 mr-5">
                                         <Button
                                             variant="link"
-                                            className={classNames([
-                                                "p-0 !inline-block !h-auto !text-zinc-400 hover:!text-zinc-100",
-                                            ])}
+                                            className={classNames(["p-0 !inline-block !h-auto !text-zinc-400 hover:!text-zinc-100"])}
                                             // !Object.keys(userSettingsState?.user?.twitter ?? {}).length && "!cursor-not-allowed !pointer-events-none",
                                             title={!Object.keys(userSettingsState?.user?.twitter ?? {}).length ? "Twitter not connected" : ""}
                                         >
-                                            <Link href={userSettingsState.user.twitter ?? '#'} className="hover:text-white transition-all duration-300">
+                                            <Link href={userSettingsState.user.twitter ?? "#"} className="hover:text-white transition-all duration-300">
                                                 <FontAwesomeIcon icon={faTwitter} className="h-4 w-4" />
                                             </Link>
                                         </Button>
                                         <Button
                                             variant="link"
-                                            className={classNames([
-                                                "p-0 !inline-block !h-auto !text-zinc-400 hover:!text-zinc-100",
-                                            ])}
+                                            className={classNames(["p-0 !inline-block !h-auto !text-zinc-400 hover:!text-zinc-100"])}
                                             // !Object.keys(userSettingsState?.user?.discord ?? {}).length && "!cursor-not-allowed !pointer-events-none",
                                             title={!Object.keys(userSettingsState?.user?.discord ?? {}).length ? "Discord not connected" : ""}
                                         >
-                                            <Link href={userSettingsState.user.discord ?? '#'} className="hover:text-white transition-all duration-300">
+                                            <Link href={userSettingsState.user.discord ?? "#"} className="hover:text-white transition-all duration-300">
                                                 <FontAwesomeIcon icon={faDiscord} className="h-4 w-4" />
                                             </Link>
                                         </Button>
                                         <Button
                                             variant="link"
-                                            className={classNames([
-                                                "p-0 !inline-block !h-auto !text-zinc-400 hover:!text-zinc-100",
-                                            ])}
+                                            className={classNames(["p-0 !inline-block !h-auto !text-zinc-400 hover:!text-zinc-100"])}
                                             // !Object.keys(userSettingsState?.user?.telegram ?? {}).length && "!cursor-not-allowed !pointer-events-none",
                                             title={!Object.keys(userSettingsState?.user?.telegram ?? {}).length ? "Telegram not connected" : ""}
                                         >
-                                            <Link href={userSettingsState.user.telegram ?? '#'} className="hover:text-white transition-all duration-300">
+                                            <Link href={userSettingsState.user.telegram ?? "#"} className="hover:text-white transition-all duration-300">
                                                 <FontAwesomeIcon icon={faTelegram} className="h-4 w-4" />
                                             </Link>
                                         </Button>
@@ -103,7 +97,7 @@ export default function UserHeader() {
                                         className="h-24 w-24 rounded-xl ring-4 ring-zinc-800 sm:h-32 sm:w-32"
                                     />
                                     <div className="ml-5 sm:hidden">
-                                        <h1 className="truncate text-2xl font-bold text-zinc-100">{userSettingsState?.user?.username ?? userSettingsState?.user?.address}</h1>
+                                        <h1 className="truncate text-2xl font-bold text-zinc-100">{userSettingsState?.user?.username ?? shortenAddress(userSettingsState?.user?.address)}</h1>
                                         {userSettingsState?.user?.created_at && (
                                             <time className="block text-sm font-medium text-zinc-400">Joined on {format(new Date(userSettingsState?.user?.created_at), "MMMM d, yyyy")}</time>
                                         )}
@@ -112,7 +106,7 @@ export default function UserHeader() {
                                 <div className="mt-6 sm:mt-0 sm:flex sm:min-w-0 sm:flex-1 sm:items-center sm:space-x-6 sm:pb-1">
                                     <div className="mt-6 sm:mt-0 min-w-0 flex-1 2xl:block">
                                         <div className="hidden sm:block">
-                                            <h1 className="truncate text-2xl font-bold text-zinc-100">{userSettingsState?.user?.username ?? userSettingsState?.user?.address}</h1>
+                                            <h1 className="truncate text-2xl font-bold text-zinc-100">{userSettingsState?.user?.username ?? shortenAddress(userSettingsState?.user?.address)}</h1>
                                             {userSettingsState?.user?.created_at && (
                                                 <time className="block text-sm font-medium text-zinc-400">Joined on {format(new Date(userSettingsState?.user?.created_at), "MMMM d, yyyy")}</time>
                                             )}
