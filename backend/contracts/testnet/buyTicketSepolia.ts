@@ -1,8 +1,8 @@
-import accounts from "./accounts.json" assert { type: "json" };
-import config from "./config.json" assert { type: "json" };
+import accounts from "./accounts.json";
+import config from "./config.json";
 import { ethers } from "ethers";
-import abi from "../artifacts/contracts/sideChain/OmniwinSide.sol/OmniwinSide.json" assert { type: "json" };
-import usdcAbi from "../artifacts/contracts/USDC.sol/USDC.json" assert { type: "json" };
+import abi from "../artifacts/contracts/sideChain/OmniwinSide.sol/OmniwinSide.json";
+import usdcAbi from "../artifacts/contracts/USDC.sol/USDC.json";
 
 const provider = new ethers.JsonRpcProvider(
   "https://sepolia.infura.io/v3/9d9284a66189412282e5c644ad094a93"
@@ -17,7 +17,7 @@ const contract = new ethers.Contract(contractAddress, abi.abi, wallet);
 
 async function callContractMethod() {
   const raffleId =
-    "0x7a2cea0a6279bb6110e5d97502d698d1ec067f1c35b5cff355cfe2aaefcf7436";
+    "0x2ac398cd71e68307f8be8537533aeed4ece42f95ee9cf2087067acf048f227ee";
   const priceId = 0;
   const usdcAmount = ethers.parseUnits("1", 6);
   const gasLimit = 300_000; //to be used by Chainlink CCIP to buy ticket on main chain

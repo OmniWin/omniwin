@@ -7,8 +7,8 @@
   "fujiSelector": "14767482510784806043",
   "sepoliaContract": "0x653C674a07cc4Ed8842f321d1759a32209fd7E02",
   "sepoliaSelector": "16015286601757825753",
-  "usdcContractBsc": "0x54B1D2D7BbaF70351aadce22c7f1d8a786E0AbBA",
+  "usdcContractBsc": "0x6df41902C6aD6C9ebBd655eB55C19A777ae69c37",
   "usdcContractBase": "0xb527a5FC3d437787d77e70AE22dBDb57BA75F5e7",
   "usdcContractFuji": "0x108C27B5e11619A975421D48C7d851E5Ed93140E",
-  "usdcContractSepolia": "0x57b000f3bedc9376a7357ae4e4f7FFB464815ba7"
+  "usdcContractSepolia": "0x54d612e899254c454268085008176b9739d3DD6e"
 }

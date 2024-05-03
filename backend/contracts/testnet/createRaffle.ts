@@ -1,14 +1,14 @@
-import accounts from "./accounts.json" assert { type: "json" };
-import config from "./config.json" assert { type: "json" }; // Add assertion here as well
+import accounts from "./accounts.json";
+import config from "./config.json"; // Add assertion here as well
 import { ethers } from "ethers";
-import abi from "../artifacts/contracts/mainChain/OmniwinMain.sol/Omniwin.json" assert { type: "json" }; // If this is JSON, add assertion
-import usdcAbi from "../artifacts/contracts/USDC.sol/USDC.json" assert { type: "json" }; // If this is JSON, add assertion
+import abi from "../artifacts/contracts/mainChain/OmniwinMain.sol/Omniwin.json"; // If this is JSON, add assertion
+import usdcAbi from "../artifacts/contracts/USDC.sol/USDC.json"; // If this is JSON, add assertion
 
 const provider = new ethers.JsonRpcProvider(
   "https://data-seed-prebsc-1-s1.binance.org:8545"
 );
 
-const privateKey = accounts.bscTestnetPrivateKey;
+const privateKey = accounts.bnbChainTestnetPrivateKey;
 const contractAddress = config.bscContract;
 
 const wallet = new ethers.Wallet(privateKey, provider);

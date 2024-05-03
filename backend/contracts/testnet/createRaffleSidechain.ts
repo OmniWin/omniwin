@@ -1,8 +1,8 @@
-import accounts from "./accounts.json" assert { type: "json" };
-import config from "./config.json" assert { type: "json" }; // Add assertion here as well
+import accounts from "./accounts.json";
+import config from "./config.json"; // Add assertion here as well
 import { ethers } from "ethers";
-import abi from "../artifacts/contracts/sideChain/OmniwinSide.sol/OmniwinSide.json" assert { type: "json" }; // If this is JSON, add assertion
-import usdcAbi from "../artifacts/contracts/USDC.sol/USDC.json" assert { type: "json" }; // If this is JSON, add assertion
+import abi from "../artifacts/contracts/sideChain/OmniwinSide.sol/OmniwinSide.json"; // If this is JSON, add assertion
+import usdcAbi from "../artifacts/contracts/USDC.sol/USDC.json"; // If this is JSON, add assertion
 
 const provider = new ethers.JsonRpcProvider(
   // "https://quiet-solemn-dew.base-sepolia.quiknode.pro/a0cd7787a7641fdd7d2b84e726105298083b73ba/"
@@ -58,7 +58,7 @@ async function callContractMethod() {
 
   const nonce = await provider.getTransactionCount(wallet.address, "latest");
 
-  const gasLimit = 450_000;
+  const gasLimit = 350_000;
   const tx = await contract.CreateRaffleCCIP(
     prizeAddress,
     prizeAmount,
@@ -68,7 +68,7 @@ async function callContractMethod() {
     deadlineDuration,
     gasLimit,
     {
-      gasLimit: 590_000,
+      gasLimit: 450_000,
       // gasPrice: adjustedGasPrice,
       // nonce: nonce + 1,
     }

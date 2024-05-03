@@ -42,8 +42,10 @@ async function main() {
     
     // const { SIDE_CONTRACT, USDC_CONTRACT_SIDE } = {
     //   SIDE_CONTRACT: "0x653C674a07cc4Ed8842f321d1759a32209fd7E02",
-    //   USDC_CONTRACT_SIDE: "0x6df41902C6aD6C9ebBd655eB55C19A777ae69c37"
+    //   USDC_CONTRACT_SIDE: "0x54d612e899254c454268085008176b9739d3DD6e"
     // }
+
+    //TODO: write these 4 contracts to config.json
 
 
     await setupSecurity(

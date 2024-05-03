@@ -1,14 +1,14 @@
-import accounts from "./accounts.json" assert { type: "json" };
-import config from "./config.json" assert { type: "json" }; // Add assertion here as well
+import accounts from "./accounts.json" ;
+import config from "./config.json" ; // Add assertion here as well
 import { ethers } from "ethers";
-import abi from "../artifacts/contracts/mainChain/OmniwinMain.sol/Omniwin.json" assert { type: "json" }; // If this is JSON, add assertion
-import usdcAbi from "../artifacts/contracts/USDC.sol/USDC.json" assert { type: "json" }; // If this is JSON, add assertion
+import abi from "../artifacts/contracts/mainChain/OmniwinMain.sol/Omniwin.json" ; // If this is JSON, add assertion
+import usdcAbi from "../artifacts/contracts/USDC.sol/USDC.json" ; // If this is JSON, add assertion
 
 const provider = new ethers.JsonRpcProvider(
   "https://data-seed-prebsc-1-s1.binance.org:8545"
 );
 
-const privateKey = accounts.bnbTestnetPrivateKey;
+const privateKey = accounts.bnbChainTestnetPrivateKey;
 const contractAddress = config.bscContract;
 
 const wallet = new ethers.Wallet(privateKey, provider);
@@ -17,7 +17,7 @@ const contract = new ethers.Contract(contractAddress, abi.abi, wallet);
 
 async function callContractMethod() {
   const raffleId =
-    "0x7a2cea0a6279bb6110e5d97502d698d1ec067f1c35b5cff355cfe2aaefcf7436";
+    "0x2ac398cd71e68307f8be8537533aeed4ece42f95ee9cf2087067acf048f227ee";
   const priceId = 0;
   const usdcAmount = ethers.parseUnits("1", 6);
 
