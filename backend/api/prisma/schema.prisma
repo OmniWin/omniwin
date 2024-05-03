@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Raffles {
-  id                    Int                     @id
+  id                    String                  @id
   chainId               Int                     @map("chain_id")
   status                RaffleStatus
   assetType             String                  @map("asset_type")
@@ -20,6 +20,7 @@ model Raffles {
   countViews            Int                     @map("count_views")
   winnerAddress         String?                 @map("winner_address")
   claimedPrize          Boolean                 @map("claimed_prize")
+  deadline              DateTime                @map("deadline")
   tickets               Tickets[]
   blockchainEvents      BlockchainEvents[]
   sidechainEnabledRaffles SidechainEnabledRaffles[] 
@@ -31,7 +32,7 @@ model Raffles {
 
 model SidechainEnabledRaffles {
   id                  Int   @id @default(autoincrement())
-  raffleId            Int                                   @map("raffle_id")
+  raffleId            String                                @map("raffle_id")
   chainId             Int                                   @map("chain_id")
   status              SidechainRaffleStatus
   raffle              Raffles @relation(fields: [raffleId], references: [id])
@@ -42,7 +43,7 @@ model SidechainEnabledRaffles {
 
 model BlockchainEvents {
   id                  String    @id
-  raffleId            Int                           @map("raffle_id")
+  raffleId            String                        @map("raffle_id")
   name                String
   json                Json      @default("{}")
   statusParsing       String                        @map("status_parsing")
@@ -55,7 +56,7 @@ model BlockchainEvents {
 
 model RaffleMetadata {
   id                  Int       @id @default(autoincrement())                     @map("id")
-  raffleId            Int       @unique                                           @map("raffle_id")
+  raffleId            String    @unique                                           @map("raffle_id")
   raffle              Raffles   @relation(fields: [raffleId], references: [id])
   json                Json?     @default("{}")
   name                String?
@@ -71,7 +72,7 @@ model RaffleMetadata {
 
 model PriceList {
   id                  Int       @id @default(autoincrement())       @map("id")
-  raffleId            Int       @unique                             @map("raffle_id")
+  raffleId            String    @unique                             @map("raffle_id")
   raffle              Raffles   @relation(fields: [raffleId], references: [id])
   eventId             Int                                           @map("event_id")
   prices              Json
@@ -83,7 +84,7 @@ model Tickets {
   tx                  String    @id
   eventId             String            @map("event_id")
   chainId             Int               @map("chain_id")
-  raffleId            Int               @map("raffle_id")
+  raffleId            String            @map("raffle_id")
   buyerAddress        String            @map("buyer_address")
   numberOfEntries     Int               @map("number_of_entries")
   valueOfTickets      Int               @map("value_of_tickets")
