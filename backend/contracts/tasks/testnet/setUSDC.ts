@@ -1,7 +1,7 @@
 import { task } from "hardhat/config";
 
 // Defining the task
-task("deployUSDC", "Sets the USDC token address on a given contract")
+task("setUSDC", "Sets the USDC token address on a given contract")
     .addParam("contract", "The address of the contract")
     .addParam("usdc", "The address of the USDC token")
     .setAction(async (taskArgs, hre) => {

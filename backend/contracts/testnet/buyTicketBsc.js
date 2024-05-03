@@ -16,7 +16,8 @@ const wallet = new ethers.Wallet(privateKey, provider);
 const contract = new ethers.Contract(contractAddress, abi.abi, wallet);
 
 async function callContractMethod() {
-  const raffleId = 2;
+  const raffleId =
+    "0x7a2cea0a6279bb6110e5d97502d698d1ec067f1c35b5cff355cfe2aaefcf7436";
   const priceId = 0;
   const usdcAmount = ethers.parseUnits("1", 6);
 
@@ -29,8 +30,8 @@ async function callContractMethod() {
 
   const approveTx = await usdcContract.approve(contractAddress, usdcAmount);
 
-  const tx = await contract.buyEntry(raffleId, priceId, usdcAmount, {
-    gasLimit: 300_000,
+  const tx = await contract.buyEntry(raffleId, priceId, {
+    gasLimit: 400_000,
   });
   await tx.wait();
   console.log("Transaction successful:", tx);

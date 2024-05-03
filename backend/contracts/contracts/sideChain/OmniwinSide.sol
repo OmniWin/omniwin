@@ -170,7 +170,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     error ETHPrizeAmountMismatch();
     error RaffleDeadlinePassed(bytes32 raffleId);
     error IncorrectUSDCAmount(uint256 providedAmount, uint256 expectedPrice);
-    error USDCAallowanceTooLow();
+    error UsdcAllowanceTooLow();
     error USDCTransferFailed();
     error CallerNotSeller();
     error ClaimPeriodNotAvailable();
@@ -254,7 +254,6 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     mapping(bytes32 => mapping(address => bool)) public hasClaimedRefund;
     mapping(bytes32 => EntriesBought[]) public entriesList;
     mapping(bytes32 => PriceStructure[]) public pricesList;
-    mapping(bytes32 => PriceStructure[]) public tempPricesList;
     mapping(bytes32 => RaffleStruct) public raffles;
     mapping(bytes32 => mapping(bytes32 => BuyTicketCCIP)) public entries;
 
@@ -805,8 +804,6 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         uint48 _id,
         uint256 gasLimit
     ) external payable {
-        if (tx.origin != msg.sender)
-            revert EntryNotAllowed("No contracts allowed");
         EntryInfoStruct storage entryInfo = rafflesEntryInfo[_raffleId];
         if (entryInfo.status != STATUS.ACCEPTED)
             revert EntryNotAllowed("Not in ACCEPTED");
@@ -821,7 +818,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         IERC20 usdc = IERC20(usdcContractAddress);
         uint256 allowance = usdc.allowance(msg.sender, address(this));
         if (allowance < priceStruct.price + ccipMessageFee) {
-            revert USDCAallowanceTooLow();
+            revert UsdcAllowanceTooLow();
         }
 
         if (!usdc.transferFrom(msg.sender, address(this), priceStruct.price)) {
@@ -975,13 +972,6 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
 
         // Calculate refund amount based on the tickets bought by msg.sender
         uint256 refundAmount = calculateRefund(raffleId, msg.sender);
-
-        console.log("refund amount: %s", refundAmount);
-        //check balance of contract usdc
-        console.log(
-            "balance of contract: %s",
-            IERC20(usdcContractAddress).balanceOf(address(this))
-        );
 
         if (refundAmount <= 0) {
             revert NoRefundAvailable();

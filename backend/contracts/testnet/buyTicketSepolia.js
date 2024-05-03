@@ -4,10 +4,12 @@ import { ethers } from "ethers";
 import abi from "../artifacts/contracts/sideChain/OmniwinSide.sol/OmniwinSide.json" assert { type: "json" };
 import usdcAbi from "../artifacts/contracts/USDC.sol/USDC.json" assert { type: "json" };
 
-const provider = new ethers.JsonRpcProvider("https://sepolia.base.org/");
+const provider = new ethers.JsonRpcProvider(
+  "https://sepolia.infura.io/v3/9d9284a66189412282e5c644ad094a93"
+);
 
-const privateKey = accounts.baseTestnetPrivateKey;
-const contractAddress = config.baseContract;
+const privateKey = accounts.sepoliaPrivateKey;
+const contractAddress = config.sepoliaContract;
 
 const wallet = new ethers.Wallet(privateKey, provider);
 
@@ -22,7 +24,7 @@ async function callContractMethod() {
 
   //allow contract to spend USDC
   const usdcContract = new ethers.Contract(
-    config.usdcContractBase,
+    config.usdcContractSepolia,
     usdcAbi.abi,
     wallet
   );
@@ -33,7 +35,7 @@ async function callContractMethod() {
     "USDC balance:",
     balance.toString(),
     "from contract:",
-    config.usdcContractBase
+    config.usdcContractSepolia
   );
 
   //check public method usdcContractAddress of contract
@@ -42,28 +44,14 @@ async function callContractMethod() {
   const ccipMessageFee = ethers.parseUnits("0.5", 6);
   const totalAmount = ccipMessageFee + usdcAmount;
 
-  const nonce = await provider.getTransactionCount(wallet.address, "latest");
-  console.log("nonce:", nonce);
   const approveTx = await usdcContract.approve(contractAddress, totalAmount);
 
   console.log("Wallet address:", wallet.address);
   console.log("USDC contract address config:", config.usdcContractBase);
   console.log("USDC contract address contract:", usdcContractAddress);
 
-  // Fetch current gas price from the network
-  const currentGasPrice = (await provider.getFeeData()).gasPrice;
-  // const price=(await Provider.getFeeData()).maxFeePerGas
-  // ​const price=(await Provider.getFeeData()).maxPriorityFeePerGas
-
-  // Increase the gas price by a certain percentage to ensure it's high enough
-  const adjustedGasPrice = (currentGasPrice * BigInt(130)) / BigInt(100);
-
-  console.log("Current gas price:", currentGasPrice.toString());
-  console.log("Adjusted gas price:", adjustedGasPrice.toString());
   const tx = await contract.buyEntry(raffleId, priceId, gasLimit, {
     gasLimit: 400_000,
-    nonce: nonce + 1,
-    gasPrice: adjustedGasPrice,
   });
   await tx.wait();
   console.log("Transaction successful:", tx);

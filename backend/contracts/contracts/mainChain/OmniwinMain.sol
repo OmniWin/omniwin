@@ -24,7 +24,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
     uint48 platformFeePercentage = 600;
 
     address public usdcContractAddress;
-    uint64 public mainChainSelector = 1;
+    uint64 public mainChainSelector = 1; //TODO: set the main chain selector
 
     uint256 ccipMessageFee = 500000; //50c USD
 
@@ -68,11 +68,14 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         uint256 normalizedRandomNumber
     );
 
-    event RaffleStarted(
+    event CreateRaffle(
         bytes32 indexed raffleId,
         address indexed nftAddress,
         uint256 indexed nftId,
-        ASSET_TYPE assetType
+        ASSET_TYPE assetType,
+        address seller,
+        uint128 minimumFundsInWei,
+        uint256 deadline
     );
 
     event CreateRaffleToSidechain(
@@ -675,7 +678,15 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             cashClaimed: false
         });
 
-        emit RaffleStarted(raffleId, _prizeAddress, _prizeNumber, _assetType);
+        emit CreateRaffle(
+            raffleId,
+            _prizeAddress,
+            _prizeNumber,
+            _assetType,
+            _seller,
+            _minimumFundsInWei,
+            block.timestamp + _deadlineDuration
+        );
 
         return raffleId;
     }
@@ -989,7 +1000,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
     /// one or more entries will be assigned to the player.
     /// @param _raffleId: id of the raffle
     /// @param _id: id of the price structure (package)
-    function buyEntry(bytes32 _raffleId, uint48 _id) external payable {
+    function buyEntry(bytes32 _raffleId, uint48 _id) external {
         EntryInfoStruct storage entryInfo = rafflesEntryInfo[_raffleId];
         if (entryInfo.status != STATUS.ACCEPTED) revert NotInAcceptedStatus();
 
@@ -997,15 +1008,11 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         IERC20 usdc = IERC20(usdcContractAddress);
 
         uint256 price = priceStruct.price;
-        if (usdc.allowance(msg.sender, address(this)) < price + ccipMessageFee)
+        if (usdc.allowance(msg.sender, address(this)) < price)
             revert USDCAllowanceTooLow();
 
         if (!usdc.transferFrom(msg.sender, address(this), price))
             revert USDCTransferFailed();
-
-        if (!usdc.transferFrom(msg.sender, destinationWallet, ccipMessageFee)) {
-            revert FailedToSendPlatformFee();
-        }
 
         uint48 numEntries = priceStruct.numEntries;
         entriesList[_raffleId].push(

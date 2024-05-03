@@ -1803,6 +1803,8 @@ describe("Omniwin", function () {
             const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
             const raffleId = eventEmittedLogs?.args?.raffleId
 
+            console.log("Raffle ID: ", raffleId)
+
 
             //enable raffle on sidechain
             const chainSelectors = [

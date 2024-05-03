@@ -25,9 +25,11 @@ const config: HardhatUserConfig = {
     enabled: false,
   },  
   networks: {
-    sepolia: {
-      url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
-      accounts: [`${secrets.sepoliaPrivateKey}`]
+    ethereumSepolia: {
+      url: `https://rpc2.sepolia.org`,
+      accounts: [`${secrets.ethereumSepoliaPrivateKey}`],
+      //local network
+
     },
     mumbai: {
       url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
@@ -35,20 +37,26 @@ const config: HardhatUserConfig = {
     },
     bscTestnet: {
       url: `https://data-seed-prebsc-1-s1.binance.org:8545`,
-      accounts: [`${secrets.bscTestnetPrivateKey}`]
+      accounts: [`${secrets.bnbChainTestnetPrivateKey}`]
     },
     baseTestnet: {
       url: "https://sepolia.base.org",
       accounts: [`${secrets.baseTestnetPrivateKey}`],
       gasPrice: 1000000000,
     },
+    fujiTestnet: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      accounts: [`${secrets.fujiTestnetPrivateKey}`],
+      gasPrice: 225000000000,
+    }
   },
   etherscan: {
     apiKey: {
       polygonMumbai: "IZK72MFIWHUZRNFKKEHETSJKZCWYN7T7R1", 
-      sepolia: "NJEHWWQ1EJ17X4PH2C7H9IESSVNBXTSCIV",
+      ethereumSepolia: "1BD5NPZ1PXJUDCRHUUPUPXR23RWD99SFSC",
       bscTestnet: "Y6AHHKSJP9611YHC1NN3SXCU9B2RV9I4CI",
       baseTestnet: "UZBX9KWZAT1SZS9NDEM6W6IEPMP62TW5MF", //from base mainnet key
+      fujiTestnet: "avascan",
     },
     customChains: [
       {
@@ -57,6 +65,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://base-sepolia.blockscout.com/api",
           browserURL: "https://base-sepolia.blockscout.com"
+        }
+      },
+      {
+        network: "fujiTestnet",
+        chainId: 43113,
+        urls: {
+          apiURL: "https://api.avascan.info/v2/network/testnet/evm/43113/etherscan",
+          browserURL: "https://testnet.avascan.info/blockchain/c"
         }
       }
     ]

@@ -1,0 +1,76 @@
+In this Readme, i chose FUJI as main and BASE as side
+
+# Omniwin
+
+Step 1:
+Have a suFUJIription to chainlink VRF: vrf.chain.link and add consumer contract (main contract) to the chainlink VRF
+
+Add LINK to all deployed contracts to have for CCIP fees
+
+//fujiTestnet - is the main contract on testnet because it supports VRF
+
+Step 2:
+
+1. npx hardhat run deployMain.ts --network fujiTestnet
+   Contract deployed to: 0x31B69a5eB2B7EFF14b145Ec7e46c9Cb1e9BDeB73
+   npx hardhat verify --constructor-args argsMain.js 0x31B69a5eB2B7EFF14b145Ec7e46c9Cb1e9BDeB73 --network fujiTestnet
+
+2. npx hardhat run deploySide.ts --network baseTestnet
+   Contract deployed to: 0x0D8418919550109cf57Cf40d3A96D7C73321760a
+   npx hardhat verify --constructor-args argsSide.js 0x0D8418919550109cf57Cf40d3A96D7C73321760a --network baseTestnet
+
+3. npx hardhat run deployUSDC.ts --network baseTestnet
+   Contract deployed to: 0xf5202a2A6AC36a2e02C845817c94F95e43f2A017
+
+4. npx hardhat run deployUSDC.ts --network fujiTestnet
+   Contract deployed to: 0x108C27B5e11619A975421D48C7d851E5Ed93140E
+
+5. Set USDC in contract using tasks (setUsdc.ts)
+   npx hardhat setUSDC --network baseTestnet --contract 0x0D8418919550109cf57Cf40d3A96D7C73321760a --usdc 0xf5202a2A6AC36a2e02C845817c94F95e43f2A017
+   npx hardhat setUSDC --network fujiTestnet --contract 0x31B69a5eB2B7EFF14b145Ec7e46c9Cb1e9BDeB73 --usdc 0x108C27B5e11619A975421D48C7d851E5Ed93140E
+
+6. Set mainchain raffle address to side contract
+   FUJI SELECTOR: 14767482510784806043
+   npx hardhat setMainChainRaffleToSidechain --network baseTestnet --contract 0x0D8418919550109cf57Cf40d3A96D7C73321760a --raffle 0x31B69a5eB2B7EFF14b145Ec7e46c9Cb1e9BDeB73
+
+   //For sidechain we tell what is the selector of the mainchain
+   npx hardhat setMainChainSelectorToSidechain --network baseTestnet --contract 0x0D8418919550109cf57Cf40d3A96D7C73321760a --selector 14767482510784806043
+
+7. Allow main contract to send message to destination chain
+   BASECHAIN SELECTOR: 10344971235874465080
+   npx hardhat allowDestinationChain --network fujiTestnet --contract 0x31B69a5eB2B7EFF14b145Ec7e46c9Cb1e9BDeB73 --selector 10344971235874465080 --allow true
+   allowlistDestinationChain(destinationChainSelector, true);
+
+8. Allow side contract to receive message from main contract selector
+   FUJI SELECTOR: 14767482510784806043
+   npx hardhat allowlistSourceChain --network baseTestnet --contract 0x0D8418919550109cf57Cf40d3A96D7C73321760a --selector 14767482510784806043 --allow true
+   await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
+
+9. Allow side contract to be able receive message from main contract
+   npx hardhat allowlistSender --network baseTestnet --contract 0x0D8418919550109cf57Cf40d3A96D7C73321760a --externalcontract 0x31B69a5eB2B7EFF14b145Ec7e46c9Cb1e9BDeB73 --allow true
+   await omniwinSide.allowlistSender(omniwinMain.target, true);
+
+10. Allow main contract to receive message from side contract selector
+    npx hardhat allowlistSourceChain --network fujiTestnet --contract 0x31B69a5eB2B7EFF14b145Ec7e46c9Cb1e9BDeB73 --selector 10344971235874465080 --allow true
+    await omniwinMain.allowlistSourceChain(omniwinSide.target, true);
+
+11. Allow main contract to receive message from side contract
+   npx hardhat allowlistSender --network fujiTestnet --contract 0x31B69a5eB2B7EFF14b145Ec7e46c9Cb1e9BDeB73 --externalcontract 0x0D8418919550109cf57Cf40d3A96D7C73321760a --allow true
+   await omniwinMain.allowlistSender(omniwinSide.target, true);
+
+10. Mint USDC
+    npx hardhat mintUSDC --network baseTestnet --contract 0xf5202a2A6AC36a2e02C845817c94F95e43f2A017 --amount 1000000000 --to 0xAb6606E5B5c35DB516D67E36fbAF049B1C38409F
+    npx hardhat mintUSDC --network fujiTestnet --contract 0x108C27B5e11619A975421D48C7d851E5Ed93140E --amount 1000000000 --to 0xAb6606E5B5c35DB516D67E36fbAF049B1C38409F
+
+Extra:
+Deploy NFT contract
+npx hardhat run deployNFT.ts --network fujiTestnet
+Contract deployed to: 0x52809A18bfDFcB29029848E96B1e3A43bf8c1437
+
+npx hardhat run deployNFT.ts --network baseTestnet
+Contract deployed to: 0x209eE5f430650e515949AE277B746cE84C124d25
+
+# Next steps are to call functions from /home/spike/omniwin/backend/contracts/testnet
+1. Add to config.json the contract addresses
+2. Add to secrets.json the private keys
+3. Send Link to contracts for fees

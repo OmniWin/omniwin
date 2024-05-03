@@ -95,3 +95,21 @@ export const routerConfig = {
         feeTokens: [LINK_ADDRESSES[`baseGoerli`], `0x4200000000000000000000000000000000000006`]
     }
 }
+
+type NetworkConfig = {
+    address: string;
+    chainSelector: string;
+    feeTokens: string[];
+    vrfCoordinator?: string;
+    keyHash?: string;
+};
+
+export type RouterConfig = {
+    ethereumSepolia: NetworkConfig;
+    optimismGoerli: NetworkConfig;
+    avalancheFuji: NetworkConfig;
+    arbitrumSepolia: NetworkConfig;
+    polygonMumbai: NetworkConfig;
+    bnbChainTestnet: NetworkConfig;
+    baseGoerli: NetworkConfig;
+};
