@@ -246,10 +246,10 @@ describe("Omniwin", function () {
             );
 
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
 
-            await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
 
             //contract should own the prize
             const prizeBalance = await erc20.balanceOf(omniwinMain.target);
@@ -313,10 +313,10 @@ describe("Omniwin", function () {
             );
 
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
 
-            await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, tokenId, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, tokenId, assetType);
 
             // contract should own the prize
             const prizeOwner = await nft.ownerOf(tokenId);
@@ -360,10 +360,10 @@ describe("Omniwin", function () {
             );
 
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
 
-            await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
 
             // contract should own the prize
             const prizeBalance = await ethers.provider.getBalance(omniwinMain.target);
@@ -434,10 +434,10 @@ describe("Omniwin", function () {
             );
 
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
 
-            await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
            
 
             const chainSelectors = 
@@ -525,10 +525,10 @@ describe("Omniwin", function () {
             );
 
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
             
-            await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
            
 
             const chainSelectors = [
@@ -641,11 +641,11 @@ describe("Omniwin", function () {
             );
 
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
 
             
-            await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
            
 
             const chainSelectors = [
@@ -724,10 +724,10 @@ describe("Omniwin", function () {
                 deadlineDuration
             );
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
             
-            await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
            
 
             const chainSelectors = [
@@ -796,10 +796,10 @@ describe("Omniwin", function () {
             );
 
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
             
-            await expect(tx).to.emit(omniwinMain, "RaffleStarted").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
            
             const chainSelectors = [
                 {
@@ -1031,7 +1031,7 @@ describe("Omniwin", function () {
             );
 
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
             
             //Emitted event to start creation of raffle on main chain
@@ -1039,7 +1039,7 @@ describe("Omniwin", function () {
             
             await expect(tx).to.emit(omniwinMain, 'RaffleCreatedFromSidechain')
 
-            await expect(tx).to.emit(omniwinMain, 'RaffleStarted')
+            await expect(tx).to.emit(omniwinMain, 'CreateRaffle')
 
 
             const rafflesSide = await omniwinSide.raffles(raffleId)
@@ -1110,7 +1110,7 @@ describe("Omniwin", function () {
             );
 
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
             
             //Emitted event to start creation of raffle on main chain
@@ -1119,7 +1119,7 @@ describe("Omniwin", function () {
             await expect(tx).to.emit(omniwinMain, 'RaffleCreatedFromSidechain')
 
             //Emitted event that sidechain received ACK and raffle from sidechain was moved from tempRaffles to raffles
-            await expect(tx).to.emit(omniwinMain, 'RaffleStarted')
+            await expect(tx).to.emit(omniwinMain, 'CreateRaffle')
 
             
             const rafflesSide = await omniwinSide.raffles(raffleId)
@@ -1187,7 +1187,7 @@ describe("Omniwin", function () {
             );
 
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
             
             //Emitted event to start creation of raffle on main chain
@@ -1196,7 +1196,7 @@ describe("Omniwin", function () {
             await expect(tx).to.emit(omniwinMain, 'RaffleCreatedFromSidechain')
 
             //Emitted event that sidechain received ACK and raffle from sidechain was moved from tempRaffles to raffles
-            await expect(tx).to.emit(omniwinMain, 'RaffleStarted')
+            await expect(tx).to.emit(omniwinMain, 'CreateRaffle')
 
             const rafflesSide = await omniwinSide.raffles(raffleId)
             expect(rafflesSide).to.exist;
@@ -1800,7 +1800,7 @@ describe("Omniwin", function () {
             );
 
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
 
             console.log("Raffle ID: ", raffleId)
@@ -2319,7 +2319,7 @@ describe("Omniwin", function () {
             await tx.wait(); // Wait for the transaction to be mined
             // Fetch the transaction receipt to access the event logs
             const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "RaffleStarted");
+            const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
 
             //enable raffle on sidechain

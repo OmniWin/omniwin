@@ -8,7 +8,7 @@ const provider = new ethers.JsonRpcProvider(
   "https://data-seed-prebsc-1-s1.binance.org:8545"
 );
 
-const privateKey = accounts.bscTestnetPrivateKey;
+const privateKey = accounts.bnbTestnetPrivateKey;
 const contractAddress = config.bscContract;
 
 const wallet = new ethers.Wallet(privateKey, provider);

@@ -1,11 +1,11 @@
 {
-  "bscContract": "0x501ce5AF440c5e067EcC355C85b98e1a887369F4",
+  "bscContract": "0xEb0Af68e467B2F2E68Aa9995DDAA2ef300c85D94",
   "bscSelector": "13264668187771770619",
   "baseContract": "0x25F36819076D2c9ee190B4392aF4c047BBb26CF8",
   "baseSelector": "10344971235874465080",
   "fujiContract": "0x31B69a5eB2B7EFF14b145Ec7e46c9Cb1e9BDeB73",
   "fujiSelector": "14767482510784806043",
-  "sepoliaContract": "0xc1C7d58Cf1251eDAD16adEe7df7E1039740E2Ca9",
+  "sepoliaContract": "0x653C674a07cc4Ed8842f321d1759a32209fd7E02",
   "sepoliaSelector": "16015286601757825753",
   "usdcContractBsc": "0x54B1D2D7BbaF70351aadce22c7f1d8a786E0AbBA",
   "usdcContractBase": "0xb527a5FC3d437787d77e70AE22dBDb57BA75F5e7",

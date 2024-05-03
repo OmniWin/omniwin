@@ -35,7 +35,7 @@ const config: HardhatUserConfig = {
       url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [`${secrets.mumbaiPrivateKey}`]
     },
-    bscTestnet: {
+    bnbChainTestnet: {
       url: `https://data-seed-prebsc-1-s1.binance.org:8545`,
       accounts: [`${secrets.bnbChainTestnetPrivateKey}`]
     },
@@ -54,6 +54,8 @@ const config: HardhatUserConfig = {
     apiKey: {
       polygonMumbai: "IZK72MFIWHUZRNFKKEHETSJKZCWYN7T7R1", 
       ethereumSepolia: "1BD5NPZ1PXJUDCRHUUPUPXR23RWD99SFSC",
+      sepolia: "1BD5NPZ1PXJUDCRHUUPUPXR23RWD99SFSC",
+      bnbChainTestnet: "Y6AHHKSJP9611YHC1NN3SXCU9B2RV9I4CI",
       bscTestnet: "Y6AHHKSJP9611YHC1NN3SXCU9B2RV9I4CI",
       baseTestnet: "UZBX9KWZAT1SZS9NDEM6W6IEPMP62TW5MF", //from base mainnet key
       fujiTestnet: "avascan",

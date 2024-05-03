@@ -6,7 +6,7 @@ async function main() {
     const usdcTokenAddress = process.argv[3];
 
     if (!contractAddress || !usdcTokenAddress) {
-        console.error("Usage: npx hardhat run deployUSDC.ts --network bscTestnet <contractAddress> <usdcTokenAddress>");
+        console.error("Usage: npx hardhat run deployUSDC.ts --network bnbTestnet <contractAddress> <usdcTokenAddress>");
         return;
     }
 
