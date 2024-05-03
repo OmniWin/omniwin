@@ -14,7 +14,8 @@ export const supportedNetworks = [
     `avalancheFuji`,
     `polygonMumbai`,
     `bnbChainTestnet`,
-    `baseGoerli`
+    `baseGoerli`,
+    `baseTestnet`
 ];
 
 export const LINK_ADDRESSES: AddressMap = {
@@ -24,7 +25,8 @@ export const LINK_ADDRESSES: AddressMap = {
     [`arbitrumSepolia`]: `0xb1D4538B4571d411F07960EF2838Ce337FE1E80E`,
     [`avalancheFuji`]: `0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846`,
     [`bnbChainTestnet`]: `0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06`,
-    [`baseGoerli`]: `0xD886E2286Fd1073df82462ea1822119600Af80b6`
+    [`baseGoerli`]: `0xD886E2286Fd1073df82462ea1822119600Af80b6`,
+    [`baseTestnet`]: `0xE4aB69C077896252FAFBD49EFD26B5D171A32410`
 };
 
 export const CCIP_BnM_ADDRESSES: AddressMap = {
@@ -93,5 +95,29 @@ export const routerConfig = {
         address: `0x80AF2F44ed0469018922c9F483dc5A909862fdc2`,
         chainSelector: `5790810961207155433`,
         feeTokens: [LINK_ADDRESSES[`baseGoerli`], `0x4200000000000000000000000000000000000006`]
+    },
+    baseTestnet: {
+        address: `0xD3b06cEbF099CE7DA4AcCf578aaebFDBd6e88a93`,
+        chainSelector: `10344971235874465080`,
+        feeTokens: [LINK_ADDRESSES[`baseTestnet`], `0x4200000000000000000000000000000000000006`]
     }
 }
+
+type NetworkConfig = {
+    address: string;
+    chainSelector: string;
+    feeTokens: string[];
+    vrfCoordinator?: string;
+    keyHash?: string;
+};
+
+export type RouterConfig = {
+    ethereumSepolia: NetworkConfig;
+    optimismGoerli: NetworkConfig;
+    avalancheFuji: NetworkConfig;
+    arbitrumSepolia: NetworkConfig;
+    polygonMumbai: NetworkConfig;
+    bnbChainTestnet: NetworkConfig;
+    baseGoerli: NetworkConfig;
+    baseTestnet: NetworkConfig;
+};

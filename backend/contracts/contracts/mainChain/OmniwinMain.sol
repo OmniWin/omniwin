@@ -24,7 +24,9 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
     uint48 platformFeePercentage = 600;
 
     address public usdcContractAddress;
-    uint64 public mainChainSelector = 1;
+    uint64 public mainChainSelector = 1; //TODO: set the main chain selector
+
+    uint256 ccipMessageFee = 500000; //50c USD
 
     //CCIP
     address immutable link;
@@ -37,15 +39,10 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
     enum STATUS {
         ACCEPTED, // the seller stakes the nft for the raffle
         CANCELLED, // the operator cancels the raffle and transfer the remaining funds after 30 days passes
-        DISABLED, // the raffle is disabled and the prize is held on the sidechain
         CLOSING_REQUESTED, // setting the winner is requested
-        ENDED // the raffle is finished, and NFT and funds were transferred
-    }
-
-    enum ENTRY_TYPE {
-        ONLY_DIRECTLY,
-        ONLY_EXTERNAL_CONTRACT,
-        MIXED
+        ENDED, // the raffle is finished, and NFT and funds are being distributed
+        FAILED, // the raffle is finished, and the funds are refunded
+        DISTRIBUTING_PRIZE // the raffle is finished, and the prize is being distributed
     }
 
     enum ASSET_TYPE {
@@ -60,7 +57,6 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         CREATE_RAFFLE_FROM_MAINCHAIN,
         PRIZE_DISTRIBUTION,
         FAILED_RAFFLE,
-        MONEY_NOT_RAISED,
         IS_REFUNDABLE,
         IS_RAFFLE_CREATED
     }
@@ -71,12 +67,15 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         uint256 randomNumber,
         uint256 normalizedRandomNumber
     );
-    // Event sent when the raffle is created by the operator
-    event RaffleStarted(
+
+    event CreateRaffle(
         bytes32 indexed raffleId,
         address indexed nftAddress,
         uint256 indexed nftId,
-        ASSET_TYPE assetType
+        ASSET_TYPE assetType,
+        address seller,
+        uint128 minimumFundsInWei,
+        uint256 deadline
     );
 
     event CreateRaffleToSidechain(
@@ -85,16 +84,14 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         uint64 indexed chainSelector,
         uint256 gasLimit
     );
-    // Event sent when the owner of the nft stakes it for the raffle
-    // event RaffleStarted(bytes32 indexed raffleId, address indexed seller);
-    // Event sent when the raffle is finished (either early cashout or successful completion)
+
     event RaffleEnded(
         bytes32 indexed raffleId,
         address indexed winner,
         uint256 amountRaised,
         uint256 randomNumber
     );
-    // Event sent when one or more entries are sold (info from the price structure)
+
     event EntrySold(
         bytes32 indexed raffleId,
         address indexed buyer,
@@ -111,7 +108,6 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         bytes32 messageId
     );
 
-    // Event sent when a free entry is added by the operator
     event FreeEntry(
         bytes32 indexed raffleId,
         address[] buyer,
@@ -119,9 +115,6 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         uint256 currentSize
     );
 
-    // Event sent when a raffle is asked to cancel by the operator
-    event RaffleCancelled(bytes32 indexed raffleId, uint256 amountRaised);
-    // The raffle is closed successfully and the platform receives the fee
     event FeeTransferredToPlatform(
         bytes32 indexed raffleId,
         uint256 amountTransferred
@@ -132,28 +125,13 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         bytes32 messageId
     );
 
-    // When the raffle is asked to be cancelled and 30 days have passed, the operator can call a method
-    // to transfer the remaining funds and this event is emitted
-    event RemainingFundsTransferred(
-        bytes32 indexed raffleId,
-        uint256 amountInWeis
-    );
-    // When the raffle is asked to be cancelled and 30 days have not passed yet, the players can call a
-    // method to refund the amount spent on the raffle and this event is emitted
     event Refund(
         bytes32 indexed raffleId,
         uint256 amountInWeis,
         address indexed player
     );
-    event EarlyCashoutTriggered(bytes32 indexed raffleId, uint256 amountRaised);
+
     event SetWinnerTriggered(bytes32 indexed raffleId, uint256 amountRaised);
-    event StatusChangedInEmergency(bytes32 indexed raffleId, uint256 newStatus);
-    // Emitted when an entry is cancelled
-    event EntryCancelled(
-        bytes32 indexed raffleId,
-        uint256 amountOfEntriesCanceled,
-        address player
-    );
 
     event AssetsReclaimed(bytes32 indexed raffleId, address indexed seller);
 
@@ -163,15 +141,6 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         bytes32 messageIdSourceChain,
         bytes32 messageId
     );
-
-    // event RaffleCreatedFromSidechain(
-    //     bytes32 raffleId,
-    //     uint128 minimumFundsInWei,
-    //     PriceStructure[] prices,
-    //     uint256 deadline,
-    //     address seller,
-    //     bytes32 messageId
-    // );
 
     event PrizeDistributionToSidechain(
         bytes32 raffleId,
@@ -200,6 +169,8 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         bool isRaffleCreated,
         bytes32 messageIdSourceChain
     );
+
+    event CashClaimed(bytes32 indexed raffleId, uint256 amount, address seller);
 
     struct RaffleCreationAckParams {
         address receiver;
@@ -268,6 +239,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         uint64 chainSelector;
     }
 
+    error USDCAallowanceTooLow();
     error EntryNotAllowed(string errorType);
     error CreateRaffleError();
     error PriceStructureError();
@@ -285,12 +257,15 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
     error RaffleDeadlineNotPassed();
     error MinimumFundingGoalMet();
     error AlreadyClaimedRefund();
+    error NoEntriesFound();
+    error InvalidRaffle();
     error NoRefundAvailable();
     error FailedToSendRefund();
     error OnlySellerCanReclaim();
     error FailedToSendERC20Prize();
     error FailedToSendERC721Prize();
     error FailedToSendEthPrize();
+    error FailedToStoreEthPrize();
     error NoContractsAllowed();
     error NotInAcceptedStatus();
     error IncorrectUSDCAmount();
@@ -441,6 +416,11 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         allowlistedSenders[_sender] = allowed;
     }
 
+    function setCcipMessageFee(uint256 _fee) external {
+        if (!isOwner()) revert NotTheOwner();
+        ccipMessageFee = _fee;
+    }
+
     function isOwner() internal view returns (bool) {
         return msg.sender == owner;
     }
@@ -452,59 +432,58 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
     ) external {
         if (!isOwner()) revert NotTheOwner();
 
-        if (
-            raffleChainActions[_raffleId][address(this)].hasActivity &&
+        bool shouldTransferFee = raffleChainActions[_raffleId][address(this)]
+            .hasActivity &&
             raffleChainActions[_raffleId][address(this)].amount > 0 &&
-            !fundingList[_raffleId].platformFeeCollected
-        ) {
+            !fundingList[_raffleId].platformFeeCollected;
+
+        if (shouldTransferFee) {
             transferFeeToPlatform(_raffleId);
             fundingList[_raffleId].platformFeeCollected = true;
         }
 
-        RaffleStruct memory raffle = raffles[_raffleId];
+        rafflesEntryInfo[_raffleId].status = STATUS.DISTRIBUTING_PRIZE;
 
         for (uint256 i = 0; i < _supportedChains.length; ++i) {
-            if (_supportedChains[i].chainSelector == mainChainSelector)
-                continue;
+            if (_supportedChains[i].chainSelector != mainChainSelector) {
+                processChain(_raffleId, _supportedChains[i]);
+            }
+        }
+    }
 
-            address receiver = _supportedChains[i].ccnsReceiverAddress;
-            ChainAction storage chainAction = raffleChainActions[_raffleId][
-                receiver
-            ];
+    function processChain(bytes32 _raffleId, SChains memory chain) internal {
+        address receiver = chain.ccnsReceiverAddress;
+        ChainAction storage chainAction = raffleChainActions[_raffleId][
+            receiver
+        ];
 
-            // console.log("ChainAction: %s", chainAction.hasActivity);
-            // console.log("ChainAction amount: %s", chainAction.amount);
-            // console.log("receiver: %s", receiver);
-
+        if (chainAction.hasActivity) {
             uint256 amountForPlatform = (chainAction.amount *
                 platformFeePercentage) / 10000;
+            uint256 amountToSend = chainAction.amount - amountForPlatform;
 
-            if (chainAction.hasActivity) {
-                uint64 chainSelector = _supportedChains[i].chainSelector;
-                MESSAGE_TYPE messageType = MESSAGE_TYPE.PRIZE_DISTRIBUTION;
-                bytes memory data = abi.encode(
-                    messageType,
-                    _raffleId,
-                    raffle.winner,
-                    raffle.seller,
-                    chainAction.amount - amountForPlatform
-                );
+            bytes memory data = abi.encode(
+                MESSAGE_TYPE.PRIZE_DISTRIBUTION,
+                _raffleId,
+                raffles[_raffleId].winner,
+                raffles[_raffleId].seller,
+                amountToSend
+            );
 
-                bytes32 messageId = sendMessage(
-                    chainSelector,
-                    receiver,
-                    data,
-                    _supportedChains[i].gasLimit
-                );
+            bytes32 messageId = sendMessage(
+                chain.chainSelector,
+                receiver,
+                data,
+                chain.gasLimit
+            );
 
-                emit PrizeDistributionToSidechain(
-                    _raffleId,
-                    receiver,
-                    raffle.winner,
-                    raffle.seller,
-                    messageId
-                );
-            }
+            emit PrizeDistributionToSidechain(
+                _raffleId,
+                receiver,
+                raffles[_raffleId].winner,
+                raffles[_raffleId].seller,
+                messageId
+            );
         }
     }
 
@@ -512,45 +491,51 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
     function sendPrizeDistributionMessagesWithStatusFail(
         bytes32 _raffleId,
         SChains[] calldata _supportedChains
-    ) external {
+    ) external nonReentrant {
         if (!isOwner()) revert NotTheOwner();
 
+        EntryInfoStruct storage entryInfo = rafflesEntryInfo[_raffleId];
+
+        if (block.timestamp <= raffles[_raffleId].deadline) {
+            revert RaffleDeadlineNotPassed();
+        }
+
+        if (
+            entryInfo.amountRaised >= fundingList[_raffleId].minimumFundsInWei
+        ) {
+            revert MinimumFundingGoalMet();
+        }
+
         for (uint256 i = 0; i < _supportedChains.length; ++i) {
-            if (_supportedChains[i].chainSelector == mainChainSelector)
-                continue;
+            if (_supportedChains[i].chainSelector != mainChainSelector) {
+                address receiver = _supportedChains[i].ccnsReceiverAddress;
+                ChainAction storage chainAction = raffleChainActions[_raffleId][
+                    receiver
+                ];
 
-            address receiver = _supportedChains[i].ccnsReceiverAddress;
-            ChainAction storage chainAction = raffleChainActions[_raffleId][
-                receiver
-            ];
+                if (chainAction.hasActivity) {
+                    uint64 chainSelector = _supportedChains[i].chainSelector;
+                    MESSAGE_TYPE messageType = MESSAGE_TYPE.FAILED_RAFFLE;
+                    bytes memory data = abi.encode(messageType, _raffleId);
 
-            if (chainAction.hasActivity) {
-                uint64 chainSelector = _supportedChains[i].chainSelector;
-                MESSAGE_TYPE messageType = MESSAGE_TYPE.FAILED_RAFFLE;
-                bytes memory data = abi.encode(messageType, _raffleId);
+                    bytes32 messageId = sendMessage(
+                        chainSelector,
+                        receiver,
+                        data,
+                        _supportedChains[i].gasLimit
+                    );
 
-                bytes32 messageId = sendMessage(
-                    chainSelector,
-                    receiver,
-                    data,
-                    _supportedChains[i].gasLimit
-                );
-
-                emit FailedRaffleToSidechain(_raffleId, receiver, messageId);
+                    emit FailedRaffleToSidechain(
+                        _raffleId,
+                        receiver,
+                        messageId
+                    );
+                }
             }
         }
-    }
 
-    // function getRandomNumber(
-    //     uint256 _id,
-    //     uint256 _entriesSize,
-    //     uint256 _requestId
-    // ) internal {
-    //     chainlinkRaffleInfo[_requestId] = RaffleInfo({
-    //         id: _id,
-    //         size: _entriesSize
-    //     });
-    // }
+        rafflesEntryInfo[_raffleId].status = STATUS.FAILED;
+    }
 
     function fulfillRandomWords(
         uint256 _requestId,
@@ -603,26 +588,20 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
     }
 
     function transferFeeToPlatform(bytes32 _raffleId) internal nonReentrant {
-        // console.log("transferFeeToPlatform");
         uint256 amountRaised = raffleChainActions[_raffleId][address(this)]
             .amount;
 
         uint256 amountForPlatform = (amountRaised * platformFeePercentage) /
             10000;
 
-        //contract balance of usdcContractAddress
         IERC20 usdc = IERC20(usdcContractAddress);
         uint256 balance = usdc.balanceOf(address(this));
-        // console.log("balance: %s", balance);
-        // console.log("amountForPlatform: %s", amountForPlatform);
+
         if (balance < amountForPlatform) {
             revert FailedToSendPlatformFeeNotEnough();
         }
 
-        bool feeSent = IERC20(usdcContractAddress).transfer(
-            destinationWallet,
-            amountForPlatform
-        );
+        bool feeSent = usdc.transfer(destinationWallet, amountForPlatform);
 
         if (!feeSent) {
             revert FailedToSendPlatformFee();
@@ -631,16 +610,6 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         emit FeeTransferredToPlatform(_raffleId, amountForPlatform);
     }
 
-    /// @param _desiredFundsInWeis the amount the seller would like to get from the raffle
-    /// @param _collateralAddress The address of the NFT of the raffle
-    /// @param _collateralId The id of the NFT (ERC721)
-    /// @param _minimumFundsInWei The mininum amount required for the raffle to set a winner
-    /// @param _prices Array of prices and amount of entries the customer could purchase
-    //   /// @param _commissionInBasicPoints commission for the platform, in basic points
-    /// @notice Creates a raffle
-    /// @dev creates a raffle struct and push it to the raffles array. Some data is stored in the funding data structure
-    /// sends an event when finished
-    /// @return raffleId
     function _createRaffle(
         address _prizeAddress,
         uint256 _prizeNumber,
@@ -649,13 +618,16 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         ASSET_TYPE _assetType,
         uint256 _deadlineDuration,
         address _seller,
-        bytes32 _raffleKey
+        bytes32 _raffleId
     ) internal returns (bytes32) {
         if (_deadlineDuration > maxDeadlineDuration) {
             revert DeadlineExceedsMaximum();
         }
 
-        bytes32 raffleKey = _raffleKey;
+        if (_prices.length == 0 || _prices.length > 6)
+            revert PriceStructureError();
+
+        bytes32 raffleId = _raffleId;
 
         if (_assetType != ASSET_TYPE.CCIP) {
             // Handle the transfer and ownership validation based on asset type
@@ -668,14 +640,20 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             );
 
             // Generate a unique key
-            raffleKey = keccak256(
-                abi.encodePacked(msg.sender, block.timestamp)
-            );
+            raffleId = keccak256(abi.encodePacked(msg.sender, block.timestamp));
         }
 
-        require(raffles[raffleKey].deadline == 0, "Raffle already exists!");
+        if (raffles[raffleId].deadline != 0) {
+            revert CreateRaffleError();
+        }
 
-        raffles[raffleKey] = RaffleStruct({
+        for (uint256 i = 0; i < _prices.length; ++i) {
+            if (_prices[i].numEntries == 0) revert NumEntriesIsZero();
+
+            pricesList[raffleId].push(_prices[i]);
+        }
+
+        raffles[raffleId] = RaffleStruct({
             prizeNumber: _prizeNumber,
             prizeAddress: _prizeAddress,
             winner: address(0),
@@ -691,27 +669,26 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             entriesLength: 0
         });
 
-        rafflesEntryInfo[raffleKey] = entryInfo;
+        rafflesEntryInfo[raffleId] = entryInfo;
 
-        uint256 prizesLength = _prices.length;
-        if (prizesLength == 0) revert PriceStructureError();
-
-        for (uint256 i = 0; i < _prices.length; ++i) {
-            if (_prices[i].numEntries == 0) revert NumEntriesIsZero();
-
-            pricesList[raffleKey].push(_prices[i]);
-        }
-
-        fundingList[raffleKey] = FundingStructure({
+        fundingList[raffleId] = FundingStructure({
             minimumFundsInWei: _minimumFundsInWei,
             platformFeeCollected: false,
             prizeClaimed: false,
             cashClaimed: false
         });
 
-        emit RaffleStarted(raffleKey, _prizeAddress, _prizeNumber, _assetType);
+        emit CreateRaffle(
+            raffleId,
+            _prizeAddress,
+            _prizeNumber,
+            _assetType,
+            _seller,
+            _minimumFundsInWei,
+            block.timestamp + _deadlineDuration
+        );
 
-        return raffleKey;
+        return raffleId;
     }
 
     function createRaffle(
@@ -739,7 +716,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             );
     }
 
-    function enableCreateRafffleOnSidechain(
+    function enableCreateRaffleOnSidechain(
         bytes32 _raffleId,
         SChains calldata _chainSelector
     ) external {
@@ -755,6 +732,16 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         // Check if each chainSelector is allowlisted
         if (!allowlistedDestinationChains[_chainSelector.chainSelector]) {
             revert DestinationChainNotAllowlisted();
+        }
+
+        IERC20 usdc = IERC20(usdcContractAddress);
+        uint256 allowance = usdc.allowance(msg.sender, address(this));
+        if (allowance < ccipMessageFee) {
+            revert USDCAallowanceTooLow();
+        }
+
+        if (!usdc.transferFrom(msg.sender, destinationWallet, ccipMessageFee)) {
+            revert FailedToSendPlatformFee();
         }
 
         SChains memory currentChain = _chainSelector;
@@ -789,15 +776,20 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         platformFeePercentage = _fee;
     }
 
+    //Winner claim amount raised
     function claimCash(bytes32 _raffleId) external nonReentrant {
         RaffleStruct storage raffle = raffles[_raffleId];
+
+        if (raffle.seller != msg.sender) {
+            revert NotTheSeller();
+        }
 
         if (raffle.winner == address(0)) {
             revert WinnerNotElected();
         }
 
         EntryInfoStruct memory entryInfo = rafflesEntryInfo[_raffleId];
-        if (entryInfo.status != STATUS.ENDED) {
+        if (entryInfo.status == STATUS.FAILED) {
             revert WrongStatus();
         }
 
@@ -805,14 +797,13 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             revert AlreadyClaimed();
         }
 
-        //transfer cash to the seller
-        if (raffle.seller != msg.sender) {
-            revert NotTheSeller();
-        }
-
         //amount raised on this chain
         uint256 amountRaised = raffleChainActions[_raffleId][address(this)]
             .amount;
+
+        if (amountRaised == 0) {
+            revert NoFundsRaised();
+        }
 
         uint256 amountForPlatform = (amountRaised * platformFeePercentage) /
             10000;
@@ -832,6 +823,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         fundingList[_raffleId].cashClaimed = true;
 
         //emit claimed cash
+        emit CashClaimed(_raffleId, amountForSeller, msg.sender);
     }
 
     function claimPrize(bytes32 _raffleId) external nonReentrant {
@@ -843,6 +835,10 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
 
         if (fundingList[_raffleId].prizeClaimed) {
             revert AlreadyClaimed();
+        }
+
+        if (raffle.deadline == 0) {
+            revert InvalidRaffle();
         }
 
         //transfer prize to the winner
@@ -872,7 +868,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
 
         // Ensure there's a check here to prevent out-of-bounds access
         if (entriesList[_raffleId].length == 0) {
-            return;
+            revert NoEntriesFound();
         }
         // Calculate refund amount based on the tickets bought by msg.sender
         uint256 refundAmount = calculateRefund(_raffleId, msg.sender);
@@ -993,71 +989,56 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             );
         } else if (raffle.assetType == ASSET_TYPE.ETH) {
             (bool sent, ) = to.call{value: raffle.prizeNumber}("");
-            require(sent, "Failed to send ETH");
+
+            if (!sent) {
+                revert FailedToSendEthPrize();
+            }
         }
     }
 
     /// @dev callable by players. Depending on the number of entries assigned to the price structure the player buys (_id parameter)
     /// one or more entries will be assigned to the player.
-    /// Also it is checked the maximum number of entries per user is not reached
-    /// As the method is payable, in msg.value there will be the amount paid by the user
-    /// @notice If the operator set requiredNFTs when creating the raffle, only the owners of nft on that collection can make a call to this method. This will be
-    /// used for special raffles
     /// @param _raffleId: id of the raffle
     /// @param _id: id of the price structure (package)
-    function buyEntry(
-        bytes32 _raffleId,
-        uint48 _id,
-        uint256 _usdcAmount
-    ) external payable {
-        if (tx.origin != msg.sender) revert NoContractsAllowed();
+    function buyEntry(bytes32 _raffleId, uint48 _id) external {
         EntryInfoStruct storage entryInfo = rafflesEntryInfo[_raffleId];
         if (entryInfo.status != STATUS.ACCEPTED) revert NotInAcceptedStatus();
 
-        // Price checks
         PriceStructure memory priceStruct = pricesList[_raffleId][_id];
-
-        if (_usdcAmount != priceStruct.price) revert IncorrectUSDCAmount();
-
         IERC20 usdc = IERC20(usdcContractAddress);
 
-        if (usdc.allowance(msg.sender, address(this)) < _usdcAmount)
+        uint256 price = priceStruct.price;
+        if (usdc.allowance(msg.sender, address(this)) < price)
             revert USDCAllowanceTooLow();
 
-        if (!usdc.transferFrom(msg.sender, address(this), _usdcAmount))
+        if (!usdc.transferFrom(msg.sender, address(this), price))
             revert USDCTransferFailed();
 
         uint48 numEntries = priceStruct.numEntries;
-
-        // save the entries onchain
-        uint48 entriesLength = entryInfo.entriesLength;
-        EntriesBought memory entryBought = EntriesBought({
-            player: msg.sender,
-            currentEntriesLength: uint48(entriesLength + numEntries),
-            priceStructureId: _id,
-            sender: address(this),
-            messageId: bytes32(0)
-        });
-        entriesList[_raffleId].push(entryBought);
+        entriesList[_raffleId].push(
+            EntriesBought({
+                player: msg.sender,
+                currentEntriesLength: entryInfo.entriesLength + numEntries,
+                priceStructureId: _id,
+                sender: address(this),
+                messageId: bytes32(0)
+            })
+        );
 
         // update raffle variables
-        entryInfo.amountRaised += _usdcAmount; //total amount raised in wei
+        entryInfo.amountRaised += price; //total amount raised in wei
         entryInfo.entriesLength += numEntries; //total entries bought
 
         raffleChainActions[_raffleId][address(this)].hasActivity = true;
-        raffleChainActions[_raffleId][address(this)].amount += _usdcAmount;
+        raffleChainActions[_raffleId][address(this)].amount += price;
 
         //add block timestamp to the raffle
         emit EntrySold(_raffleId, msg.sender, entryInfo.entriesLength, _id, "");
     }
 
-    // helper method to get the winner address of a raffle
     /// @param _raffleId Id of the raffle
     /// @param _normalizedRandomNumber Generated by chainlink
     /// @return the wallet that won the raffle
-    /// @dev Uses a binary search on the sorted array to retreive the winner
-    /// but if the winner candidate is blacklisted, loop through the left looking for
-    /// a candidate not blacklisted
     function getWinnerAddressFromRandom(
         bytes32 _raffleId,
         uint256 _normalizedRandomNumber
@@ -1067,25 +1048,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             _normalizedRandomNumber
         );
 
-        address candidate = entriesList[_raffleId][position].player;
-        // general case
-        // console.log("Candidate: %s", candidate);
-        if (candidate != address(0)) return candidate;
-        // special case. The user is blacklisted, so try next on the left until find a non-blacklisted
-        else {
-            bool ended = false;
-            uint256 i = position;
-            while (
-                ended == false && entriesList[_raffleId][i].player == address(0)
-            ) {
-                if (i == 0) i = entriesList[_raffleId].length - 1;
-                else i = i - 1;
-                // we came to the beginning without finding a non blacklisted player
-                if (i == position) ended == true;
-            }
-            require(!ended, "All users blacklisted");
-            return entriesList[_raffleId][i].player;
-        }
+        return entriesList[_raffleId][position].player;
     }
 
     /// @param array sorted array of EntriesBought. CurrentEntriesLength is the numeric field used to sort
@@ -1187,34 +1150,10 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         });
     }
 
-    /// @param _newAddress new address of the platform
-    /// @dev Change the wallet of the platform. The one that will receive the platform fee when the raffle is closed.
-    /// Only the admin can change this
+    /// @param _newAddress new address of the platform wallet
     function setDestinationAddress(address payable _newAddress) external {
         if (!isOwner()) revert NotTheOwner();
         destinationWallet = _newAddress;
-    }
-
-    /// @param _raffleId Id of the raffle
-    /// @dev after 30 days after cancelling passes, the operator can transfer to
-    /// destinationWallet the remaining funds
-    //TODO:// transfer remaining funds after 365days
-    function transferRemainingFunds(bytes32 _raffleId) external nonReentrant {
-        if (!isOwner()) revert NotTheOwner();
-
-        EntryInfoStruct storage entryInfo = rafflesEntryInfo[_raffleId];
-        if (!(entryInfo.status == STATUS.CANCELLED)) revert WrongStatus();
-
-        entryInfo.status = STATUS.CANCELLED;
-
-        (bool sent, ) = destinationWallet.call{value: entryInfo.amountRaised}(
-            ""
-        );
-        if (!sent) revert FailSendEthToOW();
-
-        emit RemainingFundsTransferred(_raffleId, entryInfo.amountRaised);
-
-        entryInfo.amountRaised = 0;
     }
 
     function getRafflesEntryInfo(
@@ -1337,7 +1276,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             PriceStructure[] memory prices,
             uint256 deadline,
             address seller,
-            bytes32 raffleKey
+            bytes32 raffleId
         ) = abi.decode(
                 message.data,
                 (uint8, uint128, PriceStructure[], uint256, address, bytes32)
@@ -1351,15 +1290,15 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             ASSET_TYPE.CCIP,
             deadline,
             seller,
-            raffleKey
+            raffleId
         );
 
         address _sender = abi.decode(message.sender, (address));
 
-        raffleChainActions[raffleKey][_sender].hasActivity = true;
+        raffleChainActions[raffleId][_sender].hasActivity = true;
 
         emit RaffleCreatedFromSidechain(
-            raffleKey,
+            raffleId,
             _sender,
             messageIdSourceChain
         );
@@ -1459,6 +1398,45 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             entriesLength,
             _priceStructureId,
             _messageIdSourceChain
+        );
+    }
+
+    // The operator can add free entries to the raffle
+    /// @param _raffleId Id of the raffle
+    /// @param _freePlayers array of addresses corresponding to the wallet of the users that won a free entrie
+    /// @dev only operator can make this call. Assigns a single entry per user, except if that user already reached the max limit of entries per user
+    function giveBatchEntriesForFree(
+        bytes32 _raffleId,
+        address[] memory _freePlayers
+    ) external {
+        if (!isOwner()) revert NotTheOwner();
+        EntryInfoStruct storage entryInfo = rafflesEntryInfo[_raffleId];
+        if (entryInfo.status != STATUS.ACCEPTED) revert NotInAcceptedStatus();
+
+        uint256 freePlayersLength = _freePlayers.length;
+        uint48 validPlayersCount = 0;
+        for (uint256 i = 0; i < freePlayersLength; i++) {
+            address entry = _freePlayers[i];
+            // add a new element to the entriesBought array.
+            // as this method only adds 1 entry per call, the amountbought is always 1
+            EntriesBought memory entryBought = EntriesBought({
+                player: entry,
+                currentEntriesLength: uint48(entryInfo.entriesLength + i + 1),
+                priceStructureId: 0,
+                sender: address(this),
+                messageId: bytes32(0)
+            });
+            entriesList[_raffleId].push(entryBought);
+            ++validPlayersCount;
+        }
+
+        entryInfo.entriesLength = entryInfo.entriesLength + validPlayersCount;
+
+        emit FreeEntry(
+            _raffleId,
+            _freePlayers,
+            freePlayersLength,
+            entryInfo.entriesLength
         );
     }
 }

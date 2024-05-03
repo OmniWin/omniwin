@@ -9,7 +9,7 @@ async function main() {
   const contract = await ContractFactory.deploy();
   await contract.waitForDeployment();
 
-  console.log("Contract deployed to:", contract.target);
+  console.log(contract.target);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
