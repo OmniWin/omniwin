@@ -26,24 +26,24 @@ function runCommand(command: string) {
 async function main() {
   try {
     const MAIN_CHAIN = "bnbChainTestnet";
-    const SIDE_CHAIN = "ethereumSepolia";
+    const SIDE_CHAIN = "baseTestnet";//ethereumSepolia
     const MAIN_CHAIN_SELECTOR = routerConfig[MAIN_CHAIN].chainSelector;
     const SIDE_CHAIN_SELECTOR = routerConfig[SIDE_CHAIN].chainSelector;
 
-    const { MAIN_CONTRACT, USDC_MAIN_CONTRACT } = await deployMain(MAIN_CHAIN) as { MAIN_CONTRACT: string, USDC_MAIN_CONTRACT: string };
+    // const { MAIN_CONTRACT, USDC_MAIN_CONTRACT } = await deployMain(MAIN_CHAIN) as { MAIN_CONTRACT: string, USDC_MAIN_CONTRACT: string };
   
-    // const { MAIN_CONTRACT, USDC_MAIN_CONTRACT } = { 
-    //   MAIN_CONTRACT: "0xEb0Af68e467B2F2E68Aa9995DDAA2ef300c85D94",
-    //   USDC_MAIN_CONTRACT: "0x6df41902C6aD6C9ebBd655eB55C19A777ae69c37"
-    // }
+    const { MAIN_CONTRACT, USDC_MAIN_CONTRACT } = { 
+      MAIN_CONTRACT: "0xEb0Af68e467B2F2E68Aa9995DDAA2ef300c85D94",
+      USDC_MAIN_CONTRACT: "0x6df41902C6aD6C9ebBd655eB55C19A777ae69c37"
+    }
 
-    const { SIDE_CONTRACT, USDC_CONTRACT_SIDE } =
-      await deploySide(SIDE_CHAIN) as { SIDE_CONTRACT: string, USDC_CONTRACT_SIDE: string };
+    // const { SIDE_CONTRACT, USDC_CONTRACT_SIDE } =
+    //   await deploySide(SIDE_CHAIN) as { SIDE_CONTRACT: string, USDC_CONTRACT_SIDE: string };
     
-    // const { SIDE_CONTRACT, USDC_CONTRACT_SIDE } = {
-    //   SIDE_CONTRACT: "0x653C674a07cc4Ed8842f321d1759a32209fd7E02",
-    //   USDC_CONTRACT_SIDE: "0x54d612e899254c454268085008176b9739d3DD6e"
-    // }
+    const { SIDE_CONTRACT, USDC_CONTRACT_SIDE } = {
+      SIDE_CONTRACT: "0x1304a1Aa1BCf40A560A2422391062451f2fE5bBC",
+      USDC_CONTRACT_SIDE: "0x32E33b084f2AB60FC77Fc75bdEA21c21F2143737"
+    }
 
     //TODO: write these 4 contracts to config.json
 
@@ -57,16 +57,18 @@ async function main() {
       SIDE_CHAIN_SELECTOR
     );
 
-    await mintUSDC(MAIN_CHAIN, USDC_MAIN_CONTRACT, 1000, secrets[MAIN_CHAIN + "Address"  as keyof typeof secrets]);
+    // await mintUSDC(MAIN_CHAIN, USDC_MAIN_CONTRACT, 1000, secrets[MAIN_CHAIN + "Address"  as keyof typeof secrets]);
     await mintUSDC(SIDE_CHAIN, USDC_CONTRACT_SIDE, 1000, secrets[SIDE_CHAIN + "Address"   as keyof typeof secrets]);
 
-    await addLinkToken(MAIN_CHAIN, MAIN_CONTRACT, 1);
+    // await addLinkToken(MAIN_CHAIN, MAIN_CONTRACT, 1);
     await addLinkToken(SIDE_CHAIN, SIDE_CONTRACT, 1);
 
     console.log("MAIN_CONTRACT", MAIN_CONTRACT);
     console.log("USDC_CONTRACT", USDC_MAIN_CONTRACT);
+
     console.log("SIDE_CONTRACT", SIDE_CONTRACT);
     console.log("USDC_CONTRACT", USDC_CONTRACT_SIDE);
+
     console.log("Contracts deployed successfully!");
   } catch (error) {
     console.error("Deployment script failed:", error);
@@ -81,6 +83,7 @@ async function mintUSDC(chain: string, contract: string, amount: number, to: str
 }
 
 async function addLinkToken(chain: string, contract: string, amount: number) {
+  //Add link token from my address to the contract
   await runCommand(
     `npx hardhat addLinkToken --network ${chain} --to ${contract} --amount ${amount}`
   );
@@ -89,7 +92,6 @@ async function addLinkToken(chain: string, contract: string, amount: number) {
 async function deployMain(mainNetwork: string) {
   const ADDRESS_MAIN = secrets[mainNetwork + "Address" as keyof typeof secrets];
   const MAIN_NETWORK = mainNetwork;
-  const AMOUNT_MINT_USDC = 1000 * 10 ** 6;
 
   generateArgsMain({
     vrfCoordinator:routerConfig.bnbChainTestnet.vrfCoordinator,
@@ -130,14 +132,13 @@ async function deployMain(mainNetwork: string) {
 async function deploySide(sideNetwork: string) {
   const ADDRESS_SIDE = secrets[sideNetwork + "Address" as keyof typeof secrets];
   const SIDE_NETWORK = sideNetwork;
-  const AMOUNT_MINT_USDC = 1000 * 10 ** 6;
 
   generateArgsSide({
     linkToken: LINK_ADDRESSES.ethereumSepolia,
     router: routerConfig.ethereumSepolia.address,
   });
 
-  console.log(`Deploying side contract on ${SIDE_NETWORK}...`);
+  console.log(`Deploying side contract on ${SIDE_NETWORK}, using wallet ${ADDRESS_SIDE}...`);
   const SIDE_CONTRACT = await runCommand(
     `npx hardhat deploySide --network ${SIDE_NETWORK}`
   );

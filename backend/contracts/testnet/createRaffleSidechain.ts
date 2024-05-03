@@ -5,12 +5,12 @@ import abi from "../artifacts/contracts/sideChain/OmniwinSide.sol/OmniwinSide.js
 import usdcAbi from "../artifacts/contracts/USDC.sol/USDC.json"; // If this is JSON, add assertion
 
 const provider = new ethers.JsonRpcProvider(
-  // "https://quiet-solemn-dew.base-sepolia.quiknode.pro/a0cd7787a7641fdd7d2b84e726105298083b73ba/"
-  "https://sepolia.infura.io/v3/9d9284a66189412282e5c644ad094a93"
+  "https://quiet-solemn-dew.base-sepolia.quiknode.pro/a0cd7787a7641fdd7d2b84e726105298083b73ba/"
+  // "https://sepolia.infura.io/v3/9d9284a66189412282e5c644ad094a93"
 );
 
-const privateKey = accounts.sepoliaPrivateKey;
-const contractAddress = config.sepoliaContract;
+const privateKey = accounts.baseTestnetPrivateKey;
+const contractAddress = config.baseContract;
 
 // Setup provider and wallet
 const wallet = new ethers.Wallet(privateKey, provider);
@@ -22,7 +22,7 @@ const contract = new ethers.Contract(contractAddress, abi.abi, wallet);
 async function callContractMethod() {
   const minimumFundsInWeis = ethers.parseUnits("1", 6);
   const assetType = 0; // ERC20 token, adjust based on enum order
-  const prizeAddress = config.usdcContractSepolia; // Token contract
+  const prizeAddress = config.usdcContractBase; // Token contract
   const prizeAmount = ethers.parseUnits("1", 6); // Number of tokens to be used as the prize
   const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
   const prices = [
@@ -39,7 +39,7 @@ async function callContractMethod() {
   ];
 
   const usdcContract = new ethers.Contract(
-    config.usdcContractSepolia,
+    config.usdcContractBase,
     usdcAbi.abi,
     wallet
   );
@@ -58,6 +58,7 @@ async function callContractMethod() {
 
   const nonce = await provider.getTransactionCount(wallet.address, "latest");
 
+  console.log("Create raffle on sidechain with nonce:", nonce);
   const gasLimit = 350_000;
   const tx = await contract.CreateRaffleCCIP(
     prizeAddress,
@@ -68,9 +69,9 @@ async function callContractMethod() {
     deadlineDuration,
     gasLimit,
     {
-      gasLimit: 450_000,
-      // gasPrice: adjustedGasPrice,
-      // nonce: nonce + 1,
+      gasLimit: 650_000,
+      gasPrice: adjustedGasPrice,
+      nonce: nonce,
     }
   );
 

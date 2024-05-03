@@ -19,9 +19,9 @@ async function callContractMethod() {
   const raffleId =
     "0x2ac398cd71e68307f8be8537533aeed4ece42f95ee9cf2087067acf048f227ee";
   const chainSelectors = {
-    ccnsReceiverAddress: config.sepoliaContract,
-    chainSelector: config.sepoliaSelector,
-    gasLimit: 350_000,
+    ccnsReceiverAddress: config.baseContract,
+    chainSelector: config.baseSelector,
+    gasLimit: 450_000,
   };
 
   console.log(
@@ -31,7 +31,7 @@ async function callContractMethod() {
 
   //read allowlistedDestinationChains public mapping
   const allowlistedDestinationChains =
-    await contract.allowlistedDestinationChains(config.sepoliaSelector);
+    await contract.allowlistedDestinationChains(config.baseSelector);
 
   //allow contract to spend USDC
   const usdcContract = new ethers.Contract(
@@ -48,7 +48,7 @@ async function callContractMethod() {
     raffleId,
     chainSelectors,
     {
-      gasLimit: 300_000,
+      gasLimit: 600_000,
     }
   );
   await tx.wait();

@@ -42,8 +42,6 @@ async function callContractMethod() {
   const ccipMessageFee = ethers.parseUnits("0.5", 6);
   const totalAmount = ccipMessageFee + usdcAmount;
 
-  const nonce = await provider.getTransactionCount(wallet.address, "latest");
-  console.log("nonce:", nonce);
   const approveTx = await usdcContract.approve(contractAddress, totalAmount);
 
   console.log("Wallet address:", wallet.address);
@@ -58,11 +56,14 @@ async function callContractMethod() {
   // Increase the gas price by a certain percentage to ensure it's high enough
   const adjustedGasPrice = (currentGasPrice * BigInt(130)) / BigInt(100);
 
+  const nonce = await provider.getTransactionCount(wallet.address, "latest");
+  console.log("nonce:", nonce);
+
   console.log("Current gas price:", currentGasPrice.toString());
   console.log("Adjusted gas price:", adjustedGasPrice.toString());
   const tx = await contract.buyEntry(raffleId, priceId, gasLimit, {
     gasLimit: 400_000,
-    nonce: nonce + 1,
+    nonce: nonce,
     gasPrice: adjustedGasPrice,
   });
   await tx.wait();
