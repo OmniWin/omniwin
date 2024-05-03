@@ -5,8 +5,8 @@ import { mysqlInstance } from '../contractInteractions/repository/MysqlRepositor
 
 
 export const provider = new ethers.WebSocketProvider("wss://bsc-testnet-rpc.publicnode.com");
-const mainContractAddress = "0xE9F8A374399d36e231d4765bb347a39047Bbd2a0"; // BSC Testnet new contract
-const contract = new ethers.Contract(mainContractAddress, abi.abi, provider) as unknown as any;
+const mainContractAddress = "0xEb0Af68e467B2F2E68Aa9995DDAA2ef300c85D94"; // BSC Testnet new contract
+const contract = new ethers.Contract(mainContractAddress, abi, provider) as unknown as any;
 
 const queue = new PQueue({
     concurrency: 2, // Adjust concurrency level as needed
@@ -24,7 +24,7 @@ async function fetchHistoricalEvents(contract, eventName, provider) {
  const currentBlock = await provider.getBlockNumber();
 
   //const fromBlock = currentBlock - 50000; // Adjust the number to fetch events from more blocks in the past
-  const startBlock = 39955806;
+  const startBlock = 40005720;
 
   const eventFilter = contract.filters[eventName](); // Replace eventName with the actual event name
   const events = await contract.queryFilter(eventFilter, startBlock, currentBlock);
@@ -42,7 +42,9 @@ async function fetchHistoricalEvents(contract, eventName, provider) {
         prizeAddress: event.args.nftAddress,
         prizeNumber: event.args.nftId,
         blockTimestamp: getBlockTimestamp(event.blockNumber),
-        ownerAddress: '0x8A50887289Fbf44B086C576C59005416c1e61C19'
+        ownerAddress: event.args.seller,
+        minFundsToRaise: event.args.minimumFundsInWei,
+        deadline: event.args.deadline
     };
 
     // mysqlInstance.insertRaffle(raffleData);
@@ -75,7 +77,7 @@ async function getBlockTimestamp(blockNumber) {
 }
 
 async function main() {
-  const eventName = "RaffleStarted";
+  const eventName = "CreateRaffle";
 
   await fetchHistoricalEvents(contract, eventName, provider);
   listenForNewEvents(contract, eventName);
