@@ -10,7 +10,9 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "dotenv": "^16.4.5",
     "ethers": "^6.12.1",
+    "mysql2": "^3.9.7",
     "p-queue": "^8.0.1"
   }
 }
