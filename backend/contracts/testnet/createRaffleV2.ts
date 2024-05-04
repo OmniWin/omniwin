@@ -47,6 +47,8 @@ async function createRaffle(network: string, provider: ethers.JsonRpcProvider, r
 
     const wallet = new ethers.Wallet(privateKey, provider);
     const contract = new ethers.Contract(contractAddress, abi.abi, wallet);
+
+    console.log("Wallet: ", wallet.address);
   
     //allow contract to spend USDC
     const usdcContract = new ethers.Contract(
@@ -69,7 +71,7 @@ async function createRaffle(network: string, provider: ethers.JsonRpcProvider, r
       }
     );
     const receipt = await tx.wait();
-    console.log("Transaction successful:", tx);
+    console.log("Transaction successful:", tx.hash);
 
         // Parse the transaction receipt to find the event logs
     const eventEmittedLogs = receipt.logs?.map(log => {
