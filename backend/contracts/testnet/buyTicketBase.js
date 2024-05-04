@@ -15,7 +15,7 @@ const contract = new ethers.Contract(contractAddress, abi.abi, wallet);
 
 async function callContractMethod() {
   const raffleId =
-    "0x7a2cea0a6279bb6110e5d97502d698d1ec067f1c35b5cff355cfe2aaefcf7436";
+    "0x2ac398cd71e68307f8be8537533aeed4ece42f95ee9cf2087067acf048f227ee";
   const priceId = 0;
   const usdcAmount = ethers.parseUnits("1", 6);
   const gasLimit = 300_000; //to be used by Chainlink CCIP to buy ticket on main chain

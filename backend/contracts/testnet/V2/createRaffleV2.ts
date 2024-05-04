@@ -1,25 +1,17 @@
-import accounts from "./accounts.json";
-import config from "./config.json"; // Add assertion here as well
+import accounts from "../accounts.json";
+import config from "../config.json"; // Add assertion here as well
 import { ethers } from "ethers";
-import abi from "../artifacts/contracts/mainChain/OmniwinMain.sol/Omniwin.json"; // If this is JSON, add assertion
-import usdcAbi from "../artifacts/contracts/USDC.sol/USDC.json"; // If this is JSON, add assertion
-
-const bnbChainTestnetProvider = new ethers.JsonRpcProvider(
-    "https://data-seed-prebsc-1-s1.binance.org:8545"
-  );
-
+import abi from "../../artifacts/contracts/mainChain/OmniwinMain.sol/Omniwin.json"; // If this is JSON, add assertion
+import usdcAbi from "../../artifacts/contracts/USDC.sol/USDC.json"; // If this is JSON, add assertion
+import {providers, Networks} from "../../providers/providers"
   
 async function main(){
-    const network = "bnbChainTestnet";
-
-    const providers = {
-        [network]: bnbChainTestnetProvider
-    }
+    const network = Networks.bnbChainTestnet;
 
     const raffleConfig = {
         minimumFundsInWeis: ethers.parseUnits("1", 6),
         assetType: 0, // ERC20 token, adjust based on enum order
-        prizeAddress: config[network + "UsdcContract"], // Token contract
+        prizeAddress: config[network + "UsdcContract"], // Token contract 
         prizeAmount: ethers.parseUnits("1", 6), // Number of tokens to be used as the prize
         deadlineDuration: 60 * 60 * 24 * 7, // 7 days
         prices: [
@@ -67,7 +59,7 @@ async function createRaffle(network: string, provider: ethers.JsonRpcProvider, r
         raffleConfig.assetType,
         raffleConfig.deadlineDuration,
       {
-        gasLimit: raffleConfig.transactionOptions.gasLimit,
+        ...raffleConfig.transactionOptions,
       }
     );
     const receipt = await tx.wait();

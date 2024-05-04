@@ -1,0 +1,16 @@
+1. Create raffle
+
+- It creates a raffle on main chain only, but you still need to set: const network = Networks.bnbChainTestnet; to whatever the main chain you set it to be
+
+Command:
+npx ts-node createRaffleV2.ts
+
+2. Buy a ticket on any chain
+
+- Set "raffleId" - you can get it from step 1, mysql, explorers, etc.
+- Set "network" -> on what chain you wish to buy ticket on
+
+Command:
+npx ts-node buyTicketV2.ts
+
+3. Enable raffle on sidechain

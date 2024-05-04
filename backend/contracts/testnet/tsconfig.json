@@ -12,7 +12,7 @@
       "allowSyntheticDefaultImports": true
     },
     "include": [
-      "./*.ts",
+      "./*.ts", "V2/*", "V2/createRaffleV2.ts", "V2/buyTicketV2.ts", "V2/enableRaffleOnSidechainV2.ts",
     ]
   }
   
