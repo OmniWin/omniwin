@@ -14,23 +14,4 @@ const access: PoolOptions = {
 
 const conn = mysql.createPool(access);
 
-async function testConnection() {
-    try {
-      const pool = mysql.createPool({
-        host: '127.0.0.1',
-        user: 'root',
-        password: '327TFg8qGjnrBi',
-        database: 'omniwin'
-      });
-      const connection = await pool.getConnection();
-      const [results] = await connection.execute('SELECT 1;');
-      console.log(results);
-      connection.release();
-    } catch (err) {
-      console.error('Database connection failed:', err);
-    }
-  }
-  
-  testConnection();
-
 export default conn;

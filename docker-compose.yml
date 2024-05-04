@@ -32,20 +32,20 @@ services:
     networks:
       - default
 
-  event-listeners:
-    container_name: event-listeners
-    depends_on:
-      - mysql-db
-      - redis
-    build:
-      context: .
-      dockerfile: ./backend/contractInteractions/Dockerfile
-    restart: unless-stopped
-    env_file: ./.env
-    volumes:
-      - ./backend/contractInteractions:/app
-    networks:
-      - default
+  # event-listeners:
+  #   container_name: event-listeners
+  #   depends_on:
+  #     - mysql-db
+  #     - redis
+  #   build:
+  #     context: .
+  #     dockerfile: ./backend/contractInteractions/Dockerfile
+  #   restart: unless-stopped
+  #   env_file: ./.env
+  #   volumes:
+  #     - ./backend/contractInteractions:/app
+  #   networks:
+  #     - default
 
   backend-app:
     container_name: backend-app
@@ -92,20 +92,20 @@ services:
     networks:
       - default
 
-  reverse-proxy:
-    container_name: nginx-reverse-proxy
-    build:
-      context: .
-      dockerfile: nginx/Dockerfile
-    depends_on:
-      - backend-app
-      - frontend-app
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-    networks:
-      - default
+  # reverse-proxy:
+  #   container_name: nginx-reverse-proxy
+  #   build:
+  #     context: .
+  #     dockerfile: nginx/Dockerfile
+  #   depends_on:
+  #     - backend-app
+  #     - frontend-app
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+  #   networks:
+  #     - default
 
 volumes:
   mysql-volume:

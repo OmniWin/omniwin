@@ -16,9 +16,9 @@ export default class MysqlRepository {
                 blockTimestamp,
                 ownerAddress,
                 minFundsToRaise,
-                countViews = 0, // Default value if not provided
-                winnerAddress = null, // Default value if not provided
-                claimedPrize = false, // Default value if not provided
+                countViews = 0,
+                winnerAddress = null,
+                claimedPrize = false,
                 deadline
             } = _raffleData;
     
@@ -49,7 +49,56 @@ export default class MysqlRepository {
         } catch (error) {
             console.error('Failed to insert raffle data:', error);
         }
+
+        
     }    
+
+    public async insertBlockchainEvent(eventData) {
+        const { id, raffleId, name, json, statusParsing, statusMessage, createdAt } = eventData;
+        const query = `
+            INSERT INTO blockchain_events (id, raffle_id, name, json, status_parsing, status_message, created_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+        `;
+
+        const params = [
+            id,
+            raffleId,
+            name,
+            json,
+            statusParsing,
+            statusMessage ?? null,
+            createdAt
+        ];
+        try {
+            const result = await conn.execute(query, params);
+            console.log('Blockchain event inserted successfully:', result);
+        } catch (error) {
+            console.error('Failed to insert blockchain event:', error);
+            throw error;
+        }
+    }    
+
+    public async insertSidechainRaffle(eventData) {
+        const { raffleId, chainId, status, receiver } = eventData;
+        const query = `
+            INSERT INTO sidechain_enable_raffle (raffle_id, chain_id, status, receiver) 
+            VALUES (?, ?, ?, ?);
+        `;
+
+        const params = [
+            raffleId,
+            chainId,
+            status,
+            receiver
+        ];
+        try {
+            const result = await conn.execute(query, params);
+            console.log('Blockchain event inserted successfully:', result);
+        } catch (error) {
+            console.error('Failed to insert blockchain event:', error);
+            throw error;
+        }
+    }  
 }
 
 export const mysqlInstance = new MysqlRepository();
