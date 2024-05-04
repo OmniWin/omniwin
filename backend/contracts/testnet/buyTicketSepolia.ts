@@ -47,7 +47,7 @@ async function callContractMethod() {
   const approveTx = await usdcContract.approve(contractAddress, totalAmount);
 
   console.log("Wallet address:", wallet.address);
-  console.log("USDC contract address config:", config.usdcContractBase);
+  console.log("USDC contract address config:", config.baseTestnetUsdcContract);
   console.log("USDC contract address contract:", usdcContractAddress);
 
   const tx = await contract.buyEntry(raffleId, priceId, gasLimit, {

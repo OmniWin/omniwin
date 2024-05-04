@@ -9,7 +9,7 @@ const provider = new ethers.JsonRpcProvider(
 );
 
 const privateKey = accounts.bnbChainTestnetPrivateKey;
-const contractAddress = config.bscContract;
+const contractAddress = config.bnbChainTestnetContract;
 
 const wallet = new ethers.Wallet(privateKey, provider);
 
@@ -23,7 +23,7 @@ async function callContractMethod() {
 
   //allow contract to spend USDC
   const usdcContract = new ethers.Contract(
-    config.usdcContractBsc,
+    config.bnbChainTestnetUsdcContract,
     usdcAbi.abi,
     wallet
   );
