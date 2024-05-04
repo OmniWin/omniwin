@@ -11,6 +11,12 @@ async function main(){
     const toNetwork = Networks.baseTestnet;
     const raffleId = "0x2ac398cd71e68307f8be8537533aeed4ece42f95ee9cf2087067acf048f227ee";
 
+    const txConfig = {
+      "baseTestnet": {
+          gasLimit: 600_000,
+      }
+  }
+
     const raffleConfig = {
         raffleId: raffleId,
         chainSelectors:{
@@ -20,7 +26,8 @@ async function main(){
         },
         ccipMessageFee: ethers.parseUnits("1", 6), //fee needed to send a message to the sidechain
         transactionOptions: {
-            gasLimit:600_000 //gas needed for the transaction to execute on the mainchain (this should also include the gas needed for the sidechain transaction)
+          ...txConfig[toNetwork]
+            // gasLimit:600_000 //gas needed for the transaction to execute on the mainchain (this should also include the gas needed for the sidechain transaction)
         }
     }
     await enableRaffleOnSidechain(fromNetwork, providers[fromNetwork], raffleConfig);

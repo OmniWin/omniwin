@@ -14,3 +14,14 @@ Command:
 npx ts-node buyTicketV2.ts
 
 3. Enable raffle on sidechain
+
+- modify fromNetwork (where main contract is deployed) to toNetwork (where you want to enable raffle)
+
+Command:
+npx ts-node enableRaffleOnSidechainV2.ts
+
+It might fail because:
+
+1. Contract does not have enough Link to send transactions
+2. Wallet does not have enough main token to send transactions
+3. Wallet does not have USDC (deploy script adds USDC), so this would be only if you forgot to send USDC to your address
