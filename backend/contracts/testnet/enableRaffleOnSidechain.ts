@@ -9,7 +9,7 @@ const provider = new ethers.JsonRpcProvider(
 );
 
 const privateKey = accounts.bnbChainTestnetPrivateKey;
-const contractAddress = config.bscContract;
+const contractAddress = config.bnbChainTestnetContract;
 
 const wallet = new ethers.Wallet(privateKey, provider);
 
@@ -19,8 +19,8 @@ async function callContractMethod() {
   const raffleId =
     "0x2ac398cd71e68307f8be8537533aeed4ece42f95ee9cf2087067acf048f227ee";
   const chainSelectors = {
-    ccnsReceiverAddress: config.baseContract,
-    chainSelector: config.baseSelector,
+    ccnsReceiverAddress: config.baseTestnetContract,
+    chainSelector: config.baseTestnetSelector,
     gasLimit: 450_000,
   };
 
@@ -31,11 +31,11 @@ async function callContractMethod() {
 
   //read allowlistedDestinationChains public mapping
   const allowlistedDestinationChains =
-    await contract.allowlistedDestinationChains(config.baseSelector);
+    await contract.allowlistedDestinationChains(config.baseTestnetSelector);
 
   //allow contract to spend USDC
   const usdcContract = new ethers.Contract(
-    config.usdcContractBsc,
+    config.bnbChainTestnetUsdcContract,
     usdcAbi.abi,
     wallet
   );

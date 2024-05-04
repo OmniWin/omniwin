@@ -9,7 +9,7 @@ const provider = new ethers.JsonRpcProvider(
 );
 
 const privateKey = accounts.bnbChainTestnetPrivateKey;
-const contractAddress = config.bscContract;
+const contractAddress = config.bnbChainTestnetContract;
 
 const wallet = new ethers.Wallet(privateKey, provider);
 
@@ -19,7 +19,7 @@ const contract = new ethers.Contract(contractAddress, abi.abi, wallet);
 async function callContractMethod() {
   const minimumFundsInWeis = ethers.parseUnits("1", 6);
   const assetType = 0; // ERC20 token, adjust based on enum order
-  const prizeAddress = config.usdcContractBsc; // Token contract
+  const prizeAddress = config.bnbChainTestnetUsdcContract; // Token contract
   const prizeAmount = ethers.parseUnits("1", 6); // Number of tokens to be used as the prize
   const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
   const prices = [
@@ -37,7 +37,7 @@ async function callContractMethod() {
 
   //allow contract to spend USDC
   const usdcContract = new ethers.Contract(
-    config.usdcContractBsc,
+    config.bnbChainTestnetUsdcContract,
     usdcAbi.abi,
     wallet
   );
