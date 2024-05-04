@@ -56,8 +56,6 @@ async function callContractMethod() {
     }
   );
   await tx.wait();
+
   console.log("Transaction successful:", tx);
 }
-
-// Execute the function
-callContractMethod().catch(console.error);
