@@ -3,16 +3,29 @@ import config from "../config.json"; // Add assertion here as well
 import { ethers } from "ethers";
 import abi from "../../artifacts/contracts/mainChain/OmniwinMain.sol/Omniwin.json"; // If this is JSON, add assertion
 import usdcAbi from "../../artifacts/contracts/USDC.sol/USDC.json"; // If this is JSON, add assertion
+import nftAbi from "../../artifacts/contracts/NFT721.sol/OmniwinNFT721.json"; // If this is JSON, add assertion
 import {providers, Networks} from "../../providers/providers"
   
 async function main(){
     const network = Networks.bnbChainTestnet;
 
+    const prize = {
+      erc20: {
+        prizeAddress: config[network + "UsdcContract"],
+        prizeAmount: ethers.parseUnits("1", 6),
+        assetType: 0,
+      },
+      nft721: {
+        prizeAddress: config[network + "NftContract"],
+        // prizeAmount: 0, //tokenId - specify only if you want a specific token
+        assetType: 1,
+      }
+    }
+
     const raffleConfig = {
         minimumFundsInWeis: ethers.parseUnits("1", 6),
         assetType: 0, // ERC20 token, adjust based on enum order
-        prizeAddress: config[network + "UsdcContract"], // Token contract 
-        prizeAmount: ethers.parseUnits("1", 6), // Number of tokens to be used as the prize
+        ...prize.nft721,
         deadlineDuration: 60 * 60 * 24 * 7, // 7 days
         prices: [
           {
@@ -42,14 +55,36 @@ async function createRaffle(network: string, provider: ethers.JsonRpcProvider, r
 
     console.log("Wallet: ", wallet.address);
   
-    //allow contract to spend USDC
-    const usdcContract = new ethers.Contract(
-      config[network + "UsdcContract"],
-      usdcAbi.abi,
-      wallet
-    );
-  
-    await usdcContract.approve(contractAddress, raffleConfig.prizeAmount);
+    if(raffleConfig.assetType === 0){
+      //allow contract to spend USDC
+      const usdcContract = new ethers.Contract(
+        config[network + "UsdcContract"],
+        usdcAbi.abi,
+        wallet
+      );
+    
+      await usdcContract.approve(contractAddress, raffleConfig.prizeAmount);
+    }
+
+    if(raffleConfig.assetType === 1){
+      const nftContract = new ethers.Contract(
+        config[network + "NftContract"],
+        nftAbi.abi,
+        wallet
+      );
+
+      //mint NFT
+      if(raffleConfig.prizeAmount === undefined){
+        const tx = await nftContract.mintCollectionNFT(wallet.address);
+      
+        const tokenId = await nftContract.currentTokenId();
+        raffleConfig.prizeAmount = (tokenId - BigInt(1)).toString();
+      }
+
+
+      //approve contract to spend NFT
+      await nftContract.approve(contractAddress, raffleConfig.prizeAmount);
+    }
   
     const tx = await contract.createRaffle(
         raffleConfig.prizeAddress,

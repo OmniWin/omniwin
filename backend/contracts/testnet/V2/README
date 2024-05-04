@@ -1,6 +1,7 @@
 1. Create raffle
 
-- It creates a raffle on main chain only, but you still need to set: const network = Networks.bnbChainTestnet; to whatever the main chain you set it to be
+- create a raffle on main chain only, but you still need to set: const network = Networks.bnbChainTestnet; to whatever the main chain you set it to be
+- Specify if you want erc20, nft721 as prize. Comment/Uncomment prizeAmount on Nft721 if you want to mint nft before creating raffle or you want to use a specific tokenId
 
 Command:
 npx ts-node createRaffleV2.ts

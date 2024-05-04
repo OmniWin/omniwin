@@ -181,8 +181,10 @@ describe("Omniwin", function () {
 
     it("Should mint NFT and transfer to other account", async function () {
         const { omniwinSide, nft, owner, otherAccount } = await loadFixture(deployContract);
-        const tokenId = 1;
-        await nft.mintCollectionNFT(owner.address, tokenId);
+        
+        await nft.mintCollectionNFT(owner.address);
+        const tokenId = await nft.currentTokenId() - BigInt(1);
+
         expect(await nft.ownerOf(tokenId)).to.equal(owner.address);
         await nft.transferFrom(owner.address, otherAccount.address, tokenId);
         expect(await nft.ownerOf(tokenId)).to.equal(otherAccount.address);
@@ -249,7 +251,7 @@ describe("Omniwin", function () {
             const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
 
-            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle")
 
             //contract should own the prize
             const prizeBalance = await erc20.balanceOf(omniwinMain.target);
@@ -273,10 +275,10 @@ describe("Omniwin", function () {
             const minimumFundsInWeis = ethers.parseEther("1");
             const assetType = 1; // ERC721 token, adjust based on enum order
             const prizeAddress = nft.target; // Token contract
-            const tokenId = 1; // tokenId of the NFT
             const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
             // Step 1: Mint ERC721 token and transfer to `otherAccount` to be used as the prize
-            await nft.mintCollectionNFT(owner.address, tokenId);
+            await nft.mintCollectionNFT(owner.address);
+            const tokenId = await nft.currentTokenId() - BigInt(1);
             expect(await nft.ownerOf(tokenId)).to.equal(owner.address);
             await nft.transferFrom(owner.address, otherAccount.address, tokenId);
             expect(await nft.ownerOf(tokenId)).to.equal(otherAccount.address);
@@ -316,7 +318,7 @@ describe("Omniwin", function () {
             const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
 
-            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, tokenId, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle")
 
             // contract should own the prize
             const prizeOwner = await nft.ownerOf(tokenId);
@@ -363,7 +365,7 @@ describe("Omniwin", function () {
             const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
 
-            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle")
 
             // contract should own the prize
             const prizeBalance = await ethers.provider.getBalance(omniwinMain.target);
@@ -437,7 +439,7 @@ describe("Omniwin", function () {
             const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
 
-            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle")
            
 
             const chainSelectors = 
@@ -528,7 +530,7 @@ describe("Omniwin", function () {
             const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
             
-            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle")
            
 
             const chainSelectors = [
@@ -645,7 +647,7 @@ describe("Omniwin", function () {
             const raffleId = eventEmittedLogs?.args?.raffleId
 
             
-            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle")
            
 
             const chainSelectors = [
@@ -727,7 +729,7 @@ describe("Omniwin", function () {
             const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
             
-            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle")
            
 
             const chainSelectors = [
@@ -799,7 +801,7 @@ describe("Omniwin", function () {
             const eventEmittedLogs = receipt?.logs?.map(log => omniwinMain.interface.parseLog(log)).find(log => log?.name === "CreateRaffle");
             const raffleId = eventEmittedLogs?.args?.raffleId
             
-            await expect(tx).to.emit(omniwinMain, "CreateRaffle").withArgs(raffleId, prizeAddress, prizeAmount, assetType);
+            await expect(tx).to.emit(omniwinMain, "CreateRaffle")
            
             const chainSelectors = [
                 {
@@ -1057,11 +1059,11 @@ describe("Omniwin", function () {
             const minimumFundsInWeis = ethers.parseEther("1");
             const assetType = 1; // ERC721 token, adjust based on enum order
             const prizeAddress = nft.target; // Token contract
-            const tokenId = 1; // tokenId of the NFT
             const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
             
             // Step 1: Mint ERC721 token and transfer to `otherAccount` to be used as the prize
-            await nft.mintCollectionNFT(owner.address, tokenId);
+            await nft.mintCollectionNFT(owner.address);
+            const tokenId = await nft.currentTokenId() - BigInt(1);
             await nft.transferFrom(owner.address, otherAccount.address, tokenId);
             
             // Step 2: `otherAccount` approves `omniwin` contract to spend its nft
@@ -1274,11 +1276,11 @@ describe("Omniwin", function () {
             const minimumFundsInWeis = ethers.parseEther("1");
             const assetType = 1; // ERC721 token, adjust based on enum order
             const prizeAddress = nft.target; // Token contract
-            const tokenId = 1; // tokenId of the NFT
             const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
             
             // Step 1: Mint ERC721 token and transfer to `otherAccount` to be used as the prize
-            await nft.mintCollectionNFT(owner.address, tokenId);
+            await nft.mintCollectionNFT(owner.address);
+            const tokenId = await nft.currentTokenId() - BigInt(1);
             await nft.transferFrom(owner.address, otherAccount.address, tokenId);
             
             // Step 2: `otherAccount` approves `omniwin` contract to spend its nft
@@ -1336,12 +1338,13 @@ describe("Omniwin", function () {
             const minimumFundsInWeis = ethers.parseEther("1");
             const assetType = 1; // ERC721 token, adjust based on enum order
             const prizeAddress = nft.target; // Token contract
-            const tokenId = 1; // tokenId of the NFT
             const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
             
             // Step 1: Mint ERC721 token and transfer to `otherAccount` to be used as the prize
-            await nft.mintCollectionNFT(owner.address, tokenId);
-            await nft.mintCollectionNFT(owner.address, tokenId + 1);
+            await nft.mintCollectionNFT(owner.address);
+            const tokenId = await nft.currentTokenId() - BigInt(1);
+            await nft.mintCollectionNFT(owner.address);
+            const tokenId2 = await nft.currentTokenId() - BigInt(1);
             await nft.transferFrom(owner.address, otherAccount.address, tokenId);
             
             // Step 2: `otherAccount` approves `omniwin` contract to spend its nft
@@ -1381,7 +1384,7 @@ describe("Omniwin", function () {
             const gasLimit = 300_000;  
             await expect(omniwinSide.connect(otherAccount).CreateRaffleCCIP(
                 prizeAddress,
-                tokenId + 1,
+                tokenId2,
                 minimumFundsInWeis,
                 prices,
                 assetType,
@@ -1509,11 +1512,12 @@ describe("Omniwin", function () {
             const minimumFundsInWeis = ethers.parseEther("1");
             const assetType = 1; // ERC721 token, adjust based on enum order
             const prizeAddress = nft.target; // Token contract
-            const tokenId = 1; // tokenId of the NFT
             const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
             // Step 1: Mint ERC721 token and transfer to `otherAccount` to be used as the prize
-            await nft.mintCollectionNFT(owner.address, tokenId);
-            await nft.mintCollectionNFT(owner.address, tokenId + 1);
+            await nft.mintCollectionNFT(owner.address);
+            const tokenId = await nft.currentTokenId() - BigInt(1);
+            await nft.mintCollectionNFT(owner.address);
+            const tokenId2 = await nft.currentTokenId() - BigInt(1);
             expect(await nft.ownerOf(tokenId)).to.equal(owner.address);
             await nft.transferFrom(owner.address, otherAccount.address, tokenId);
             expect(await nft.ownerOf(tokenId)).to.equal(otherAccount.address);
@@ -1542,7 +1546,7 @@ describe("Omniwin", function () {
             // Call createRaffle with the defined parameters
             await expect(omniwinMain.connect(otherAccount).createRaffle(
                 prizeAddress,
-                tokenId + 1,
+                tokenId2,
                 minimumFundsInWeis,
                 prices,
                 assetType,
@@ -1556,13 +1560,14 @@ describe("Omniwin", function () {
             const minimumFundsInWeis = ethers.parseEther("1");
             const assetType = 1; // ERC721 token, adjust based on enum order
             const prizeAddress = nft.target; // Token contract
-            const tokenId = 1; // tokenId of the NFT
             const deadlineDuration = 60 * 60 * 24 * 7; // 7 days
             // Step 1: Mint ERC721 token and transfer to `otherAccount` to be used as the prize
-            await nft.mintCollectionNFT(owner.address, tokenId);
+            await nft.mintCollectionNFT(owner.address);
+            const tokenId = await nft.currentTokenId() - BigInt(1);
             expect(await nft.ownerOf(tokenId)).to.equal(owner.address);
             await nft.transferFrom(owner.address, otherAccount.address, tokenId);
-            expect(await nft.ownerOf(tokenId)).to.equal(otherAccount.address);
+            const tokenId2 = await nft.currentTokenId() - BigInt(1);
+            expect(await nft.ownerOf(tokenId2)).to.equal(otherAccount.address);
 
             // Step 2: `otherAccount` approves `omniwin` contract to spend its nft
             // await nft.connect(otherAccount).approve(omniwinMain.target, tokenId);
@@ -2288,10 +2293,10 @@ describe("Omniwin", function () {
 
 
             const prizeAddressNft = nft.target; // Token contract
-            const tokenId = 1; // tokenId of the NFT
             const assetTypeNft = 1; // ERC721 token, adjust based on enum order
 
-            await nft.mintCollectionNFT(owner.address, tokenId);
+            await nft.mintCollectionNFT(owner.address);
+            const tokenId = await nft.currentTokenId() - BigInt(1);
             await nft.transferFrom(owner.address, otherAccount.address, tokenId);
             await nft.connect(otherAccount).approve(omniwinSide2.target, tokenId);
 

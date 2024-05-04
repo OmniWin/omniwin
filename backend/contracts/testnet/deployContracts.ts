@@ -47,15 +47,24 @@ async function main() {
     //   USDC_CONTRACT_SIDE: "0x32E33b084f2AB60FC77Fc75bdEA21c21F2143737"
     // }
 
+    
+    // await deployNft(MAIN_CHAIN);
+    // await deployNft(SIDE_CHAIN);
+    const tokenId = await mintNft(MAIN_CHAIN, config[MAIN_CHAIN + "NftContract"], secrets[MAIN_CHAIN + "Address" as keyof typeof secrets]);
+
+    console.log("tokenId", tokenId);
+
     // addContractToConfig(
     //   {
     //     [MAIN_CHAIN]: {
     //       "Contract": MAIN_CONTRACT,
-    //       "UsdcContract": USDC_MAIN_CONTRACT
+    //       "UsdcContract": USDC_MAIN_CONTRACT,
+    //       "NftContract": NFT_MAIN_CONTRACT
     //     },
     //     [SIDE_CHAIN]: {
     //       "Contract": SIDE_CONTRACT,
-    //       "UsdcContract": USDC_CONTRACT_SIDE
+    //       "UsdcContract": USDC_CONTRACT_SIDE,
+    //       "NftContract": NFT_SIDE_CONTRACT
     //     }
     //   }
     // );
@@ -73,7 +82,8 @@ async function main() {
     // await mintUSDC(MAIN_CHAIN, USDC_MAIN_CONTRACT, 1000, secrets[MAIN_CHAIN + "Address"  as keyof typeof secrets]);
     // await mintUSDC(SIDE_CHAIN, USDC_CONTRACT_SIDE, 1000, secrets[SIDE_CHAIN + "Address"   as keyof typeof secrets]);
 
-    await addLinkToken(MAIN_CHAIN, config[MAIN_CHAIN + "Contract"], 1);
+
+    // await addLinkToken(MAIN_CHAIN, config[MAIN_CHAIN + "Contract"], 1);
     // await addLinkToken(SIDE_CHAIN, config[SIDE_CHAIN + "Contract"], 1);
 
     // console.log("MAIN_CONTRACT", MAIN_CONTRACT);
@@ -86,6 +96,20 @@ async function main() {
   } catch (error) {
     console.error("Deployment script failed:", error);
   }
+}
+
+async function deployNft(network: string){
+  const nftContract = await runCommand(
+    `npx hardhat deployNft --network ${network}`
+  ) as string;
+
+  await runCommand(
+    `npx hardhat verify ${nftContract} --network ${network}`
+  );
+
+  console.log("NFT Contract deployed:", nftContract);
+
+  return nftContract;
 }
 
 function addContractToConfig(data: {[network: string]: {Contract: string, UsdcContract: string}}) {
@@ -109,6 +133,14 @@ async function mintUSDC(chain: string, contract: string, amount: number, to: str
   await runCommand(
     `npx hardhat mintUSDC --network ${chain} --contract ${contract} --amount ${AMOUNT} --to ${to}`
   );
+}
+
+async function mintNft(chain: string, contract: string, to: string) {
+  const tokenId = await runCommand(
+    `npx hardhat mintNft --network ${chain} --contract ${contract} --to ${to}`
+  );
+
+  return tokenId;
 }
 
 async function addLinkToken(chain: string, contract: string, amount: number) {
@@ -152,9 +184,12 @@ async function deployMain(mainNetwork: string) {
     `cd /home/spike/omniwin/backend/contracts/scripts/Deploy; npx hardhat setUSDC --network ${MAIN_NETWORK} --contract ${MAIN_CONTRACT} --usdc ${USDC_MAIN_CONTRACT}`
   );
 
+  const NFT_MAIN_CONTRACT = await deployNft(mainNetwork);
+
   return {
     MAIN_CONTRACT,
     USDC_MAIN_CONTRACT,
+    NFT_MAIN_CONTRACT
   };
 }
 
@@ -188,9 +223,12 @@ async function deploySide(sideNetwork: string) {
     `cd /home/spike/omniwin/backend/contracts/scripts/Deploy; npx hardhat setUSDC --network ${SIDE_NETWORK} --contract ${SIDE_CONTRACT} --usdc ${USDC_CONTRACT_SIDE}`
   );
 
+  const NFT_SIDE_CONTRACT = await deployNft(sideNetwork);
+
   return {
     SIDE_CONTRACT,
     USDC_CONTRACT_SIDE,
+    NFT_SIDE_CONTRACT
   };
 }
 

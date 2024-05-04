@@ -12,3 +12,5 @@ export * from "./testnet/allowlistSender";
 export * from "./deploySide";
 export * from "./testnet/deployUSDC";
 export * from "./testnet/addLinkToken";
+export * from "./testnet/deployNft";
+export * from "./testnet/mintNft";
