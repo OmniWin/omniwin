@@ -59,3 +59,15 @@ docker-compose up --build -d frontend-app
 - dc-exec = Execute a command inside a running Docker container (eg. dc-exec my-container ls /app)
 - dc-bash = Open a Bash terminal to your container (eg. dc-bash frontend-app)
 - dc-sh = Open a SH terminal to your container (eg. dc-sh frontend-app)
+
+
+
+## PRISMA Commands:
+- create new migration without applying it      =   npx prisma migrate dev --create-only --name migration_name
+- create new migration applying it in db        =   npx prisma migrate dev --name migration_name
+- check which migrations have been applied      =   npx prisma migrate status
+- apply latest migration for dev                =   npx prisma migrate dev
+- apply latest migration for prod               =   npx prisma migrate deploy
+- whenever you update the schema check ur app   =   npx prisma generate
+    is sync with db schema 
+
