@@ -1,4 +1,4 @@
-import { RowDataPacket } from 'mysql2';
+
 import conn from '../db/mysql';
 import { NFT, NFTMetadata } from '../types/nft';
 import { AssetType } from '../types/nft';
@@ -6,8 +6,25 @@ import logger from "../log/winston";
 
 export default class MysqlRepository {
     constructor() {
-
+        console.log('MysqlRepository instantiated');
     }
+
+    public async insertRaffle(_raffleData: object) {
+        try {
+            console.log('test');
+           // const { transactionHash, sender, raffleId, value, blockNumber, timestamp } = eventData;
+            // const sql = `
+            //     INSERT INTO events (transactionHash, senderAddress, raffleId, value, blockNumber, timestamp)
+            //     VALUES (?, ?, ?, ?, ?, ?)
+            // `;
+            // const formattedTimestamp = new Date(timestamp * 1000).toISOString().slice(0, 19).replace('T', ' ');
+            // const results = await conn.query(sql, [transactionHash, sender, raffleId.toString(), value.toString(), blockNumber, formattedTimestamp]);
+            // console.log('Data inserted successfully:', results);
+        } catch (error) {
+            console.error('Failed to insert event data:', error);
+        }
+    }
+
 
     public async insertNFT(data: NFT) {
         try {
@@ -22,7 +39,7 @@ export default class MysqlRepository {
             ]);
 
 
-            const nftID = (rows as RowDataPacket).insertId;
+            const nftID = (rows as any).insertId;
             return nftID;
         }
         catch (error) {
