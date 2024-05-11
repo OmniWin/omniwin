@@ -1,0 +1,28 @@
+1. Create raffle
+
+- create a raffle on main chain only, but you still need to set: const network = Networks.bnbChainTestnet; to whatever the main chain you set it to be
+- Specify if you want erc20, nft721 as prize. Comment/Uncomment prizeAmount on Nft721 if you want to mint nft before creating raffle or you want to use a specific tokenId
+
+Command:
+npx ts-node createRaffleV2.ts
+
+2. Buy a ticket on any chain
+
+- Set "raffleId" - you can get it from step 1, mysql, explorers, etc.
+- Set "network" -> on what chain you wish to buy ticket on
+
+Command:
+npx ts-node buyTicketV2.ts
+
+3. Enable raffle on sidechain
+
+- modify fromNetwork (where main contract is deployed) to toNetwork (where you want to enable raffle)
+
+Command:
+npx ts-node enableRaffleOnSidechainV2.ts
+
+It might fail because:
+
+1. Contract does not have enough Link to send transactions
+2. Wallet does not have enough main token to send transactions
+3. Wallet does not have USDC (deploy script adds USDC), so this would be only if you forgot to send USDC to your address

@@ -1,0 +1,76 @@
+In this Readme, i chose BSC as main and BASE as side
+
+# Omniwin
+
+Step 1:
+Have a subscription to chainlink VRF: vrf.chain.link and add consumer contract (main contract) to the chainlink VRF
+
+Add LINK to all deployed contracts to have for CCIP fees
+
+Step 2: go to folder: /home/spike/omniwin/backend/contracts/scripts/Deploy
+
+1. npx hardhat run deployMain.ts --network bscTestnet
+   Contract deployed to: 0x501ce5AF440c5e067EcC355C85b98e1a887369F4
+   npx hardhat verify --constructor-args argsMain.js 0x501ce5AF440c5e067EcC355C85b98e1a887369F4 --network bscTestnet
+
+2. npx hardhat run deploySide.ts --network baseTestnet
+   Contract deployed to: 0x25F36819076D2c9ee190B4392aF4c047BBb26CF8
+   npx hardhat verify --constructor-args argsSide.js 0x25F36819076D2c9ee190B4392aF4c047BBb26CF8 --network baseTestnet
+
+3. npx hardhat run deployUSDC.ts --network baseTestnet
+   Contract deployed to: 0xb527a5FC3d437787d77e70AE22dBDb57BA75F5e7
+
+4. npx hardhat run deployUSDC.ts --network bscTestnet
+   Contract deployed to: 0x54B1D2D7BbaF70351aadce22c7f1d8a786E0AbBA
+
+5. Set USDC in contract using tasks
+   npx hardhat setUSDC --network baseTestnet --contract 0x25F36819076D2c9ee190B4392aF4c047BBb26CF8 --usdc 0xb527a5FC3d437787d77e70AE22dBDb57BA75F5e7
+   npx hardhat setUSDC --network bscTestnet --contract 0x501ce5AF440c5e067EcC355C85b98e1a887369F4 --usdc 0x54B1D2D7BbaF70351aadce22c7f1d8a786E0AbBA
+
+6. Set mainchain raffle address to side contract
+   BSC SELECTOR: 13264668187771770619
+   npx hardhat setMainChainRaffleToSidechain --network baseTestnet --contract 0x25F36819076D2c9ee190B4392aF4c047BBb26CF8 --raffle 0x501ce5AF440c5e067EcC355C85b98e1a887369F4
+
+   //For sidechain we tell what is the selector of the mainchain
+   npx hardhat setMainChainSelectorToSidechain --network baseTestnet --contract 0x25F36819076D2c9ee190B4392aF4c047BBb26CF8 --selector 13264668187771770619
+
+7. Allow main contract to send message to destination chain
+   BASECHAIN SELECTOR: 10344971235874465080
+   npx hardhat allowDestinationChain --network bscTestnet --contract 0x501ce5AF440c5e067EcC355C85b98e1a887369F4 --selector 10344971235874465080 --allow true
+   allowlistDestinationChain(destinationChainSelector, true);
+
+8. Allow side contract to receive message from main contract selector
+   BSC SELECTOR: 13264668187771770619
+   npx hardhat allowlistSourceChain --network baseTestnet --contract 0x25F36819076D2c9ee190B4392aF4c047BBb26CF8 --selector 13264668187771770619 --allow true
+   await omniwinSide.allowlistSourceChain(sourceChainSelector, true);
+
+9. Allow side contract to be able receive message from main contract
+   npx hardhat allowlistSender --network baseTestnet --contract 0x25F36819076D2c9ee190B4392aF4c047BBb26CF8 --externalcontract 0x501ce5AF440c5e067EcC355C85b98e1a887369F4 --allow true
+   await omniwinSide.allowlistSender(omniwinMain.target, true);
+
+10. Allow main contract to receive message from side contract selector
+    npx hardhat allowlistSourceChain --network bscTestnet --contract 0x501ce5AF440c5e067EcC355C85b98e1a887369F4 --selector 10344971235874465080 --allow true
+    await omniwinMain.allowlistSourceChain(omniwinSide.target, true);
+
+11. Allow main contract to receive message from side contract
+   npx hardhat allowlistSender --network bscTestnet --contract 0x501ce5AF440c5e067EcC355C85b98e1a887369F4 --externalcontract 0x25F36819076D2c9ee190B4392aF4c047BBb26CF8 --allow true
+   await omniwinMain.allowlistSender(omniwinSide.target, true);
+
+10. Mint USDC
+    npx hardhat mintUSDC --network baseTestnet --contract 0xb527a5FC3d437787d77e70AE22dBDb57BA75F5e7 --amount 1000000000 --to 0x57991E46Ae38599e77e8046d2621ae3690b3B9F9
+    npx hardhat mintUSDC --network bscTestnet --contract 0x54B1D2D7BbaF70351aadce22c7f1d8a786E0AbBA --amount 1000000000 --to 0x8A50887289Fbf44B086C576C59005416c1e61C19
+
+Extra:
+Deploy NFT contract
+npx hardhat run deployNFT.ts --network bscTestnet
+Contract deployed to: 0x5Cf20A073A80cD1700fED1A1F68CFad013004e0b
+
+npx hardhat run deployNFT.ts --network baseTestnet
+Contract deployed to: 0x0D246993AbC469df48727eC7fCD2c56D1DF9BaCC
+
+# Omniwin Main
+
+# Next steps are to call functions from /home/spike/omniwin/backend/contracts/testnet
+1. Add to config.json the contract addresses
+2. Add to secrets.json the private keys
+3. Send Link to contracts for fees

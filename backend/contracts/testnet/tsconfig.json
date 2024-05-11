@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+      "module": "CommonJS",
+      "target": "ES2018",
+      "moduleResolution": "node",
+      "resolveJsonModule": true, // Add this line
+      "baseUrl": "./", // This is your base directory
+      "paths": {
+        "*": ["node_modules/*", "../../constants/*"] // Adjust this path
+      },
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true
+    },
+    "include": [
+      "./*.ts", "V2/*"
+    ]
+  }
+  

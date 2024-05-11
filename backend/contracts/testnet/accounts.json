@@ -1,0 +1,12 @@
+{
+  "sepoliaAddress": "0x6Ee234184880D8C6Eda599A0aB0FB678b7de8809",
+  "sepoliaPrivateKey": "0xad8c566351f329964cbd1900325505f4fda81888771d6d5b79030b8e7603e288",
+  "mumbaiAddress": "0xe7Df3a97438337069f09A0D7530892E29Af65C5B",
+  "mumbaiPrivateKey": "6af817a60c6c44abb100b6d8e8c286bb83605af1e1b28389ded3f9bdfbd7608b",
+  "bnbChainTestnetAddress": "0x8A50887289Fbf44B086C576C59005416c1e61C19",
+  "bnbChainTestnetPrivateKey": "416b146ca485e6d6dc38101cf3699e14ce34496557378dfe0dfe961ac27cc7a7",
+  "baseTestnetAddress": "0x57991E46Ae38599e77e8046d2621ae3690b3B9F9",
+  "baseTestnetPrivateKey": "8b8452e7dbd03614749d92473978b760ca730aaa2769613ac13321e741472a3b",
+  "fujiTestnetAddress": "0x1e4A4600bcF4F898e5a4d2e6F9f87c0096d23eE6",
+  "fujiTestnetPrivateKey": "dc8647ed79672afac232e1b3906a44e39b3b12c85b4694bc227a55ac3fcee5bb"
+}
