@@ -3,21 +3,19 @@
 // import { classNames } from "@/app/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // import { Link } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Disclosure } from "@headlessui/react";
 
 import { classNames, tiers } from "@/app/utils";
 
 import ProgressBar from "@/app/components/Ui/ProgressBar";
-import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFallback";
+import CustomImageWithFallback from "@/app/components/CustomImageWithFallback";
+import RankInfoModal from "./RankInfoModal";
+import UserProgressCard from "@/app/components/User/ProgressCard";
 
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 
 // const tabs = [
@@ -875,165 +873,14 @@ export default function ChallengesHeader() {
                             for your efforts.
                         </p>
                     </div>
-                    <div className="bg-zinc-900 rounded-2xl p-px h-full mt-8 xl:mt-0">
-                        <div
-                            className="border border-transparent hover:border-emerald-400 shadow-xl rounded-2xl flex flex-col divide-y divide-zinc-800 min-w-80"
-                            style={{ background: "linear-gradient(160deg, rgb(17 186 130 / 10%) 0%, rgb(229 42 95 / 5%) 54%, rgb(251 162 19 / 12%) 100%)" }}
-                        >
-                            <div className="flex items-center justify-between gap-2 py-4 px-6">
-                                <div className="flex items-center gap-2">
-                                    <p className="text-sm text-zinc-200">Rank</p>
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <InformationCircleIcon className="w-5 h-5 text-zinc-300 cursor-pointer" />
-                                        </DialogTrigger>
-                                        <DialogContent className="sm:max-w-[425px] lg:max-w-2xl text-zinc-100 max-h-[calc(100vh-6rem)] overflow-auto">
-                                            <DialogHeader className="space-y-5">
-                                                <DialogTitle className="text-zinc-100">Tier list</DialogTitle>
-                                                <DialogDescription>
-                                                    In our rank system, participants can advance through various levels by completing quests. Each tier offers a unique set of benefits, enhancing the user experience and
-                                                    rewarding continued engagement. As users accumulate more quests, they level up, unlocking new perks, exclusive access, or rewards specific to their tier.
-                                                </DialogDescription>
-                                            </DialogHeader>
-                                            <div className="p-6 rounded-lg space-y-8" style={{ background: "linear-gradient(160deg, rgb(17 186 130 / 10%) 0%, rgb(229 42 95 / 5%) 54%, rgb(251 162 19 / 12%) 100%)" }}>
-                                                <div className="flex items-center justify-center">
-                                                    <CustomImageWithFallback src="/images/tier/2.png" alt="" containerClass="!w-auto" className="object-cover inset-0 !w-auto !max-h-[64px]" width={60} height={60} />
-                                                    <div className="text-left ml-6">
-                                                        <p className="text-base font-semibold">Tier 2</p>
-                                                        <p className="text-zinc-400">1 more rank to go</p>
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-3">
-                                                    <div className="flex items-center justify-between">
-                                                        <div
-                                                            className={classNames("flex items-center text-xs gap-1 py-1.5 px-2.5 rounded")}
-                                                            style={{ backgroundColor: tiers[1].lowOpacityColor, color: tiers[1].color, borderColor: tiers[1].color }}
-                                                        >
-                                                            <CustomImageWithFallback
-                                                                src="/images/tier/2.png"
-                                                                alt=""
-                                                                containerClass="!w-auto"
-                                                                className="object-cover inset-0 !w-auto !max-h-[16px]"
-                                                                width={60}
-                                                                height={60}
-                                                            />
-                                                            <span>Tier 2</span>
-                                                        </div>
-                                                        <p className="text-zinc-400 text-sm">2500 left</p>
-                                                        <div
-                                                            className={classNames("flex items-center text-xs gap-1 py-1.5 px-2.5 rounded")}
-                                                            style={{ backgroundColor: tiers[0].lowOpacityColor, color: tiers[0].color, borderColor: tiers[0].color }}
-                                                        >
-                                                            <CustomImageWithFallback
-                                                                src="/images/tier/1.png"
-                                                                alt=""
-                                                                containerClass="!w-auto"
-                                                                className="object-cover inset-0 !w-auto !max-h-[16px]"
-                                                                width={60}
-                                                                height={60}
-                                                            />
-                                                            <span>Tier 1</span>
-                                                        </div>
-                                                    </div>
-                                                    <Progress value={20} className="h-2" />
-                                                </div>
-                                            </div>
-                                            {
-                                                <dl className="space-y-3">
-                                                    {tiers.map((tier) => (
-                                                        <Disclosure as="div" key={tier.name} className="bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 px-4 py-2.5 rounded-lg">
-                                                            {({ open }) => (
-                                                                <>
-                                                                    <dt className="">
-                                                                        <Disclosure.Button className="flex w-full items-center justify-between text-left text-white">
-                                                                            <div className="text-base font-semibold leading-7 flex items-center gap-6">
-                                                                                {/* <div className="text-center w-14"> */}
-                                                                                <CustomImageWithFallback
-                                                                                    src={tier.image}
-                                                                                    alt=""
-                                                                                    containerClass="flex justify-center !w-14"
-                                                                                    className="object-cover inset-0 !w-auto !h-[36px]"
-                                                                                    width={60}
-                                                                                    height={60}
-                                                                                />
-                                                                                {/* </div> */}
-                                                                                <span className="flex items-center gap-4">
-                                                                                    {tier.name}
-                                                                                    {tier.name === "Tier 2" && (
-                                                                                        <Badge form="round" variant="zinc">
-                                                                                            Your tier
-                                                                                        </Badge>
-                                                                                    )}
-                                                                                </span>
-                                                                            </div>
-                                                                            <span className="ml-6 flex h-7 items-center">
-                                                                                {open ? <ChevronUpIcon className="h-6 w-6" aria-hidden="true" /> : <ChevronDownIcon className="h-6 w-6" aria-hidden="true" />}
-                                                                            </span>
-                                                                        </Disclosure.Button>
-                                                                    </dt>
-                                                                    <Disclosure.Panel as="dd" className="mt-6 pr-12">
-                                                                        <p className="text-base leading-7 text-gray-300">{tier.description}</p>
-                                                                    </Disclosure.Panel>
-                                                                </>
-                                                            )}
-                                                        </Disclosure>
-                                                    ))}
-                                                </dl>
-                                            }
-                                            {/* tiers.map((tier, index) => (
-                                            <div key={index} className="flex items-center gap-6">
-                                                <div className="text-center w-14">
-                                                    <CustomImageWithFallback src={tier.image} alt="" containerClass="!inline-block !w-auto" className="object-cover inset-0 !w-auto !max-h-[42px]" width={60} height={60} />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <p className="text-base font-semibold">{tier.name}</p>
-                                                    <p className="text-zinc-400">{tier.description}</p>
-                                                </div>
-                                            </div>
-                                        )) */}
-                                            <DialogFooter>
-                                                <DialogClose asChild>
-                                                    <Button type="button" variant="secondary">
-                                                        Close
-                                                    </Button>
-                                                </DialogClose>
-                                            </DialogFooter>
-                                        </DialogContent>
-                                    </Dialog>
-                                </div>
-                                <div className="text-emerald-400 font-semibold">
-                                    {/* <CustomImageWithFallback src="/images/tier/2.png" alt="" containerClass="!w-auto" className="object-cover inset-0 !w-auto !max-h-[24px]" width={60} height={60} /> */}
-                                    <div
-                                        className={classNames("flex items-center text-xs gap-1 py-1.5 px-2.5 rounded")}
-                                        style={{ backgroundColor: tiers[0].lowOpacityColor, color: tiers[0].color, borderColor: tiers[0].color }}
-                                    >
-                                        <CustomImageWithFallback
-                                            src="/images/tier/1.png"
-                                            alt=""
-                                            containerClass="!w-auto"
-                                            className="object-cover inset-0 !w-auto !max-h-[16px]"
-                                            width={60}
-                                            height={60}
-                                        />
-                                        <span>Tier 1</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex items-center justify-between gap-2 py-4 px-6">
-                                <p className="text-sm text-zinc-200">XP</p>
-                                <p className="text-emerald-400 font-semibold">1,000 <span className="text-zinc-400 text-xs">points</span></p>
-                            </div>
-                            <div className="flex items-center justify-between gap-2 py-4 px-6">
-                                <p className="text-sm text-zinc-200">Position</p>
-                                <p className="text-emerald-400 font-semibold">234 <span className="text-zinc-400 text-xs">/ 20,000</span></p>
-                            </div>
-                        </div>
+                    <div className="h-full w-full lg:w-auto">
+                        <UserProgressCard />
                     </div>
                 </div>
-                <div className="flex items-center gap-6 sm:gap-12 xl:gap-16 mt-12 w-full">
+                <div className="flex flex-wrap items-center gap-8 sm:gap-12 xl:gap-16 mt-12 w-full">
                     <div className="space-y-3 min-h-[76px]">
-                        <p className="max-w-3xl text-lg text-zinc-300">Status</p>
-                        <Badge form="round" variant="blue">
+                        <p className="max-w-3xl text-sm lg:text-lg text-zinc-300">Status</p>
+                        <Badge form="round" variant="blue" size="sm">
                             In progress
                         </Badge>
                     </div>
@@ -1041,8 +888,8 @@ export default function ChallengesHeader() {
                         <Tooltip>
                             <TooltipTrigger>
                                 <div className="space-y-3 min-h-[76px] text-left">
-                                    <p className="max-w-3xl text-lg text-zinc-300">S1 Ending in</p>
-                                    <Badge form="round" variant="lemon">
+                                    <p className="max-w-3xl text-sm lg:text-lg text-zinc-300">S1 Ending in</p>
+                                    <Badge form="round" variant="lemon" size="sm">
                                         TBU
                                     </Badge>
                                 </div>
@@ -1052,110 +899,11 @@ export default function ChallengesHeader() {
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                    {/* <div className="space-y-3 min-h-[76px]" title="Your rank">
-                        <div className="max-w-3xl text-lg text-zinc-300 flex items-center gap-2">
-                            <p>Rank</p>
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <InformationCircleIcon className="w-5 h-5 text-zinc-300 cursor-pointer" />
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-[425px] lg:max-w-2xl text-zinc-100 max-h-[calc(100vh-6rem)] overflow-auto">
-                                    <DialogHeader className="space-y-5">
-                                        <DialogTitle className="text-zinc-100">Tier list</DialogTitle>
-                                        <DialogDescription>
-                                            In our rank system, participants can advance through various levels by completing quests. Each tier offers a unique set of benefits, enhancing the user experience and rewarding
-                                            continued engagement. As users accumulate more quests, they level up, unlocking new perks, exclusive access, or rewards specific to their tier.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <div className="p-6 rounded-lg space-y-8" style={{ background: "linear-gradient(160deg, rgb(17 186 130 / 10%) 0%, rgb(229 42 95 / 5%) 54%, rgb(251 162 19 / 12%) 100%)" }}>
-                                        <div className="flex items-center justify-center">
-                                            <CustomImageWithFallback src="/images/tier/2.png" alt="" containerClass="!w-auto" className="object-cover inset-0 !w-auto !max-h-[64px]" width={60} height={60} />
-                                            <div className="text-left ml-6">
-                                                <p className="text-base font-semibold">Tier 2</p>
-                                                <p className="text-zinc-400">1 more rank to go</p>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <div className="flex items-center justify-between">
-                                                <div
-                                                    className={classNames("flex items-center text-xs gap-1 py-1.5 px-2.5 rounded")}
-                                                    style={{ backgroundColor: tiers[1].lowOpacityColor, color: tiers[1].color, borderColor: tiers[1].color }}
-                                                >
-                                                    <CustomImageWithFallback src="/images/tier/2.png" alt="" containerClass="!w-auto" className="object-cover inset-0 !w-auto !max-h-[16px]" width={60} height={60} />
-                                                    <span>Tier 2</span>
-                                                </div>
-                                                <p className="text-zinc-400 text-sm">2500 left</p>
-                                                <div
-                                                    className={classNames("flex items-center text-xs gap-1 py-1.5 px-2.5 rounded")}
-                                                    style={{ backgroundColor: tiers[0].lowOpacityColor, color: tiers[0].color, borderColor: tiers[0].color }}
-                                                >
-                                                    <CustomImageWithFallback src="/images/tier/1.png" alt="" containerClass="!w-auto" className="object-cover inset-0 !w-auto !max-h-[16px]" width={60} height={60} />
-                                                    <span>Tier 1</span>
-                                                </div>
-                                            </div>
-                                            <Progress value={20} className="h-2" />
-                                        </div>
-                                    </div>
-                                    {
-                                        <dl className="space-y-3">
-                                            {tiers.map((tier) => (
-                                                <Disclosure as="div" key={tier.name} className="bg-gradient-to-tl from-zinc-900 to-zinc-800/30 shadow-xl hover:bg-zinc-800/50 px-4 py-2.5 rounded-lg">
-                                                    {({ open }) => (
-                                                        <>
-                                                            <dt className="">
-                                                                <Disclosure.Button className="flex w-full items-center justify-between text-left text-white">
-                                                                    <div className="text-base font-semibold leading-7 flex items-center gap-6">
-                                                                        <CustomImageWithFallback
-                                                                            src={tier.image}
-                                                                            alt=""
-                                                                            containerClass="flex justify-center !w-14"
-                                                                            className="object-cover inset-0 !w-auto !h-[36px]"
-                                                                            width={60}
-                                                                            height={60}
-                                                                        />
-                                                                        <span className="flex items-center gap-4">
-                                                                            {tier.name}
-                                                                            {tier.name === "Tier 2" && (
-                                                                                <Badge form="round" variant="zinc">
-                                                                                    Your tier
-                                                                                </Badge>
-                                                                            )}
-                                                                        </span>
-                                                                    </div>
-                                                                    <span className="ml-6 flex h-7 items-center">
-                                                                        {open ? <ChevronUpIcon className="h-6 w-6" aria-hidden="true" /> : <ChevronDownIcon className="h-6 w-6" aria-hidden="true" />}
-                                                                    </span>
-                                                                </Disclosure.Button>
-                                                            </dt>
-                                                            <Disclosure.Panel as="dd" className="mt-6 pr-12">
-                                                                <p className="text-base leading-7 text-gray-300">{tier.description}</p>
-                                                            </Disclosure.Panel>
-                                                        </>
-                                                    )}
-                                                </Disclosure>
-                                            ))}
-                                        </dl>
-                                    }
-                                    <DialogFooter>
-                                        <DialogClose asChild>
-                                            <Button type="button" variant="secondary">
-                                                Close
-                                            </Button>
-                                        </DialogClose>
-                                    </DialogFooter>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
-                        <div className="text-md text-zinc-100 flex items-center gap-2">
-                            <CustomImageWithFallback src="/images/tier/1.png" alt="" className="object-cover inset-0 !w-auto !max-h-[32px]" width={60} height={60} />
-                            <span>2,450</span>
-                        </div>
-                    </div> */}
                     {/* <TooltipProvider delayDuration={100}>
                         <Tooltip>
                             <TooltipTrigger>
                                 <div className="space-y-3 min-h-[76px] text-left">
-                                    <p className="max-w-3xl text-lg text-zinc-300">Points</p>
+                                    <p className="max-w-3xl text-sm lg:text-lg text-zinc-300">Points</p>
                                     <p className="text-md text-zinc-100">1,000</p>
                                 </div>
                             </TooltipTrigger>
@@ -1168,7 +916,7 @@ export default function ChallengesHeader() {
                         <Tooltip>
                             <TooltipTrigger>
                                 <div className="space-y-3 min-h-[76px] text-left">
-                                    <p className="max-w-3xl text-lg text-zinc-300">S1 XP points</p>
+                                    <p className="max-w-3xl text-sm lg:text-lg text-zinc-300">S1 XP points</p>
                                     <p className="text-md text-zinc-100">100,000</p>
                                 </div>
                             </TooltipTrigger>
@@ -1177,8 +925,8 @@ export default function ChallengesHeader() {
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                    <div className="space-y-3 min-h-[76px] min-w-[50%] md:min-w-[33%]">
-                        <p className="max-w-3xl text-lg text-zinc-300">S1 Progress</p>
+                    <div className="space-y-3 min-h-[76px] min-w-[50%] md:min-w-[33%] w-full lg:w-auto">
+                        <p className="max-w-3xl text-sm lg:text-lg text-zinc-300">S1 Progress</p>
                         {/* <Badge form="round" variant="blood">100 000</Badge> */}
                         {/* <ProgressBar value={1} maxValue={9} size="default" color="emerald-400" labelOutside labelOutsideText={"8 more quests to go"} /> */}
                         <div className="!-mt-1">

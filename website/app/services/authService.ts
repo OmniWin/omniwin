@@ -1,42 +1,36 @@
 const domain = process.env.NEXT_PUBLIC_API_URL;
+// const domain = 'http://omniwin.local/b';
 
-export const getNonce = async () => {
+export const createAccount = async (body: any) => {
     try {
-        const response = await fetch(`${domain}/v1/auth/nonce`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-
-        const data = await response.text();
-        console.log('nonce', data)
-        return data; // assuming data contains the nonce
-    } catch (error) {
-        console.error('Error fetching nonce:', error);
-        throw error; // Rethrow the error if you want to handle it outside
-    }
-};
-
-export const getSession = async () => {
-    try {
-        const response = await fetch(`${domain}/v1/auth/session`, {
+        const response = await fetch(`${domain}/v1/user`, {
+            method: 'POST',
+            body: JSON.stringify(body),
             credentials: "include",
+            headers: {
+                'Content-Type': 'application/json'
+            },
         });
 
-        if (!response.ok) throw new Error('Session fetch failed');
+        if (!response.ok) {
+            // throw new Error('Network response was not ok');
+            return false;
+        }
 
-        const data = await response.json();
-        return data; // assuming data contains the session
+        const jsonData = await response.json();
+
+        return jsonData.data;
     } catch (error) {
-        console.error('Error fetching session:', error);
+        console.error('Error validating message:', error);
         throw error; // Rethrow the error if you want to handle it outside
     }
 }
 
-export const validateMessage = async ({ message, signature }: any) => {
+export const checkIfUserExists = async (address: string) => {
     try {
-        const response = await fetch(`${domain}/v1/auth/verify`, {
+        const response = await fetch(`${domain}/v1/user/exists`, {
             method: 'POST',
-            body: JSON.stringify({ message, signature }),
+            body: JSON.stringify({ address }),
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -46,27 +40,35 @@ export const validateMessage = async ({ message, signature }: any) => {
             throw new Error('Network response was not ok');
         }
 
-        const isValid = await response.json();
+        const jsonData = await response.json();
 
-        return isValid;
+        return jsonData.data.exists;
     } catch (error) {
         console.error('Error validating message:', error);
         throw error; // Rethrow the error if you want to handle it outside
     }
 }
 
-export const signOut = async () => {
+export const validateReferralCode = async (referralCode: string) => {
     try {
-        const response = await fetch(`${domain}/v1/auth/signout`, {
-            credentials: "include",
+        const response = await fetch(`${domain}/v1/referral/validate`, {
+            method: 'POST',
+            body: JSON.stringify({ referralCode }),
+            headers: {
+                'Content-Type': 'application/json'
+            },
         });
+
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            // throw new Error('Network response was not ok');
+            return false;
         }
-        const data = await response.json();
-        return data; // assuming data contains the session
+
+        const jsonData = await response.json();
+
+        return jsonData.data;
     } catch (error) {
-        console.error('Error signing out:', error);
+        console.error('Error validating message:', error);
         throw error; // Rethrow the error if you want to handle it outside
     }
 }

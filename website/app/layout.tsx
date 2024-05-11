@@ -1,11 +1,13 @@
 // "use client";
 /* Components */
 import { Providers } from "@/lib/providers";
+import { getServerSession } from "next-auth";
 // import { Nav } from "./components/Nav
 // import { SidebarNavigation } from "./components/SidebarNavigation";
 // import { TopNavigation } from "./components/TopNavigation";
 import MainLayout from "./components/MainLayout";
 import { ThemeContextProvider } from "./contexts/ThemeContextProvider";
+import SessionProvider from "./components/SessionProvider";
 
 /* Core */
 // import { useSelector } from "@/lib/redux";
@@ -19,44 +21,41 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 /**walletConnect */
-import type { Metadata } from 'next'
-import { headers } from 'next/headers'
+import type { Metadata } from "next";
+// import { headers } from "next/headers";
 
-import { cookieToInitialState } from 'wagmi'
+// import { cookieToInitialState } from "wagmi";
 
-import { config } from '@/config'
-import { Web3Modal } from '@/context'
+// import { config } from "@/config";
+import { Web3Modal } from "@/context";
 
-
-
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-    title: 'Omniwin',
-    description: 'Your one stop shop for all things crypto',
-}
+    title: "Omniwin",
+    description: "Your one stop shop for all things crypto",
+};
 
-export default function RootLayout(props: React.PropsWithChildren) {
-
-    // const sidebarToggleState = useSelector(selectSidebarToggleState);
-    const initialState = cookieToInitialState(config, headers().get('cookie'))
+export default async function RootLayout(props: React.PropsWithChildren) {
+    const session = await getServerSession();
 
     return (
         <Providers>
-            <Web3Modal initialState={initialState}>
-                <ThemeContextProvider>
-                    <html lang="en" className="dark">
-                        <head>
-                            <link rel="preload" href="/fonts/Himagsikan-MoXB.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
-                        </head>
-                        <body className={inter.className}>
-                            <MainLayout>
-                                {props.children}
-                            </MainLayout>
-                        </body>
-                    </html>
-                </ThemeContextProvider>
-            </Web3Modal>
+            <ThemeContextProvider>
+                <html lang="en" className="dark">
+                    <head>
+                        <link rel="preload" href="/fonts/Himagsikan-MoXB.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
+                    </head>
+                    <body className={inter.className}>
+                        <SessionProvider session={session} refetchInterval={0}>
+                            <Web3Modal>
+                                <MainLayout>{props.children}</MainLayout>
+                                <Toaster />
+                            </Web3Modal>
+                        </SessionProvider>
+                    </body>
+                </html>
+            </ThemeContextProvider>
         </Providers>
     );
 }
-

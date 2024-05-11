@@ -115,7 +115,7 @@ export default function List() {
         <>
             <ChallengesHeader />
             <section className="relative z-20 mx-auto -mt-36 sm:max-w-3xl lg:max-w-7xl lg:px-8 pb-20" aria-labelledby="contact-heading">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-20 xl:grid-cols-3 lg:gap-x-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-20 sm:gap-x-4 xl:grid-cols-3 lg:gap-x-8">
                     {challenges.map((challenge, key) => (
                         <div key={challenge.name} className="bg-zinc-900 rounded-2xl p-px flex flex-col border border-transparent transition-all ease-in-out duration-300 hover:translate-y-[-4px]">
                             <div

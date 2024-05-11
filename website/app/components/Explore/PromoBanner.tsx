@@ -1,4 +1,4 @@
-import CustomImageWithFallback from "@/app/components/Raffle/CustomImageWithFallback";
+import CustomImageWithFallback from "@/app/components/CustomImageWithFallback";
 
 export default function PromoBanner() {
     return (

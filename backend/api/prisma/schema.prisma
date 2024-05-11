@@ -73,20 +73,35 @@ model Tickets {
 }
 
 model User {
-  id_user             String    @id
+  id_user             Int       @id @default(autoincrement())
   address             String    @unique
   created_at          DateTime  @default(now())
   updated_at          DateTime  @default(now()) @updatedAt
   email               String?   @unique
   username            String?   @unique
+  description         String?   @db.VarChar(600)
   issued_at           DateTime?
   chainId             Int
+  avatar              String?   @default("")
+  telegram            Json?     @default("{}")
+  twitter             Json?     @default("{}")
+  discord             Json?     @default("{}")
+  referral_code       String?   @unique
   Season_Leaderboard  Season_Leaderboard[]
   User_Quests         User_Quests[]
   User_Quest_Steps    User_Quest_Steps[]
+  Referral            Referral[]
 
   @@index([username])
   @@index([email])
+}
+
+model Referral {
+  id                Int      @id @default(autoincrement())
+  referred_user_id  Int
+  referral_code     String
+  created_at        DateTime @default(now())
+  User              User     @relation(fields: [referred_user_id], references: [id_user])
 }
 
 model Favorites {
@@ -119,8 +134,8 @@ model Season {
 
 model Season_Leaderboard {
   id               Int         @id @default(autoincrement())
-  season_id        Int      
-  user_id          String
+  season_id        Int
+  user_id          Int
   xp_points        Int
   created_at       DateTime    @default(now())
   updated_at       DateTime    @default(now()) @updatedAt
@@ -162,7 +177,7 @@ model Step {
 }
 
 model User_Quests {
-  user_id          String
+  user_id          Int
   quest_id         Int
   status           Int
   created_at       DateTime    @default(now())
@@ -177,12 +192,12 @@ model User_Quests {
 }
 
 model User_Quest_Steps {
-  user_id          String
+  user_id          Int
   quest_id         Int
   step_id          Int
   status           Int
   created_at       DateTime    @default(now())
-  updated_at       DateTime    @default(now()) @updatedAt    
+  updated_at       DateTime    @default(now()) @updatedAt
   User             User        @relation(fields: [user_id], references: [id_user])
   Quest            Quest       @relation(fields: [quest_id], references: [quest_id])
   Step             Step        @relation(fields: [step_id], references: [step_id])

@@ -1,4 +1,4 @@
-// "use client";
+"use client";
 
 /* Core */
 import Link from "next/link";
@@ -31,14 +31,18 @@ import {
 } from "@heroicons/react/24/outline";
 import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
 
-import { useSelector, useDispatch, sidebarSlice } from "@/lib/redux";
+import { useSelector, useDispatch, sidebarSlice, userSettingsSlice } from "@/lib/redux";
 import { selectSidebarOpenState, selectSidebarToggleState } from "@/lib/redux/slices/sidebarSlice/selectors";
+import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
+import ClaimFaucetModal from "./Wallet/ClaimFaucetModal";
+import { Button } from "@/components/ui/button";
 
 interface NavigationItemChildren {
     name: string;
     href: string;
     current: boolean;
     icon: any;
+    needsSession: boolean;
 }
 interface NavigationItem {
     name: string;
@@ -49,15 +53,15 @@ interface NavigationItem {
 }
 
 const initialNavigation = [
-    { name: "Home", href: "/", icon: HomeIcon, current: true, children: null },
-    { name: "Explore", href: "/raffles", icon: BookOpenIcon, current: false, children: null },
+    { name: "Home", href: "/", icon: HomeIcon, current: true, needsSession: false, children: null },
+    { name: "Explore", href: "/raffles", icon: BookOpenIcon, current: false, needsSession: false, children: null },
     {
         name: "Challenges",
         icon: TrophyIcon,
         current: false,
         children: [
-            { name: "List", href: "/challenges/list", current: false, icon: TableCellsIcon },
-            { name: "Leaderboard", href: "/challenges/leaderboard", current: false, icon: ChartBarIcon },
+            { name: "List", href: "/challenges/list", current: false, needsSession: true, icon: TableCellsIcon },
+            { name: "Leaderboard", href: "/challenges/leaderboard", current: false, needsSession: true, icon: ChartBarIcon },
         ],
     },
     {
@@ -65,12 +69,12 @@ const initialNavigation = [
         icon: UserIcon,
         current: false,
         children: [
-            { name: "Profile", href: "#", current: false, icon: InformationCircleIcon },
-            { name: "Inventory", href: "#", current: false, icon: RectangleStackIcon },
-            { name: "Tickets", href: "#", current: false, icon: TicketIcon },
-            { name: "Favorites", href: "#", current: false, icon: HeartIcon },
-            { name: "Settings", href: "#", current: false, icon: Cog6ToothIcon },
-            { name: "Support", href: "#", current: false, icon: QuestionMarkCircleIcon },
+            // { name: "Profile", href: "/profile", current: false, needsSession: true, icon: InformationCircleIcon },
+            { name: "Inventory", href: "/profile/inventory", current: false, needsSession: true, icon: RectangleStackIcon },
+            { name: "Tickets", href: "/profile/tickets", current: false, needsSession: true, icon: TicketIcon },
+            { name: "Favorites", href: "/profile/favorites", current: false, needsSession: true, icon: HeartIcon },
+            { name: "Settings", href: "/profile/settings", current: false, needsSession: true, icon: Cog6ToothIcon },
+            // { name: "Support", href: "#", current: false, needsSession: true, icon: QuestionMarkCircleIcon },
         ],
     },
 ];
@@ -261,6 +265,29 @@ export const SidebarNavigation = () => {
     const dispatch = useDispatch();
     const sidebarOpenState = useSelector(selectSidebarOpenState);
     const sidebarToggleState = useSelector(selectSidebarToggleState);
+    const userSettingsState = useSelector(selectUserSettingsState);
+
+    const groupedSidebarIconsByNames: { [key: string]: { children: { [key: string]: JSX.Element }; icon: JSX.Element } } = navigationIcons.reduce(
+        (acc: { [key: string]: { children: { [key: string]: JSX.Element }; icon: JSX.Element } }, item) => {
+            if (item.children) {
+                const children = item.children.reduce((acc: { [key: string]: JSX.Element }, child) => {
+                    acc[child.name] = child.icon;
+                    return acc;
+                }, {});
+                acc[item.name] = {
+                    children,
+                    icon: item.icon,
+                };
+            } else {
+                acc[item.name] = {
+                    children: {},
+                    icon: item.icon,
+                };
+            }
+            return acc;
+        },
+        {}
+    );
 
     useEffect(() => {
         const storedIsSidebarOpen = JSON.parse(localStorage.getItem("toggleSidebar") || "false");
@@ -275,13 +302,30 @@ export const SidebarNavigation = () => {
             navigation.map((navItem: NavigationItem) => ({
                 ...navItem,
                 current: navItem.href === path,
-                children: navItem?.children?.map((child: NavigationItemChildren) => ({
-                    ...child,
-                    current: child.href === path,
-                })),
+                children:
+                    navItem?.children?.map((child: NavigationItemChildren) => ({
+                        ...child,
+                        current: child.href === path,
+                    })) || null,
             }))
         );
     }, [path]);
+
+    useEffect(() => {
+        const isActiveNavItemThatNeedsSession = navigation.reduce((acc, item) => {
+            if (item.children) {
+                const isActiveChild = item.children.some((child) => child.current && child.needsSession);
+                if (isActiveChild) {
+                    acc = true;
+                }
+            }
+            return acc;
+        }, false);
+
+        if (isActiveNavItemThatNeedsSession) {
+            dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true));
+        }
+    }, [navigation]);
 
     // If user clicks inside the sidebar switch the toggle state to !toggleSidebar
     useEffect(() => {
@@ -304,9 +348,18 @@ export const SidebarNavigation = () => {
         }
     }, [sidebarToggleState.toggleSidebar]); // Empty dependency array
 
+    const checkIfSessionExists = (e: any) => {
+        if (!userSettingsState.user?.address) {
+            e.preventDefault();
+            e.stopPropagation();
+            dispatch(userSettingsSlice.actions.setWalletConnectorModalOpen(true));
+            return false;
+        }
+    };
+
     return (
         <>
-            <Transition.Root show={sidebarOpenState.isSidebarOpen} as={Fragment}>
+            {/* <Transition.Root show={sidebarOpenState.isSidebarOpen} as={Fragment}>
                 <Dialog as="div" className="relative z-50 lg:hidden" onClose={() => dispatch(sidebarSlice.actions.setSidebarOpenState(false))}>
                     <Transition.Child
                         as={Fragment}
@@ -381,7 +434,6 @@ export const SidebarNavigation = () => {
                                                                                 {item.children &&
                                                                                     item.children.map((subItem) => (
                                                                                         <li key={subItem.name}>
-                                                                                            {/* 44px */}
                                                                                             <Disclosure.Button
                                                                                                 as={Link}
                                                                                                 href={subItem.href}
@@ -421,7 +473,7 @@ export const SidebarNavigation = () => {
                         </Transition.Child>
                     </div>
                 </Dialog>
-            </Transition.Root>
+            </Transition.Root> */}
 
             {/* Static sidebar for desktop */}
             <div className={`hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col transition-all duration-300 group-[parent]`}>
@@ -444,7 +496,11 @@ export const SidebarNavigation = () => {
                     </Link>
                 </div>
                 {/* <div className={`group flex grow flex-col bg-zinc-950 pb-4 relative transition-all duration-300 ${sidebarOpenState.toggleSidebar ? "px-4 w-[64px] hover:!w-72" : "pl-4 pr-4 lg:w-72"}`}> */}
-                <div className={`group flex grow flex-col bg-zinc-900 mb-3 pt-4 ml-3 hover:bg-gradient-to-br hover:from-zinc-800/5 hover:to-zinc-800/20 rounded-lg pb-4 relative transition-all duration-300 ${sidebarOpenState.toggleSidebar ? "px-4 w-[90px] hover:!w-72" : "pl-4 pr-4 lg:w-72"}`}>
+                <div
+                    className={`group flex grow flex-col bg-zinc-900 mb-3 pt-4 ml-3 hover:bg-gradient-to-br hover:from-zinc-800/5 hover:to-zinc-800/20 rounded-lg pb-4 relative transition-all duration-300 ${
+                        sidebarOpenState.toggleSidebar ? "px-4 w-[90px] hover:!w-72" : "pl-4 pr-4 lg:w-72"
+                    }`}
+                >
                     <nav className="flex flex-1 flex-col sidebar relative">
                         {/* <div className="md:opacity-100 w-4 transition-opacity duration-300 absolute -right-6 top-1/2 transform -translate-y-1/2">
                             <button
@@ -469,7 +525,7 @@ export const SidebarNavigation = () => {
                                                     )}
                                                 >
                                                     {/* <item.icon className="h-6 w-6 shrink-0" aria-hidden="true" /> */}
-                                                    {navigationIcons[navKey].icon}
+                                                    {groupedSidebarIconsByNames[item.name].icon}
 
                                                     {/* {sidebarToggleState.toggleSidebar ? "" : item.name} */}
                                                     <span className={classNames(sidebarToggleState.toggleSidebar && "w-0 opacity-0 group-hover:w-auto group-hover:opacity-100", "transition-all duration-300 ease-out")}>
@@ -477,7 +533,7 @@ export const SidebarNavigation = () => {
                                                     </span>
                                                 </Link>
                                             ) : (
-                                                <Disclosure as="div" defaultOpen={item.children.some((child) => child.current)} key={item.children.some((child) => child.current)}>
+                                                <Disclosure as="div" defaultOpen={item.children.some((child) => child.current)} key={"collapse" + item?.name + item.current}>
                                                     {({ open }) => (
                                                         <>
                                                             <Disclosure.Button
@@ -488,9 +544,14 @@ export const SidebarNavigation = () => {
                                                                 )}
                                                             >
                                                                 {/* <item.icon className="h-6 w-6 shrink-0" aria-hidden="true" /> */}
-                                                                {navigationIcons[navKey].icon}
+                                                                {groupedSidebarIconsByNames[item.name].icon}
                                                                 {/* {sidebarToggleState.toggleSidebar ? "" : item.name} */}
-                                                                <span className={classNames(sidebarToggleState.toggleSidebar && "w-0 opacity-0 group-hover:w-auto group-hover:opacity-100", "transition-all duration-300 ease-out")}>
+                                                                <span
+                                                                    className={classNames(
+                                                                        sidebarToggleState.toggleSidebar && "w-0 opacity-0 group-hover:w-auto group-hover:opacity-100",
+                                                                        "transition-all duration-300 ease-out"
+                                                                    )}
+                                                                >
                                                                     {item.name}
                                                                 </span>
                                                                 <ChevronRightIcon
@@ -502,13 +563,13 @@ export const SidebarNavigation = () => {
                                                                     aria-hidden="true"
                                                                 />
                                                             </Disclosure.Button>
-                                                            <Disclosure.Panel as="ul" className="mt-1">
+                                                            <Disclosure.Panel as="ul" className="mt-1 space-y-2">
                                                                 {item.children &&
                                                                     item.children.map((subItem, childrenKey) => (
                                                                         <li key={subItem.name}>
-                                                                            {/* 44px */}
-                                                                            <Disclosure.Button
-                                                                                as="a"
+                                                                            <Link
+                                                                                // as={Link}
+                                                                                onClick={(e) => (subItem?.needsSession ? checkIfSessionExists(e) : () => {})}
                                                                                 href={subItem.href}
                                                                                 className={classNames(
                                                                                     // subItem.current ? "text-jade-400" : "text-zinc-400/90 hover:bg-zinc-800 hover:text-white",
@@ -519,7 +580,7 @@ export const SidebarNavigation = () => {
                                                                                 )}
                                                                             >
                                                                                 {/* {subItem.icon && <subItem.icon className="h-6 w-6 shrink-0" aria-hidden="true" />} */}
-                                                                                {navigationIcons?.[navKey]?.children !== undefined && navigationIcons[navKey].children[childrenKey].icon}
+                                                                                {groupedSidebarIconsByNames[item.name].children[subItem.name]}
 
                                                                                 <span
                                                                                     className={classNames(
@@ -529,7 +590,7 @@ export const SidebarNavigation = () => {
                                                                                 >
                                                                                     {subItem.name}
                                                                                 </span>
-                                                                            </Disclosure.Button>
+                                                                            </Link>
                                                                         </li>
                                                                     ))}
                                                             </Disclosure.Panel>
@@ -576,6 +637,9 @@ export const SidebarNavigation = () => {
                                 </a>
                             </li> */}
                             <li className="mt-auto">
+                                {/* <ClaimFaucetModal>
+                                    <Button variant="soft" className="w-full">Get tokens</Button>
+                                </ClaimFaucetModal> */}
                                 <a
                                     href="#"
                                     className={classNames(
@@ -584,7 +648,7 @@ export const SidebarNavigation = () => {
                                     )}
                                 >
                                     {/* <QuestionMarkCircleIcon className="h-6 w-6 shrink-0" aria-hidden="true" /> */}
-                                    {navigationIcons[3].children[5].icon}
+                                    {navigationIcons && navigationIcons[3] && navigationIcons[3].children && navigationIcons[3].children[5].icon}
                                     <span className={classNames(sidebarToggleState.toggleSidebar && "w-0 opacity-0 group-hover:w-auto group-hover:opacity-100")}>{"Support"}</span>
                                 </a>
                             </li>

@@ -84,8 +84,8 @@ web_modules/
 .parcel-cache
 
 # Next.js build output
-.next
-out
+website/.next/*
+website/out/*
 
 # Nuxt.js build / generate output
 .nuxt
@@ -128,3 +128,4 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+.pnpm-store/*

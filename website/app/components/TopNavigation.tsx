@@ -14,25 +14,65 @@ import { Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon, MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { Search } from "./Search";
+import WalletConnect from "./Wallet/WalletConnect";
 
 import { useDispatch, sidebarSlice } from "@/lib/redux";
 
-import { useState } from "react";
-import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { useState, useEffect } from "react";
+// import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { useAccount } from "wagmi";
 
-const userNavigation = [
-    { name: "Your profile", href: "#" },
-    { name: "Sign out", href: "#" },
-];
+import { useSelector, useDispatch, userSettingsSlice, sidebarSlice } from "@/lib/redux";
+import { selectUserSettingsState } from "@/lib/redux/slices/userSettingsSlice/selectors";
+import { selectChatOpenState } from "@/lib/redux/slices/sidebarSlice/selectors";
+
+// const userNavigation = [
+//     { name: "Your profile", href: "#" },
+//     { name: "Sign out", href: "#" },
+// ];
+import { useSession, signIn, signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 
 export const TopNavigation = () => {
+    const { data: session } = useSession();
+    // console.log('lululululu', session)
+
     // const pathname = usePathname();
     // const dispatch = useDispatch();
+    const account = useAccount();
+    const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
+
+    const isChatOpenState = useSelector(selectChatOpenState);
+
+    // useEffect(() => {
+    //     if (account && account.status === "connected") {
+    //         // dispatch(userSettingsSlice.actions.setUser(account));
+    //     }
+    // }, [account]);
+
+    useEffect(() => {
+        const storedIsChatOpen = localStorage.getItem("isChatOpen");
+        dispatch(sidebarSlice.actions.setChatOpenState(storedIsChatOpen === "true"));
+    }, []);
 
     return (
         <>
             <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-zinc-950 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+                <Link href="/" className="font-himagsikan text-[#6cf60f] text-4xl inline-flex items-center gap-3 hue-rotate-[45deg] sm:hidden">
+                    <img className="h-10  w-auto" src="/images/omniwin-logo.png" alt="Your Company" />
+                    {/* <span
+                        style={{
+                            // "-webkit-text-stroke-width": "1px",
+                            // "-webkit-text-stroke-color": "black",
+                            WebkitTextStrokeWidth: "1px",
+                            WebkitTextStrokeColor: "black",
+                        }}
+                    >
+                        OmniWin
+                    </span> */}
+                </Link>
                 {/* <button type="button" className="-m-2.5 p-2.5 text-zinc-700 lg:hidden" onClick={() => dispatch(sidebarSlice.actions.setSidebarOpenState(true))}>
                     <span className="sr-only">Open sidebar</span>
                     <Bars3Icon className="h-6 w-6" aria-hidden="true" />
@@ -58,7 +98,7 @@ export const TopNavigation = () => {
                         <button
                             onClick={() => setOpen(true)}
                             type="button"
-                            className="min-w-72 ml-1 my-3 hidden w-auto lg:flex items-center text-sm leading-6 text-zinc-400 rounded-md ring-1 ring-zinc-900/10 shadow-sm py-1.5 pl-2 pr-3 ring-zinc-700 bg-zinc-900 highlight-white/5 hover:bg-zinc-800"
+                            className="min-w-72 my-3 hidden w-auto lg:flex items-center text-sm leading-6 text-zinc-400 rounded-md ring-1 ring-zinc-900/10 shadow-sm py-1.5 pl-2 pr-3 ring-zinc-700 bg-zinc-900 highlight-white/5 hover:bg-zinc-800"
                         >
                             <svg width="24" height="24" fill="none" aria-hidden="true" className="mr-3 flex-none">
                                 <path d="m19 19-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
@@ -80,8 +120,19 @@ export const TopNavigation = () => {
                         {/* Separator */}
                         {/* <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-zinc-950/10" aria-hidden="true" /> */}
 
+                        <Button size="sm" variant="ghost" className="gap-2" onClick={() => dispatch(sidebarSlice.actions.setChatOpenState(!isChatOpenState.isChatOpen))}>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="h-6 w-6" fill="currentColor">
+                                <path
+                                    className="opacity-20"
+                                    d="M0 64C0 28.7 28.7 0 64 0H448c35.3 0 64 28.7 64 64V352c0 35.3-28.7 64-64 64H309.3L185.6 508.8c-4.8 3.6-11.3 4.2-16.8 1.5s-8.8-8.2-8.8-14.3V416H64c-35.3 0-64-28.7-64-64V64zM128 240a32 32 0 1 0 0-64 32 32 0 1 0 0 64zm128 0a32 32 0 1 0 0-64 32 32 0 1 0 0 64zm160-32a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"
+                                />
+                                <path className="fill-emerald-400" d="M96 208a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm128 0a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm160-32a32 32 0 1 1 0 64 32 32 0 1 1 0-64z" />
+                            </svg>
+                            Chat
+                        </Button>
+                        <WalletConnect />
+                        {/* <w3m-button /> */}
                         {/* Profile dropdown */}
-                        <w3m-button />
                         {/* <Menu as="div" className="relative">
                             <Menu.Button className="-m-1.5 flex items-center p-1.5">
                                 <span className="sr-only">Open user menu</span>

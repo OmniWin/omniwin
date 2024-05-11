@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 
 // Components
-import Filters from "./Filters";
+import Filters from "../Filters";
 import RaffleMetaWin from "../Raffle/RaffleMetaWin";
 import RaffleEse from "../Raffle/RaffleEse";
 import RaffleDefault from "../Raffle/RaffleDefault";
@@ -15,203 +15,316 @@ import { classNames } from "@/app/utils";
 // Types
 import { Filter, SortOption, FetchRafflesRequestBody, RaffleCard, FilterOption } from "@/app/types";
 
-// const raffleList = [
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "10,000",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/1.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 33279,
-//         title: "Doodles",
-//         price: "12,200",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/2.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 10276,
-//         title: "BoredApeYachtClub",
-//         price: "50,000",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/3.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1,000,000",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/4.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 33279,
-//         title: "Doodles",
-//         price: "15,000",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/5.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 10276,
-//         title: "BoredApeYachtClub",
-//         price: "50K",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/6.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1000",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/7.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1000",
-//         currency: "USDC",
-//         image: "https://cloudflare-ipfs.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/8.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1000",
-//         currency: "USDC",
-//         image: "https://ipfs.raribleuserdata.com/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5/penguin/2674.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 33279,
-//         title: "Doodles",
-//         price: "12.22K",
-//         currency: "USDC",
-//         image: "https://metadata.degods.com/g/1792-dead.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 10276,
-//         title: "BoredApeYachtClub",
-//         price: "50K",
-//         currency: "USDC",
-//         image: "https://ipfs.raribleuserdata.com/ipfs/QmUUnTTWCrnfkVCv2gU8Mpdzeu2PR867kdjWeZBCoKCUVZ",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1000",
-//         currency: "USDC",
-//         image: "https://ipfs.raribleuserdata.com/ipfs/QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/2029.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 33279,
-//         title: "Doodles",
-//         price: "12.22K",
-//         currency: "USDC",
-//         image: "https://ipfs.raribleuserdata.com/ipfs/QmSxtE6WeLDVNsSnmBtADoRDWqdHMEKRSG1MXBhkiRw1jY",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 10276,
-//         title: "BoredApeYachtClub",
-//         price: "50K",
-//         currency: "USDC",
-//         image: "https://ipfs.raribleuserdata.com/ipfs/QmdfqpbAhx9BQrZqY1UR3RpuGUmPe2jkXMVXC9drCBjQZG",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1000",
-//         currency: "USDC",
-//         image: "https://ipfs.raribleuserdata.com/ipfs/Qmb7rsvrzTfHhB9aJxygWhR1mSkpsTcWuqNZD1zPgP9V1D",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-//     {
-//         id: 9750,
-//         title: "BoredApeYachtClub",
-//         price: "1000",
-//         currency: "USDC",
-//         image: "https://metadata.degods.com/g/1570-dead.png",
-//         chain: "Goerli Network",
-//         chainIcon: "/icons.svg#ethereumChain",
-//         tickets: 50,
-//         raisedTickets: 5,
-//         endingIn: "1 day",
-//     },
-// ];
+const raffleDemoList: RaffleCard[] = [
+    {
+        full_price: 1000,
+        ticket_price: 100,
+        tickets_bought: 3,
+        tickets_total: 421,
+        end_timestamp: 1715407420,
+        nft_name: "Azuki #343",
+        nft_image: "343_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 2,
+        token_id: "343",
+        network: "GOERLI",
+        collection_name: "Azuki",
+        is_verified: true,
+        is_favorite: false,
+        favorites_count: 0,
+        count_views: 0,
+    },
+    {
+        full_price: 33000,
+        ticket_price: 3300,
+        tickets_bought: 1,
+        tickets_total: 22,
+        end_timestamp: 1715197820,
+        nft_name: "W#635",
+        nft_image: "635_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 20,
+        token_id: "635",
+        network: "GOERLI",
+        collection_name: "Wrapped Cryptopunks",
+        is_verified: true,
+        is_favorite: false,
+        favorites_count: 0,
+        count_views: 0,
+    },
+    {
+        full_price: 2400000,
+        ticket_price: 4000,
+        tickets_bought: 21,
+        tickets_total: 21,
+        end_timestamp: 1715533544,
+        nft_name: "W#872",
+        nft_image: "872_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 3,
+        token_id: "872",
+        network: "GOERLI",
+        collection_name: "Wrapped Cryptopunks",
+        is_verified: true,
+        is_favorite: false,
+        favorites_count: 10, // Example placeholder
+        count_views: 100, // Example placeholder
+    },
+    {
+        full_price: 2000,
+        ticket_price: 200,
+        tickets_bought: 1,
+        tickets_total: 353,
+        end_timestamp: 1715506620,
+        nft_name: "Doodle #246",
+        nft_image: "246_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 4,
+        token_id: "246",
+        network: "GOERLI",
+        collection_name: "Doodles",
+        is_verified: false,
+        is_favorite: true,
+        favorites_count: 25, // Example placeholder
+        count_views: 250, // Example placeholder
+    },
+    {
+        full_price: 39000,
+        ticket_price: 3900,
+        tickets_bought: 1,
+        tickets_total: 362,
+        end_timestamp: 1715111420,
+        nft_name: "Pudgy Penguin #798",
+        nft_image: "798_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 5,
+        token_id: "798",
+        network: "GOERLI",
+        collection_name: "Pudgy Penguins",
+        is_verified: true,
+        is_favorite: false,
+        favorites_count: 15, // Example placeholder
+        count_views: 150, // Example placeholder
+    },
+    {
+        full_price: 47000,
+        ticket_price: 4700,
+        tickets_bought: 1,
+        tickets_total: 206,
+        end_timestamp: 1715370620,
+        nft_name: "Doodle #128",
+        nft_image: "128_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 6,
+        token_id: "128",
+        network: "GOERLI",
+        collection_name: "Doodles",
+        is_verified: true,
+        is_favorite: true,
+        favorites_count: 30, // Example placeholder
+        count_views: 300, // Example placeholder
+    },
+    {
+        full_price: 414000,
+        ticket_price: 400,
+        tickets_bought: 418,
+        tickets_total: 418,
+        end_timestamp: 1715279112,
+        nft_name: "W#773",
+        nft_image: "773_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 7,
+        token_id: "773",
+        network: "GOERLI",
+        collection_name: "Wrapped Cryptopunks",
+        is_verified: false,
+        is_favorite: false,
+        favorites_count: 5, // Example placeholder
+        count_views: 50, // Example placeholder
+    },
+    {
+        full_price: 13000,
+        ticket_price: 1300,
+        tickets_bought: 3,
+        tickets_total: 340,
+        end_timestamp: 1715025020,
+        nft_name: "Azuki #719",
+        nft_image: "719_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 8,
+        token_id: "719",
+        network: "GOERLI",
+        collection_name: "Azuki",
+        is_verified: false,
+        is_favorite: true,
+        favorites_count: 12,
+        count_views: 120,
+    },
+    {
+        full_price: 2300,
+        ticket_price: 3700,
+        tickets_bought: 0,
+        tickets_total: 954,
+        end_timestamp: 1715111420,
+        nft_name: "Doodle #705",
+        nft_image: "705_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 9,
+        token_id: "705",
+        network: "GOERLI",
+        collection_name: "Doodles",
+        is_verified: true,
+        is_favorite: false,
+        favorites_count: 7,
+        count_views: 70,
+    },
+    {
+        full_price: 30000,
+        ticket_price: 3000,
+        tickets_bought: 1,
+        tickets_total: 188,
+        end_timestamp: 1715111420,
+        nft_name: "Azuki #96",
+        nft_image: "96_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 10,
+        token_id: "96",
+        network: "GOERLI",
+        collection_name: "Azuki",
+        is_verified: false,
+        is_favorite: true,
+        favorites_count: 15,
+        count_views: 150,
+    },
+    {
+        full_price: 37000,
+        ticket_price: 3700,
+        tickets_bought: 1,
+        tickets_total: 791,
+        end_timestamp: 1715975420,
+        nft_name: "DeGod #343",
+        nft_image: "343_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 11,
+        token_id: "343",
+        network: "GOERLI",
+        collection_name: "DeGods",
+        is_verified: true,
+        is_favorite: false,
+        favorites_count: 20,
+        count_views: 200,
+    },
+    {
+        full_price: 31000,
+        ticket_price: 3100,
+        tickets_bought: 1,
+        tickets_total: 612,
+        end_timestamp: 1715975420,
+        nft_name: "DeGod #886",
+        nft_image: "886_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 12,
+        token_id: "886",
+        network: "GOERLI",
+        collection_name: "DeGods",
+        is_verified: false,
+        is_favorite: true,
+        favorites_count: 25,
+        count_views: 250,
+    },
+    {
+        full_price: 1000,
+        ticket_price: 100,
+        tickets_bought: 3,
+        tickets_total: 421,
+        end_timestamp: 1715407420,
+        nft_name: "Azuki #343",
+        nft_image: "343_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 2,
+        token_id: "343",
+        network: "GOERLI",
+        collection_name: "Azuki",
+        is_verified: true,
+        is_favorite: false,
+        favorites_count: 0,
+        count_views: 0,
+    },
+    {
+        full_price: 33000,
+        ticket_price: 3300,
+        tickets_bought: 1,
+        tickets_total: 22,
+        end_timestamp: 1715197820,
+        nft_name: "W#635",
+        nft_image: "635_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 20,
+        token_id: "635",
+        network: "GOERLI",
+        collection_name: "Wrapped Cryptopunks",
+        is_verified: true,
+        is_favorite: false,
+        favorites_count: 0,
+        count_views: 0,
+    },
+    {
+        full_price: 240000,
+        ticket_price: 4000,
+        tickets_bought: 21,
+        tickets_total: 21,
+        end_timestamp: 1715533544,
+        nft_name: "W#872",
+        nft_image: "872_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 3,
+        token_id: "872",
+        network: "GOERLI",
+        collection_name: "Wrapped Cryptopunks",
+        is_verified: true,
+        is_favorite: false,
+        favorites_count: 10, // Example placeholder
+        count_views: 100, // Example placeholder
+    },
+    {
+        full_price: 2000,
+        ticket_price: 200,
+        tickets_bought: 1,
+        tickets_total: 353,
+        end_timestamp: 1715506620,
+        nft_name: "Doodle #246",
+        nft_image: "246_goerli.png",
+        nft_owner: "0xebFC7A970CAAbC18C8e8b7367147C18FC7585492",
+        asset_type: "ERC721",
+        nft_id: 4,
+        token_id: "246",
+        network: "GOERLI",
+        collection_name: "Doodles",
+        is_verified: false,
+        is_favorite: true,
+        favorites_count: 25, // Example placeholder
+        count_views: 250, // Example placeholder
+    },
+];
 
 export default function RaffleList() {
     // Local states
+    // const [raffleList, setRaffleList] = useState<RaffleCard[]>([]);
     const [raffleList, setRaffleList] = useState<RaffleCard[]>([]);
     const [nextCursor, setNextCursor] = useState(0);
     const [sortOptions, setSortOptions] = useState<SortOption[]>([
@@ -254,7 +367,7 @@ export default function RaffleList() {
             observer.current = new IntersectionObserver((entries) => {
                 if (entries[0].isIntersecting && nextCursor) {
                     // Load more items here
-                    fetchRaffleList();
+                    // fetchRaffleList();
                 }
             });
             if (node) observer.current.observe(node);
@@ -290,7 +403,7 @@ export default function RaffleList() {
             sortBy: selectedSortOption,
         };
 
-        console.log("process.env.NEXT_PUBLIC_API_URL: ", process.env.NEXT_PUBLIC_API_URL)
+        console.log("process.env.NEXT_PUBLIC_API_URL: ", process.env.NEXT_PUBLIC_API_URL);
 
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/nfts`, {
             method: "POST",
@@ -299,7 +412,6 @@ export default function RaffleList() {
                 // Authorization: "Bearer " + localStorage.getItem("token"),
             },
             body: JSON.stringify(requestBody),
-
         })
             .then((response) => response.json())
             .then((data) => {
@@ -317,7 +429,9 @@ export default function RaffleList() {
     useEffect(() => {
         setRaffleList([]); // Clear the list before fetching new data
         setNextCursor(0); // Reset cursor
-        fetchRaffleList();
+        // fetchRaffleList();
+        setRaffleList(raffleDemoList);
+        console.log("test", typeof userSettingsState.userSettings.style, userSettingsState.userSettings.style);
     }, [sortOptions, filters]); // Dependency array includes sortOptions and filters
 
     return (
@@ -327,7 +441,7 @@ export default function RaffleList() {
                 <p className="mt-4 max-w-xl text-sm text-zinc-400">Dive into a world of unique chances and hidden gems. Find your next big win or the perfect addition to your collection — start exploring today!</p>
             </div>
             {/* <div className="sticky -top-[80px] bg-zinc-900 z-[30] sm:mx-0"> */}
-            <div className="sticky -top-[50px] bg-zinc-900 z-[30] sm:mx-0 pt-8 pb-4">
+            <div className="sticky sm:-top-[50px] -top-[25px] bg-zinc-900 z-[30] sm:mx-0 pt-8 pb-4">
                 <Filters filters={filters} setFilters={setFilters} sortOptions={sortOptions} setSortOptions={setSortOptions} />
                 <CardSettings showStyle={true} showDisplay={false} />
             </div>
@@ -335,14 +449,18 @@ export default function RaffleList() {
                 className={classNames(
                     "flex flex-wrap sm:grid sm:gap-x-3 gap-y-4 lg:gap-y-3 mt-5 xl:mt-5",
                     // userSettingsState.userSettings.style === 1 && "sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6",
-                    userSettingsState.userSettings.style === 1 && "sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-8",
+                    userSettingsState.userSettings.style === 1 && "justify-center gap-x-2 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-8",
                     userSettingsState.userSettings.style === 2 && "sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-5 4xl:grid-cols-6",
                     userSettingsState.userSettings.style === 3 && "grid gap-3 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 4xl:grid-cols-6"
                 )}
             >
                 {raffleList.map((item: any, index: number) => (
                     <>
-                        <span className={classNames(userSettingsState.userSettings.style === 1 && 'w-[calc(33%-.45rem)] sm:w-full inline-block')} ref={index === raffleList.length - 1 ? lastRaffleElementRef : null} key={item.nft_id}>
+                        <span
+                            className={classNames(userSettingsState.userSettings.style === 1 && "w-[calc(33.33%-.45rem)] sm:w-full inline-block", "w-full")}
+                            ref={index === raffleList.length - 1 ? lastRaffleElementRef : null}
+                            key={item.nft_id}
+                        >
                             {userSettingsState.userSettings.style === 1 && <RaffleMetaWin {...item} />}
                             {userSettingsState.userSettings.style === 2 && <RaffleEse {...item} />}
                             {userSettingsState.userSettings.style === 3 && <RaffleDefault {...item} />}

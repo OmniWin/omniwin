@@ -5,13 +5,14 @@
 /.pnp
 .pnp.js
 .yarn/install-state.gz
+.pnpm-store/*
 
 # testing
 /coverage
 
 # next.js
-/.next/
-/out/
+.next/
+out/
 
 # production
 /build
@@ -36,3 +37,4 @@ yarn-error.log*
 next-env.d.ts
 
 public/nft
+public/images/uploads/*
