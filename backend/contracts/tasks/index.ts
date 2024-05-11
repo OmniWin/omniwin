@@ -14,3 +14,4 @@ export * from "./testnet/deployUSDC";
 export * from "./testnet/addLinkToken";
 export * from "./testnet/deployNft";
 export * from "./testnet/mintNft";
+export * from "./testnet/setBaseURI";

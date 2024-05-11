@@ -31,8 +31,9 @@ async function main() {
     const SIDE_CHAIN = "baseTestnet";//ethereumSepolia
     const MAIN_CHAIN_SELECTOR = routerConfig[MAIN_CHAIN].chainSelector;
     const SIDE_CHAIN_SELECTOR = routerConfig[SIDE_CHAIN].chainSelector;
+    const NFT_BASE_URI = "https://api.omniwin.io/v1/nft/"
 
-    // const { MAIN_CONTRACT, USDC_MAIN_CONTRACT } = await deployMain(MAIN_CHAIN) as { MAIN_CONTRACT: string, USDC_MAIN_CONTRACT: string };
+    // const { MAIN_CONTRACT, USDC_MAIN_CONTRACT } = await deployMain(MAIN_CHAIN,NFT_BASE_URI) as { MAIN_CONTRACT: string, USDC_MAIN_CONTRACT: string };
   
     // const { MAIN_CONTRACT, USDC_MAIN_CONTRACT } = { 
     //   MAIN_CONTRACT: "0xEb0Af68e467B2F2E68Aa9995DDAA2ef300c85D94",
@@ -40,7 +41,7 @@ async function main() {
     // }
 
     // const { SIDE_CONTRACT, USDC_CONTRACT_SIDE } =
-    //   await deploySide(SIDE_CHAIN) as { SIDE_CONTRACT: string, USDC_CONTRACT_SIDE: string };
+    //   await deploySide(SIDE_CHAIN,NFT_BASE_URI) as { SIDE_CONTRACT: string, USDC_CONTRACT_SIDE: string };
     
     // const { SIDE_CONTRACT, USDC_CONTRACT_SIDE } = {
     //   SIDE_CONTRACT: "0x1304a1Aa1BCf40A560A2422391062451f2fE5bBC",
@@ -48,11 +49,9 @@ async function main() {
     // }
 
     
-    // await deployNft(MAIN_CHAIN);
-    // await deployNft(SIDE_CHAIN);
-    const tokenId = await mintNft(MAIN_CHAIN, config[MAIN_CHAIN + "NftContract"], secrets[MAIN_CHAIN + "Address" as keyof typeof secrets]);
-
-    console.log("tokenId", tokenId);
+    await deployNft(MAIN_CHAIN, NFT_BASE_URI);
+    await deployNft(SIDE_CHAIN, NFT_BASE_URI);
+    // const tokenId = await mintNft(MAIN_CHAIN, config[MAIN_CHAIN + "NftContract"], secrets[MAIN_CHAIN + "Address" as keyof typeof secrets]);
 
     // addContractToConfig(
     //   {
@@ -98,13 +97,18 @@ async function main() {
   }
 }
 
-async function deployNft(network: string){
+async function deployNft(network: string, NFT_BASE_URI: string = "https://api.omniwin.io/v1/nft/"){
   const nftContract = await runCommand(
     `npx hardhat deployNft --network ${network}`
   ) as string;
 
   await runCommand(
     `npx hardhat verify ${nftContract} --network ${network}`
+  );
+
+  //Set base uri
+  await runCommand(
+    `npx hardhat setBaseURI --network ${network} --contract ${nftContract} --uri ${NFT_BASE_URI}`
   );
 
   console.log("NFT Contract deployed:", nftContract);
@@ -150,7 +154,7 @@ async function addLinkToken(chain: string, contract: string, amount: number) {
   );
 }
 
-async function deployMain(mainNetwork: string) {
+async function deployMain(mainNetwork: string, NFT_BASE_URI: string = "https://api.omniwin.io/v1/nft/") {
   const ADDRESS_MAIN = secrets[mainNetwork + "Address" as keyof typeof secrets];
   const MAIN_NETWORK = mainNetwork;
 
@@ -184,7 +188,7 @@ async function deployMain(mainNetwork: string) {
     `cd /home/spike/omniwin/backend/contracts/scripts/Deploy; npx hardhat setUSDC --network ${MAIN_NETWORK} --contract ${MAIN_CONTRACT} --usdc ${USDC_MAIN_CONTRACT}`
   );
 
-  const NFT_MAIN_CONTRACT = await deployNft(mainNetwork);
+  const NFT_MAIN_CONTRACT = await deployNft(mainNetwork,NFT_BASE_URI);
 
   return {
     MAIN_CONTRACT,
@@ -193,7 +197,7 @@ async function deployMain(mainNetwork: string) {
   };
 }
 
-async function deploySide(sideNetwork: string) {
+async function deploySide(sideNetwork: string, NFT_BASE_URI: string = "https://api.omniwin.io/v1/nft/") {
   const ADDRESS_SIDE = secrets[sideNetwork + "Address" as keyof typeof secrets];
   const SIDE_NETWORK = sideNetwork;
 
@@ -223,7 +227,7 @@ async function deploySide(sideNetwork: string) {
     `cd /home/spike/omniwin/backend/contracts/scripts/Deploy; npx hardhat setUSDC --network ${SIDE_NETWORK} --contract ${SIDE_CONTRACT} --usdc ${USDC_CONTRACT_SIDE}`
   );
 
-  const NFT_SIDE_CONTRACT = await deployNft(sideNetwork);
+  const NFT_SIDE_CONTRACT = await deployNft(sideNetwork,NFT_BASE_URI);
 
   return {
     SIDE_CONTRACT,

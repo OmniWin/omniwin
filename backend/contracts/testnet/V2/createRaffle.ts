@@ -5,26 +5,27 @@ import abi from "../../artifacts/contracts/mainChain/OmniwinMain.sol/Omniwin.jso
 import usdcAbi from "../../artifacts/contracts/USDC.sol/USDC.json"; // If this is JSON, add assertion
 import nftAbi from "../../artifacts/contracts/NFT721.sol/OmniwinNFT721.json"; // If this is JSON, add assertion
 import {providers, Networks} from "../../providers/providers"
+import {ASSET_TYPE} from "../../constants/constants"
   
 async function main(){
+    //only works for main chain
     const network = Networks.bnbChainTestnet;
 
     const prize = {
       erc20: {
         prizeAddress: config[network + "UsdcContract"],
         prizeAmount: ethers.parseUnits("1", 6),
-        assetType: 0,
+        assetType: ASSET_TYPE.ERC20,
       },
       nft721: {
         prizeAddress: config[network + "NftContract"],
         // prizeAmount: 0, //tokenId - specify only if you want a specific token
-        assetType: 1,
+        assetType: ASSET_TYPE.ERC721,
       }
     }
 
     const raffleConfig = {
         minimumFundsInWeis: ethers.parseUnits("1", 6),
-        assetType: 0, // ERC20 token, adjust based on enum order
         ...prize.nft721,
         deadlineDuration: 60 * 60 * 24 * 7, // 7 days
         prices: [
