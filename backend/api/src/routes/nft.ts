@@ -14,6 +14,11 @@ async function routes(fastify: FastifyInstance, options: any) {
     fastify.post('/nfts/:id/favorite', { onRequest: [fastify.authenticate] }, NftController.addFavorite)
 
     // fastify.post('/logout', { schema: logoutSchema, onRequest: [fastify.authenticate] }, AuthController.logout)
+
+
+
+    // Provide NFT metadata for our minted NFTs
+    fastify.get('/nft/:id', NftController.generateNftMetadata)
 }
 
 export default routes

@@ -75,7 +75,8 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         ASSET_TYPE assetType,
         address seller,
         uint128 minimumFundsInWei,
-        uint256 deadline
+        uint256 deadline,
+        uint256 deadlineDuration
     );
 
     event CreateRaffleToSidechain(
@@ -685,7 +686,8 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             _assetType,
             _seller,
             _minimumFundsInWei,
-            block.timestamp + _deadlineDuration
+            block.timestamp + _deadlineDuration,
+            _deadlineDuration
         );
 
         return raffleId;

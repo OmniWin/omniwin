@@ -41,6 +41,6 @@ export class ReferralService {
   public validateCode = async (code: string) => {
     if (code === "OMNI-8989-8989-6969") return true;
     const user = await this.referralRepository.findByCode(code);
-    return Boolean(user?.referral_code);
+    return Boolean(user?.referralCode);
   };
 }

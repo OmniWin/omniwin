@@ -37,14 +37,14 @@ export class UserController {
     public static async create(req: FastifyRequest, res: FastifyReply) {
         try {
             const { address, chainId, usedReferralCode } = req?.body as any;
-            const referralService = await new ReferralService(req.server as FastifyInstance);
-            const userService = await new UserService(req.server as FastifyInstance);
+            const referralService = new ReferralService(req.server as FastifyInstance);
+            const userService = new UserService(req.server as FastifyInstance);
 
             // Check if user exists
             const exists = await userService.exists(address);
             if (exists) {
                 // throw new HttpError(req.server, "USER_EXISTS");
-                const { issued_at, updated_at, ...userWithoutTimestamps } = exists;
+                const { issuedAt, updatedAt, ...userWithoutTimestamps } = exists;
                 return res.code(200).send({
                     success: true,
                     data: userWithoutTimestamps,
@@ -69,9 +69,9 @@ export class UserController {
                 referral_code: referralCode,
             };
             const user = await userService.createUser(data);
-            await referralService.createReferral({ referred_user_id: user.id_user, referral_code: usedReferralCode });
+            await referralService.createReferral({ referred_user_id: user.id, referral_code: usedReferralCode });
 
-            const { issued_at, updated_at, ...userWithoutTimestamps } = user;
+            const { issuedAt, updatedAt, ...userWithoutTimestamps } = user;
             return res.code(200).send({
                 success: true,
                 data: userWithoutTimestamps,

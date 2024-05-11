@@ -3,7 +3,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { NftService } from '../services/nftService';
 import { HttpError } from '../errors/httpError';
 import { FastifyInstance } from 'fastify';
-import { AssetType, NetworkType } from '@prisma/client';
+import { AssetType } from '@prisma/client';
 import { SortBy, FetchNFTsResultType } from "../types";
 export class NftController {
     /**
@@ -25,7 +25,7 @@ export class NftController {
                     cursor: string
                 },
                 types: AssetType[],
-                networks: NetworkType[],
+                networks: number[],
                 sortBy: SortBy,
                 includeClosed: boolean
             };
@@ -130,26 +130,26 @@ export class NftController {
 
     public static async fetchNFTTickets(req: FastifyRequest, res: FastifyReply) {
         try {
-            const lotId = (req.params as any).id;
-            const nftService = new NftService(req.server as FastifyInstance);
+            // const lotId = (req.params as any).id;
+            // const nftService = new NftService(req.server as FastifyInstance);
 
-            let { cursor, limit, order } = req.query as { cursor: string, limit: string, order: string };
+            // let { cursor, limit, order } = req.query as { cursor: string, limit: string, order: string };
 
-            const lotId_ = parseInt(lotId, 10);
-            const limit_ = parseInt(limit, 10) || 10;
-            const cursor_ = cursor ? parseInt(cursor.toString()) : 0;
-            const order_ = order === 'asc' ? 'asc' : 'desc';
+            // const lotId_ = parseInt(lotId, 10);
+            // const limit_ = parseInt(limit, 10) || 10;
+            // const cursor_ = cursor ? parseInt(cursor.toString()) : 0;
+            // const order_ = order === 'asc' ? 'asc' : 'desc';
 
-            const { tickets, nextCursor } = await nftService.fetchNFTTickets(lotId_, limit_, cursor_, order_);
+            // const { tickets, nextCursor } = await nftService.fetchNFTTickets(lotId_, limit_, cursor_, order_);
 
-            return res.code(200).send({
-                success: true,
-                data: {
-                    items: tickets,
-                    next_cursor: nextCursor
-                },
-                message: "Nfts fetched successfully",
-            });
+            // return res.code(200).send({
+            //     success: true,
+            //     data: {
+            //         items: tickets,
+            //         next_cursor: nextCursor
+            //     },
+            //     message: "Nfts fetched successfully",
+            // });
 
         } catch (error: any) {
             console.log(error);
@@ -159,26 +159,26 @@ export class NftController {
 
     public static async fetchNFTActivity(req: FastifyRequest, res: FastifyReply) {
         try {
-            const lotId = (req.params as any).id;
-            const nftService = new NftService(req.server as FastifyInstance);
+            // const lotId = (req.params as any).id;
+            // const nftService = new NftService(req.server as FastifyInstance);
 
-            let { offset, limit } = req.query as { offset: string, limit: string };
+            // let { offset, limit } = req.query as { offset: string, limit: string };
 
-            const lotId_ = parseInt(lotId, 10);
-            const limit_ = parseInt(limit, 10) || 10;
-            const offset_ = offset ? parseInt(offset.toString()) : 0;
+            // const lotId_ = parseInt(lotId, 10);
+            // const limit_ = parseInt(limit, 10) || 10;
+            // const offset_ = offset ? parseInt(offset.toString()) : 0;
 
 
-            const activity = await nftService.fetchNFTActivity(lotId_, limit_, offset_);
+            // const activity = await nftService.fetchNFTActivity(lotId_, limit_, offset_);
 
-            return res.code(200).send({
-                success: true,
-                data: {
-                    items: activity.activity,
-                    pagination: activity.pagination
-                },
-                message: "Activity fetched successfully",
-            });
+            // return res.code(200).send({
+            //     success: true,
+            //     data: {
+            //         items: activity.activity,
+            //         pagination: activity.pagination
+            //     },
+            //     message: "Activity fetched successfully",
+            // });
 
         } catch (error: any) {
             console.log(error);
@@ -188,32 +188,32 @@ export class NftController {
 
     public static async fetchNFTEntrants(req: FastifyRequest, res: FastifyReply) {
         try {
-            const lotId = (req.params as any).id;
-            const nftService = new NftService(req.server as FastifyInstance);
+            // const lotId = (req.params as any).id;
+            // const nftService = new NftService(req.server as FastifyInstance);
 
-            let { offset, limit, ticketId } = req.query as { offset: string, limit: string, ticketId: string };
+            // let { offset, limit, ticketId } = req.query as { offset: string, limit: string, ticketId: string };
 
-            const lotId_ = parseInt(lotId, 10);
-            const limit_ = parseInt(limit, 10) || 10;
-            const offset_ = offset ? parseInt(offset.toString()) : 0;
-            const last_page_last_id_ticket = ticketId ? parseInt(ticketId.toString()) : 0;
+            // const lotId_ = parseInt(lotId, 10);
+            // const limit_ = parseInt(limit, 10) || 10;
+            // const offset_ = offset ? parseInt(offset.toString()) : 0;
+            // const last_page_last_id_ticket = ticketId ? parseInt(ticketId.toString()) : 0;
 
-            console.log({
-                lotId_,
-                limit_,
-                offset_,
-                last_page_last_id_ticket
-            });
+            // console.log({
+            //     lotId_,
+            //     limit_,
+            //     offset_,
+            //     last_page_last_id_ticket
+            // });
 
-            const { entrants } = await nftService.fetchNFTEntrants(lotId_, limit_, offset_);
+            // const { entrants } = await nftService.fetchNFTEntrants(lotId_, limit_, offset_);
 
-            return res.code(200).send({
-                success: true,
-                data: {
-                    items: entrants,
-                },
-                message: "Entrants fetched successfully",
-            });
+            // return res.code(200).send({
+            //     success: true,
+            //     data: {
+            //         items: entrants,
+            //     },
+            //     message: "Entrants fetched successfully",
+            // });
 
         } catch (error: any) {
             console.log(error);
@@ -223,28 +223,46 @@ export class NftController {
 
     public static async addFavorite(req: FastifyRequest, res: FastifyReply) {
         try {
-            const lotId = (req.params as any).id;
+            // const lotId = (req.params as any).id;
+            // const nftService = new NftService(req.server as FastifyInstance);
+
+            // const decodedToken = await req.jwtDecode() as any;
+
+
+            // const session = {
+            //     address: decodedToken.payload.address,
+            //     chainId: decodedToken.payload.chainId,
+            //     userId: decodedToken.payload.userId,
+            //     username: decodedToken.payload.username,
+            //     email: decodedToken.payload.email,
+            // };
+
+            // const lotId_ = parseInt(lotId, 10);
+            // const favorite = await nftService.addFavorite(lotId_, session.userId);
+
+            // return res.code(200).send({
+            //     success: true,
+            //     message: favorite.message,
+            // });
+
+        } catch (error: any) {
+            console.log(error);
+            throw new HttpError(req.server, error.message);
+        }
+    }
+
+
+    public static async generateNftMetadata(req: FastifyRequest, res: FastifyReply) {
+        try {
+            const nftId = parseInt((req.params as any).id.toString(), 10);
+
             const nftService = new NftService(req.server as FastifyInstance);
 
-            const decodedToken = await req.jwtDecode() as any;
+            const nft = await nftService.generateMetadata(nftId);
 
+            req.server.log.info(`Nft fetched successfully, id: ${nftId}`);
 
-            const session = {
-                address: decodedToken.payload.address,
-                chainId: decodedToken.payload.chainId,
-                userId: decodedToken.payload.userId,
-                username: decodedToken.payload.username,
-                email: decodedToken.payload.email,
-            };
-
-            const lotId_ = parseInt(lotId, 10);
-            const favorite = await nftService.addFavorite(lotId_, session.userId);
-
-            return res.code(200).send({
-                success: true,
-                message: favorite.message,
-            });
-
+            return res.code(200).send(nft);
         } catch (error: any) {
             console.log(error);
             throw new HttpError(req.server, error.message);

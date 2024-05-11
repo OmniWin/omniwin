@@ -79,7 +79,10 @@ async function createRaffle(network: string, provider: ethers.JsonRpcProvider, r
         const tx = await nftContract.mintCollectionNFT(wallet.address);
       
         const tokenId = await nftContract.currentTokenId();
-        raffleConfig.prizeAmount = (tokenId - BigInt(1)).toString();
+        console.log(`Minted NFT with token ID: ${tokenId}`)
+        raffleConfig.prizeAmount = (tokenId ).toString();
+
+        await sleep(6000);
       }
 
 
@@ -122,3 +125,8 @@ async function createRaffle(network: string, provider: ethers.JsonRpcProvider, r
 
 
 main().catch(console.error);
+
+//sleep for 5 seconds
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

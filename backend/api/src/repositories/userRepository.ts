@@ -27,7 +27,7 @@ export class UserRepository {
 
     async find(id: number) {
         const { prisma } = this.fastify;
-        return await prisma.user.findUnique({ where: { id_user: id } });
+        return await prisma.user.findUnique({ where: { id: id } });
     }
 
     async syncSocialPlatforms(platform: any, data: any, address: string) {
@@ -53,7 +53,7 @@ export class UserRepository {
 
     async getUserByReferralCode(referralCode: string) {
         const { prisma } = this.fastify;
-        return await prisma.user.findFirst({ where: { referral_code: referralCode } });
+        return await prisma.user.findFirst({ where: { referralCode: referralCode } });
     }
 
     async exists(address: string) {

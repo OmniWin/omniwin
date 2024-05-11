@@ -20,7 +20,7 @@ export class ReferralRepository {
 
     const referral = await prisma.user.findUnique({
       where: {
-        referral_code: referralCode,
+        referralCode: referralCode,
       },
     });
     return referral;

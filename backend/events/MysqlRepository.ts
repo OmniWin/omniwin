@@ -33,7 +33,7 @@ export default class MysqlRepository {
                 id,
                 chainId,
                 status,
-                assetType,
+                Number(assetType) + 1,
                 prizeAddress,
                 prizeNumber,
                 formattedTimestamp,
@@ -53,22 +53,39 @@ export default class MysqlRepository {
         
     }    
 
-    public async insertBlockchainEvent(eventData) {
+    public async insertBlockchainEvent(eventData: {
+        id: string;
+        raffleId: string;
+        name: string;
+        json: any;
+        statusParsing: string;
+        statusMessage: null;
+        createdAt: Date;
+    }) {
         const { id, raffleId, name, json, statusParsing, statusMessage, createdAt } = eventData;
         const query = `
             INSERT INTO blockchain_events (id, raffle_id, name, json, status_parsing, status_message, created_at) 
             VALUES (?, ?, ?, ?, ?, ?, ?);
         `;
 
+        const logEvent = {
+            args:json?.args,
+            log: json?.log
+        }
+
+        console.log('logEvent:', logEvent);
+
         const params = [
             id,
             raffleId,
             name,
-            json,
+            this.stringifyBigInts(logEvent),
             statusParsing,
             statusMessage ?? null,
             createdAt
         ];
+
+        console.log('Inserting blockchain event:', params);
         try {
             const result = await conn.execute(query, params);
             console.log('Blockchain event inserted successfully:', result);
@@ -78,6 +95,15 @@ export default class MysqlRepository {
         }
     }    
 
+    private stringifyBigInts(obj:any) {
+        return JSON.stringify(obj, (key, value) =>
+            typeof value === 'bigint'
+                ? value.toString()  // Convert BigInt to string
+                : value             // Return other values unchanged
+        );
+    }
+
+    
     public async insertSidechainRaffle(eventData) {
         const { raffleId, chainId, status, receiver } = eventData;
         const query = `

@@ -4,7 +4,7 @@
 - Specify if you want erc20, nft721 as prize. Comment/Uncomment prizeAmount on Nft721 if you want to mint nft before creating raffle or you want to use a specific tokenId
 
 Command:
-npx ts-node createRaffleV2.ts
+npx ts-node createRaffle.ts
 
 2. Buy a ticket on any chain
 
@@ -12,14 +12,14 @@ npx ts-node createRaffleV2.ts
 - Set "network" -> on what chain you wish to buy ticket on
 
 Command:
-npx ts-node buyTicketV2.ts
+npx ts-node buyTicket.ts
 
 3. Enable raffle on sidechain
 
 - modify fromNetwork (where main contract is deployed) to toNetwork (where you want to enable raffle)
 
 Command:
-npx ts-node enableRaffleOnSidechainV2.ts
+npx ts-node enableRaffleOnSidechain.ts
 
 It might fail because:
 
