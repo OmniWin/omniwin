@@ -73,8 +73,6 @@ export default class MysqlRepository {
             log: json?.log
         }
 
-        console.log('logEvent:', logEvent);
-
         const params = [
             id,
             raffleId,

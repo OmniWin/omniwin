@@ -5,6 +5,7 @@ import { mysqlInstance } from './MysqlRepository';
 import PQueue from 'p-queue';
 import Redis from 'ioredis';
 import util from 'util';
+import {getNFTData} from './getNftMetadata'
 
 const providerPathHistoryURL = "https://bsc-testnet-rpc.publicnode.com";
 const providerLiveURL = "wss://falling-intensive-smoke.bsc-testnet.quiknode.pro/81d8733025b2515526cbce4707cc78314201c03b/";
@@ -96,7 +97,7 @@ async function processCreateRaffleEvent(event: {
     deadlineDuration: BigInt;
   };
 },eventName: string) {
-
+  const chainId = 2;
   let connection; 
   try {
     connection = await conn.getConnection();
@@ -121,7 +122,7 @@ async function processCreateRaffleEvent(event: {
       console.log('Preparing for insert...');
       const raffleData = {
           id: event.args.raffleId,
-          chainId: 2,
+          chainId: chainId,
           status: 'money_raised', //TODO: fix status
           assetType: event.args.assetType,
           prizeAddress: event.args.nftAddress,
@@ -138,6 +139,9 @@ async function processCreateRaffleEvent(event: {
       const blockchainEvent = processBlockchainEvent(event, eventName, uniqueID);
       await mysqlInstance.insertRaffle(raffleData);
       await mysqlInstance.insertBlockchainEvent(blockchainEvent);
+
+      const nftMetadata = await getNFTData(event.args.nftAddress, event.args.nftId.toString(), parseInt(event.args.assetType.toString()), providerHistory, chainId);
+      console.log('NFT Metadata:', nftMetadata);
 
       await connection.commit();
 

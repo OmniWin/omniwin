@@ -88,7 +88,7 @@ export async function getNFTData(nftContractAddress: string, tokenId: string, as
 
 async function downloadImage(url: string, tokenId: string, chainId: number) {
     // const __dirname = path.resolve(path.dirname(''));
-    const __dirname = '/home/spike/omniwin/website/public/';
+    const __dirname = '/home/spike/omniwin/backend/events/public/';
 
     if (url.startsWith("ipfs:")) {
         const baseUrl = "https://ipfs.io/ipfs/";
@@ -240,6 +240,7 @@ async function fetchNFTData(uri: string, tokenId: string, chainId:number) {
 
             return data;
         } else if (uri.startsWith('https://') || uri.startsWith('http://')) {
+            console.log("uri", uri);
             const response = await fetch(uri);
             if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText} `);
             let data = await response.json() as any;
