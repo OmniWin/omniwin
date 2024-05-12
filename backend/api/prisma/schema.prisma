@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = "mysql://root:327TFg8qGjnrBi@localhost:3306/omniwin"
 }
 
 model Raffles {
@@ -23,7 +23,6 @@ model Raffles {
   claimedPrize            Boolean                   @map("claimed_prize")
   deadline                DateTime                  @map("deadline")
   tickets                 Tickets[]
-  blockchainEvents        BlockchainEvents[]
   sidechainEnabledRaffles SidechainEnabledRaffles[]
   raffleMetadataId        RaffleMetadata?
   priceList               PriceList?
@@ -35,6 +34,7 @@ model SidechainEnabledRaffles {
   id       Int                   @id @default(autoincrement())
   raffleId String                @map("raffle_id")
   chainId  Int                   @map("chain_id")
+  receiver String
   status   SidechainRaffleStatus
   raffle   Raffles               @relation(fields: [raffleId], references: [id])
 
@@ -44,13 +44,12 @@ model SidechainEnabledRaffles {
 
 model BlockchainEvents {
   id            String   @id
-  raffleId      String   @map("raffle_id")
+  raffleId      String?   @map("raffle_id")
   name          String
   json          Json     @default("{}")
   statusParsing String   @map("status_parsing")
   statusMessage String?  @map("status_message")
   createdAt     DateTime @map("created_at")
-  raffle        Raffles  @relation(fields: [raffleId], references: [id])
 
   @@map("blockchain_events")
 }
@@ -274,6 +273,7 @@ enum StatusParsing {
 }
 
 enum RaffleStatus {
+  ACCEPTED        @map("accepted") // raffle has been successfully created
   MONEY_RAISED     @map("money_raised") // Money has been successfully raised
   MONEY_NOT_RAISED @map("money_not_raised") // Minimum amount of money not raised, can claim
   WINNER_SET       @map("winner_set") // Winner has been set, can claim money

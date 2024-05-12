@@ -58,6 +58,7 @@ async function getEventFromRedis(uniqueID) {
     return false;
   }
 }
+
 /** REDIS END */
 
 function listenForNewEvents(contract:any, eventName: string) {
@@ -122,8 +123,9 @@ async function processCreateRaffleEvent(event: {
     ));
 
     const existEventInRedis = await getEventFromRedis(uniqueID);
+  
 
-    if (!existEventInRedis) {
+    if (existEventInRedis) {
       console.log('Event already processed');
       return true;
     } else {
@@ -131,7 +133,8 @@ async function processCreateRaffleEvent(event: {
       const raffleData = {
           id: event.args.raffleId,
           chainId: chainId,
-          status: 'money_raised', //TODO: fix status
+          contract_address: mainContractAddress,
+          status: 'accepted', //TODO: fix status
           assetType: event.args.assetType,
           prizeAddress: event.args.nftAddress,
           prizeNumber: event.args.nftId.toString(),
@@ -205,6 +208,7 @@ async function processCreateRaffleEvent(event: {
         raffleMetadata.collectionName = '';
       }
 
+      await mysqlInstance.insertRaffleMetadata(raffleMetadata);
 
       await connection.commit();
 
@@ -212,6 +216,25 @@ async function processCreateRaffleEvent(event: {
     }
   } catch (error) {
     await connection.rollback();
+
+    try {
+      const errorEventData = {
+        id: event.log.transactionHash,
+        raffleId: event.args.raffleId,
+        name: eventName,
+        json: JSON.stringify(error),
+        statusParsing: 'error',
+        statusMessage: error.message,
+        createdAt: new Date()
+      };
+
+      await mysqlInstance.insertBlockchainEvent(errorEventData);
+      console.log('Error event logged successfully');
+      
+    } catch (logError) {
+      console.error('Failed to log error event:', logError);
+    }
+
     console.error('Failed to process and store raffle event:', error);
     throw error;
   } finally {
@@ -239,8 +262,8 @@ async function processCreateRaffleToSidechainEvent(event: any, eventName: string
       const raffleData = {
           raffleId: event.args.raffleId,
           chainId: 2,
-          status: 'success',
-          receiver: event.args.receiver
+          receiver: event.args.receiver,
+          status: 'pending',
       };
 
       const blockchainEvent = processBlockchainEvent(event, eventName, uniqueID);
@@ -320,8 +343,16 @@ async function fetchHistoricalEvents(contract:any, eventName: string, provider: 
 async function main() {
   const eventName = "CreateRaffle";
 
-  await fetchHistoricalEvents(contract, eventName, providerHistory);
-  listenForNewEvents(contract, eventName);
+  const eventNames = [
+    'CreateRaffle',
+    'CreateRaffleToSidechain',
+    //'BuyEntry' // Add more event names as needed
+  ];
+
+  for (const eventName of eventNames) {
+    await fetchHistoricalEvents(contract, eventName, providerHistory);
+    listenForNewEvents(contract, eventName);
+  }
 }
 
 main().catch(console.error);
