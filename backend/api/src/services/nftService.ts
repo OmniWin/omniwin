@@ -10,18 +10,19 @@ export class NftService {
         this.nftRepository = new NftRepository(this.fastify);
     }
 
-    async fetchNFTs(limit: number, cursor: number, filters: { types?: AssetType[], networks?: number[], sortBy?: SortBy, includeClosed?: boolean }) {
-        let whereCondition = cursor ? { id_nft: { gt: cursor } } : {} as any;
+    async fetchNFTs(limit: number, skip: number, filters: { asset_type?: AssetType[], chain_id?: number[], sortBy?: SortBy, includeClosed?: boolean }) {
+        // let whereCondition = cursor ? { id_nft: { gt: cursor } } : {} as any;
+        let whereCondition = {} as any;
 
-        if (filters?.types) {
+        if (filters?.asset_type) {
             whereCondition.asset_type = {
-                in: filters.types
+                in: filters.asset_type
             };
         }
 
-        if (filters?.networks) {
+        if (filters?.chain_id) {
             whereCondition.network = {
-                in: filters.networks
+                in: filters.chain_id
             };
         }
 
@@ -38,15 +39,12 @@ export class NftService {
         }
 
 
-        const items = await this.nftRepository.fetchNFTs(whereCondition, limit, cursor, filters.sortBy);
+        const items = await this.nftRepository.fetchNFTs(whereCondition, limit, skip, filters.sortBy);
+        
+        // Determine next skip value
+        let nextSkip = skip + limit;
 
-        let nextCursor: string | null = null;
-        if (items.length > limit) {
-            nextCursor = items[limit - 1].id_nft.toString();
-            items.pop(); // Remove the extra item
-        }
-
-        return { items, nextCursor };
+        return { items, nextSkip };
     }
 
     async fetchNFT(id: number, limit: number) {

@@ -10,145 +10,71 @@ export class NftRepository {
         this.fastify = fastify;
     }
 
-    async fetchNFTs(whereCondition: any, limit: number, cursor: number, sortBy: any): Promise<{
-        id_nft: number;
-        id_lot: number;
-        total_tickets: number;
-        bonus_tickets: number;
-        tickets_bought: number;
-        ticket_price: number;
-        transactions: number;
-        end_timestamp: Date;
-        fee: number;
-        closed: boolean;
-        buyout: number;
-        asset_claimed: boolean;
-        tokens_claimed: boolean;
-        owner: string;
-        signer: string;
-        token: string;
-        token_id: string;
-        amount: number;
-        asset_type: string;
-        data: string;
-        network: string;
-        created_at: Date;
-        updated_at: Date;
-        name: string;
-        collection_name: string;
-        image_local: string;
-
-    }[]> {
+    async fetchNFTs(whereCondition: any, limit: number, skip: number, sortBy: any): Promise<any> {
         const { prisma } = this.fastify;
-        const currentTimestamp = Math.floor(Date.now() / 1000);
-
-        // Construct the base query with parameter placeholders
-        let rawQuery = `SELECT 
-                            Nft.id_nft, 
-                            Nft.id_lot, 
-                            Nft.total_tickets, 
-                            Nft.bonus_tickets, 
-                            Nft.tickets_bought, 
-                            Nft.ticket_price, 
-                            Nft.transactions, 
-                            Nft.end_timestamp, 
-                            Nft.fee, 
-                            Nft.closed, 
-                            Nft.buyout, 
-                            Nft.asset_claimed, 
-                            Nft.tokens_claimed, 
-                            Nft.owner, 
-                            Nft.signer, 
-                            Nft.token, 
-                            Nft.token_id, 
-                            Nft.amount, 
-                            Nft.asset_type, 
-                            Nft.data, 
-                            Nft.network, 
-                            Nft.created_at, 
-                            Nft.updated_at, 
-                            NftMetadata.name, 
-                            NftMetadata.collection_name, 
-                            NftMetadata.image_local 
-                        FROM Nft
-                        LEFT JOIN NftMetadata ON Nft.id_nft = NftMetadata.id_nft
-        `;
-
-        // Parameters for the query
-        let queryParams: any[] = [];
-
-        // Building the WHERE clause with parameters
-        let whereClauses = [];
-        let orderByClause = "";
+      
+        // Initialize where conditions based on input
+        const prismaWhereConditions: any = {
+            AND: [],
+        };
 
         if (whereCondition.asset_type?.in) {
-            whereClauses.push(`asset_type IN (${whereCondition.asset_type.in.map(() => '?').join(', ')})`);
-            queryParams.push(...whereCondition.asset_type.in);
+            prismaWhereConditions.AND.push({
+                asset_type: { in: whereCondition.asset_type.in },
+            });
         }
 
         if (whereCondition.network?.in) {
-            whereClauses.push(`network IN (${whereCondition.network.in.map(() => '?').join(', ')})`);
-            queryParams.push(...whereCondition.network.in);
-        }
-
-        if (cursor) {
-            whereClauses.push(`Nft.id_nft > ?`);
-            queryParams.push(cursor);
+            prismaWhereConditions.AND.push({
+                network: { in: whereCondition.network.in },
+            });
         }
 
         if (whereCondition.includeClosed === false) {
-            // do not include closed nfts
-            whereClauses.push(`end_timestamp > ${currentTimestamp} AND closed = 0`);
+            const currentTimestamp = new Date(Math.floor(Date.now()));
+            prismaWhereConditions.AND.push({
+                deadline: { gt: currentTimestamp }
+            });
+        }
+    
+         // Prepare sorting dynamically
+         //add min funds raised
+        let orderBy = [] as any;
+        if (sortBy) {
+            switch (sortBy) {
+                // case SortBy.PriceHighToLow:
+                //     orderBy.push({ ticket_price: 'desc' });
+                //     break;
+                // case SortBy.PriceLowToHigh:
+                //     orderBy.push({ ticket_price: 'asc' });
+                //     break;
+                // case SortBy.TicketsRemaining:
+                //     orderBy.push({ tickets_bought: 'asc' }); // Adjust according to your model
+                //     break;
+                case SortBy.Newest:
+                    orderBy = [{ block_timestamp: 'desc' }];
+                    break;
+                case SortBy.Oldest:
+                    orderBy = [{ block_timestamp: 'asc' }];
+                    break;
+                case SortBy.TimeRemaining:
+                    orderBy = [{ deadline: 'asc' }];
+                    break;
+                // case SortBy.Trending:
+                //     orderBy.push({ trending_score: 'desc' }); // Assuming `trending_score` exists
+                //     break;
+            }
         }
 
+        // Execute query with dynamic where and order conditions
+        const nfts = await prisma.raffles.findMany({
+            where: prismaWhereConditions,
+            orderBy,
+            skip: skip,
+            take: limit,
+        });
 
-        if (sortBy === SortBy.PriceHighToLow) {
-            orderByClause += ` ORDER BY (ticket_price / 6) * total_tickets DESC LIMIT ?`;
-        }
-
-        if (sortBy === SortBy.PriceLowToHigh) {
-            orderByClause += ` ORDER BY (ticket_price / 6) * total_tickets ASC LIMIT ?`;
-        }
-
-        if (sortBy === SortBy.TicketsRemaining) {
-            orderByClause += ` ORDER BY (total_tickets - tickets_bought) / total_tickets ASC LIMIT ?`;
-        }
-
-        if (sortBy === SortBy.Newest) {
-            orderByClause += ` ORDER BY created_at DESC LIMIT ?`;
-        }
-
-        if (sortBy === SortBy.Oldest) {
-            orderByClause += ` ORDER BY created_at ASC LIMIT ?`;
-        }
-
-        if (sortBy === SortBy.TimeRemaining) {
-            orderByClause += ` ORDER BY end_timestamp ASC LIMIT ?`;
-        }
-
-        if (sortBy === SortBy.Trending) {
-            orderByClause += ` ORDER BY trending_score DESC LIMIT ?`;
-        }
-
-        if (whereClauses.length > 0) {
-            rawQuery += ` WHERE ${whereClauses.join(' AND ')}`;
-        }
-
-
-        queryParams.push(limit + 1);
-
-        rawQuery += orderByClause;
-
-
-        // console.log("rawQuery", rawQuery);
-        // console.log("queryParams", queryParams);
-        // Execute the query with parameterized values
-        const nfts = await prisma.$queryRawUnsafe(rawQuery, ...queryParams);
-
-
-
-        return nfts as any[];
-
+        return nfts;
     }
 
 

@@ -7,6 +7,13 @@ import Redis from 'ioredis';
 import util from 'util';
 import {getNFTData} from './getNftMetadata'
 
+enum ASSET_TYPE {
+  ERC20,
+  ERC721,
+  ETH,
+  CCIP
+}
+
 const providerPathHistoryURL = "https://bsc-testnet-rpc.publicnode.com";
 const providerLiveURL = "wss://falling-intensive-smoke.bsc-testnet.quiknode.pro/81d8733025b2515526cbce4707cc78314201c03b/";
 const providerLive = new ethers.WebSocketProvider(providerLiveURL);
@@ -28,6 +35,7 @@ const redis = new Redis(
     port: 6380
   }
 );
+
 async function updateRedis(uniqueID) {
   try {
     await redis.set(uniqueID, uniqueID);
@@ -97,7 +105,7 @@ async function processCreateRaffleEvent(event: {
     deadlineDuration: BigInt;
   };
 },eventName: string) {
-  const chainId = 2;
+  const chainId = 97; //BSC Testnet
   let connection; 
   try {
     connection = await conn.getConnection();
@@ -115,7 +123,7 @@ async function processCreateRaffleEvent(event: {
 
     const existEventInRedis = await getEventFromRedis(uniqueID);
 
-    if (existEventInRedis) {
+    if (!existEventInRedis) {
       console.log('Event already processed');
       return true;
     } else {
@@ -140,8 +148,63 @@ async function processCreateRaffleEvent(event: {
       await mysqlInstance.insertRaffle(raffleData);
       await mysqlInstance.insertBlockchainEvent(blockchainEvent);
 
-      const nftMetadata = await getNFTData(event.args.nftAddress, event.args.nftId.toString(), parseInt(event.args.assetType.toString()), providerHistory, chainId);
-      console.log('NFT Metadata:', nftMetadata);
+      const raffleMetadata = {
+        raffleId: event.args.raffleId,
+        json: {},
+        name: '',
+        description: '',
+        imageUrl: '',
+        imageCid: '',
+        status: 'success',
+        collectionName: '',
+        statusMessage: ''
+      }
+  
+      if(event.args.assetType.toString() === ASSET_TYPE.ERC721.toString()) {
+        const nftMetadata = await getNFTData(event.args.nftAddress, event.args.nftId.toString(), parseInt(event.args.assetType.toString()), providerHistory, chainId);
+
+        raffleMetadata.json = nftMetadata;
+        raffleMetadata.name = nftMetadata.name;
+        raffleMetadata.description = nftMetadata.description;
+        raffleMetadata.imageUrl = nftMetadata.image;
+        raffleMetadata.imageCid = nftMetadata.image_local;
+        raffleMetadata.collectionName = nftMetadata.collectionName;
+      } else if(event.args.assetType.toString() === ASSET_TYPE.ERC20.toString()) {
+        // ERC-20 Token Contract ABI (only including functions needed for getting name and symbol)
+        const tokenAbi = [
+          "function name() view returns (string)",
+          "function symbol() view returns (string)"
+        ];
+
+        //get symbol and name of the token from erc20 contract 
+        const tokenContract = new ethers.Contract(event.args.nftAddress, tokenAbi, providerHistory);
+
+        const symbol = await tokenContract.symbol();
+        const name = await tokenContract.name();
+
+        raffleMetadata.json = {symbol, name};
+        raffleMetadata.name = name;
+        raffleMetadata.description = '';
+        raffleMetadata.imageUrl = '';
+        raffleMetadata.imageCid = '';
+        raffleMetadata.collectionName = '';
+      } else if (event.args.assetType.toString() === ASSET_TYPE.ETH.toString()) {
+        raffleMetadata.json = {symbol: 'ETH', name: 'Ethereum'};
+        raffleMetadata.name = 'Ethereum';
+        raffleMetadata.description = '';
+        raffleMetadata.imageUrl = '';
+        raffleMetadata.imageCid = '';
+        raffleMetadata.collectionName = '';
+      } else if (event.args.assetType.toString() === ASSET_TYPE.CCIP.toString()) {
+        //Prize is not here, its on another chain
+        raffleMetadata.json = {symbol: 'CCIP', name: 'CCIP'};
+        raffleMetadata.name = 'CCIP';
+        raffleMetadata.description = '';
+        raffleMetadata.imageUrl = '';
+        raffleMetadata.imageCid = '';
+        raffleMetadata.collectionName = '';
+      }
+
 
       await connection.commit();
 
@@ -217,6 +280,7 @@ function processBlockchainEvent(event: any, eventName: string, uniqueID: string)
 async function processEvent(event: any, eventName: string) {
   console.log(`Processing ${eventName} event...`);
   if(event?.log === undefined) {
+    //Depending on RPC provider, the event object might not have a log property
     event.log = event;
   }
   switch (eventName) {

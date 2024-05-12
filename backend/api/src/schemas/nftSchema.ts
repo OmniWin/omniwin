@@ -6,9 +6,9 @@ export const nftPagination = {
                 type: "object",
                 properties: {
                     pageSize: { type: "integer" },
-                    cursor: { type: "string" }
+                    skip: { type: "integer" }
                 },
-                required: ["pageSize", "cursor"]
+                required: ["pageSize", "skip"]
             },
             types: {
                 type: "array",
@@ -25,6 +25,6 @@ export const nftPagination = {
                 type: "boolean"
             }
         },
-        required: ["pagination", "types"] // Adjust according to your requirements
+        required: ["pagination", "types"]
     },
 };

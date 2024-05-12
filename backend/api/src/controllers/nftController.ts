@@ -4,7 +4,7 @@ import { NftService } from '../services/nftService';
 import { HttpError } from '../errors/httpError';
 import { FastifyInstance } from 'fastify';
 import { AssetType } from '@prisma/client';
-import { SortBy, FetchNFTsResultType } from "../types";
+import { SortBy } from "../types";
 export class NftController {
     /**
      * 
@@ -21,8 +21,8 @@ export class NftController {
 
             const { pagination, types, networks, sortBy } = req.body as {
                 pagination: {
-                    pageSize: string,
-                    cursor: string
+                    pageSize: number,
+                    skip: number
                 },
                 types: AssetType[],
                 networks: number[],
@@ -33,8 +33,8 @@ export class NftController {
             console.log("filters", req.body);
 
 
-            const limit = parseInt(pagination.pageSize, 10) || 10;
-            const cursor = pagination?.cursor ? parseInt(pagination.cursor.toString()) : 0;
+            const limit = pagination.pageSize || 10;
+            const skip = pagination.skip || 0;
 
             const filters = {
                 types,
@@ -42,55 +42,20 @@ export class NftController {
                 sortBy
             }
 
-
-
-            const { items, nextCursor } = await nftService.fetchNFTs(limit, cursor, filters);
-
-            //full_price
-            //ticket_price
-            //tickets_bought / tickets_total
-            //time_left
-            //nft name
-            //nft image
-            //nft owner
-            //favorites
-            //assetType
-
-            const USDC_decimals = 6;
-            const convertedItems = items.map(item => ({
-                full_price: (Number(item.ticket_price) / Math.pow(10, USDC_decimals)) * item.total_tickets,
-                ticket_price: Number(item.ticket_price) / Math.pow(10, USDC_decimals),
-                tickets_bought: item.tickets_bought,
-                tickets_total: item.total_tickets,
-                end_timestamp: item.end_timestamp,
-                nft_name: item.name,
-                nft_image: item.image_local,
-                nft_owner: item.owner,
-                // favorites: item.favorites,
-                asset_type: item.asset_type,
-                nft_id: item.id_lot,
-                token_id: item.token_id,
-                network: item.network,
-                collection_name: item.collection_name,
-                is_verified: false,
-            }));
-
-            req.server.log.info(`Nfts fetched successfully, page: ${cursor}, limit: ${limit}`);
+            const { items, nextSkip } = await nftService.fetchNFTs(limit, skip, filters);
 
             return res.code(200).send({
                 success: true,
                 data: {
-                    items: convertedItems,
-                    next_cursor: nextCursor
-                } as FetchNFTsResultType,
+                    items: items,
+                    next_cursor: nextSkip
+                } as any,
                 message: "Nfts fetched successfully",
             });
 
         } catch (error: any) {
             console.log(error);
-            if (error.code === 'P2002') { // Prisma's code for unique constraint violation
-                throw new HttpError(req.server, "EMAIL_IN_USE");
-            }
+            
             throw new HttpError(req.server, error.message);
         }
     }

@@ -10,6 +10,7 @@ datasource db {
 model Raffles {
   id                      String                    @id
   chainId                 Int                       @map("chain_id")
+  contractAddress         String                    @map("contract_address")
   status                  RaffleStatus
   assetType               AssetType                 @map("asset_type")
   prizeAddress            String                    @map("prize_address")
