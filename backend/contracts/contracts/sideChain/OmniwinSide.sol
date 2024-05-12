@@ -65,7 +65,12 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
 
     event MessageSent(bytes32 messageId);
 
-    event RaffleCreatedFromMainChain(bytes32 indexed raffleId);
+    event RaffleCreatedFromMainChain(
+        bytes32 indexed raffleId,
+        address sender,
+        uint64 sourceChainSelector,
+        bytes32 messageId
+    );
 
     event RaffleCreatedAck(
         bytes32 indexed raffleId,
@@ -75,19 +80,25 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
     );
 
     event CreateRaffleCCIPEvent(
-        bytes32 raffleId,
-        address prizeAddress,
-        uint256 prizeNumber,
-        ASSET_TYPE assetType
+        bytes32 indexed raffleId,
+        address indexed nftAddress,
+        uint256 indexed nftId,
+        ASSET_TYPE assetType,
+        address seller,
+        uint128 minimumFundsInWei,
+        uint256 blockTimestamp,
+        uint256 deadlineDuration
     );
 
     event EntrySold(
         bytes32 indexed raffleId,
         address indexed buyer,
+        uint256 price,
         uint256 numEntries,
-        uint256 usdAmount,
         uint256 amountRaised,
-        uint256 entriesLength,
+        uint256 totalNumEntries,
+        uint256 priceStructureId,
+        uint256 blockTimestamp,
         bytes32 messageId
     );
 
@@ -194,12 +205,6 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         bool prizeClaimed;
         bool cashClaimed;
         uint256 amountForSeller;
-    }
-
-    struct CreateRaffle {
-        uint256 number;
-        string text;
-        address addr;
     }
 
     struct PriceStructure {
@@ -426,7 +431,11 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
             raffleId,
             _prizeAddress,
             _prizeNumber,
-            _assetType
+            _assetType,
+            msg.sender,
+            _minimumFundsInWei,
+            block.timestamp,
+            _deadlineDuration
         );
 
         return raffleId;
@@ -691,6 +700,8 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
             revert RaffleAlreadyExists();
         }
 
+        bytes32 messageIdSourceChain = message.messageId;
+
         raffles[raffleId] = RaffleStruct({
             prizeNumber: 0,
             prizeAddress: address(0),
@@ -715,7 +726,14 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
             amountForSeller: 0
         });
 
-        emit RaffleCreatedFromMainChain(raffleId);
+        address sender = abi.decode(message.sender, (address));
+
+        emit RaffleCreatedFromMainChain(
+            raffleId,
+            sender,
+            message.sourceChainSelector,
+            messageIdSourceChain
+        );
     }
 
     function transferAsset(
@@ -805,22 +823,14 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         uint256 gasLimit
     ) external payable {
         EntryInfoStruct storage entryInfo = rafflesEntryInfo[_raffleId];
-        if (entryInfo.status != STATUS.ACCEPTED)
-            revert EntryNotAllowed("Not in ACCEPTED");
 
-        if (block.timestamp > raffles[_raffleId].deadline) {
-            revert RaffleDeadlinePassed(_raffleId);
-        }
-
-        // Price checks
-        PriceStructure memory priceStruct = pricesList[_raffleId][_id];
+        PriceStructure memory priceStruct = _validateEntry(
+            _raffleId,
+            _id,
+            msg.sender
+        );
 
         IERC20 usdc = IERC20(usdcContractAddress);
-        uint256 allowance = usdc.allowance(msg.sender, address(this));
-        if (allowance < priceStruct.price + ccipMessageFee) {
-            revert UsdcAllowanceTooLow();
-        }
-
         if (!usdc.transferFrom(msg.sender, address(this), priceStruct.price)) {
             revert USDCTransferFailed();
         }
@@ -829,29 +839,12 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
             revert FailedToSendPlatformFee();
         }
 
-        uint48 numEntries = priceStruct.numEntries;
-
-        // save the entries onchain
-        uint48 entriesLength = entryInfo.entriesLength;
-        EntriesBought memory entryBought = EntriesBought({
-            player: msg.sender,
-            currentEntriesLength: uint48(entriesLength + numEntries),
-            priceStructureId: _id
-        });
-
-        entriesList[_raffleId].push(entryBought);
-
-        // update raffle variables
-        entryInfo.amountRaised += priceStruct.price;
-        entryInfo.entriesLength += numEntries;
+        _updateRaffleDetails(_raffleId, priceStruct, _id);
 
         MESSAGE_TYPE messageType = MESSAGE_TYPE.BUY_ENTRY;
-
         bytes memory data = abi.encode(messageType, _raffleId, msg.sender, _id);
-
         //for testing
         // bytes32 messageId = 0x726566756e64636369706d657373616765696400000000000000000000000000;
-
         //sent bought entry to main chain
         bytes32 messageId = sendMessage(data, gasLimit);
 
@@ -861,12 +854,60 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
         emit EntrySold(
             _raffleId,
             msg.sender,
-            numEntries,
             priceStruct.price,
+            priceStruct.numEntries,
             entryInfo.amountRaised,
-            entriesLength,
+            entryInfo.entriesLength,
+            _id,
+            block.timestamp,
             messageId
         );
+    }
+
+    function _updateRaffleDetails(
+        bytes32 _raffleId,
+        PriceStructure memory priceStruct,
+        uint48 _id
+    ) internal {
+        EntryInfoStruct storage entryInfo = rafflesEntryInfo[_raffleId];
+        uint48 numEntries = priceStruct.numEntries;
+
+        // save the entries onchain
+        EntriesBought memory entryBought = EntriesBought({
+            player: msg.sender,
+            currentEntriesLength: uint48(entryInfo.entriesLength + numEntries),
+            priceStructureId: _id
+        });
+        entriesList[_raffleId].push(entryBought);
+
+        // update raffle variables
+        entryInfo.amountRaised += priceStruct.price;
+        entryInfo.entriesLength += numEntries;
+    }
+
+    function _validateEntry(
+        bytes32 _raffleId,
+        uint48 _id,
+        address sender
+    ) internal view returns (PriceStructure memory priceStruct) {
+        EntryInfoStruct storage entryInfo = rafflesEntryInfo[_raffleId];
+        if (entryInfo.status != STATUS.ACCEPTED)
+            revert EntryNotAllowed("Not in ACCEPTED status");
+
+        if (block.timestamp > raffles[_raffleId].deadline) {
+            revert RaffleDeadlinePassed(_raffleId);
+        }
+
+        priceStruct = pricesList[_raffleId][_id];
+        IERC20 usdc = IERC20(usdcContractAddress);
+        uint256 requiredAmount = priceStruct.price + ccipMessageFee;
+        uint256 allowance = usdc.allowance(sender, address(this));
+
+        if (allowance < requiredAmount) {
+            revert UsdcAllowanceTooLow();
+        }
+
+        return priceStruct;
     }
 
     function saveEntriesMessage(
