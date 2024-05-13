@@ -34,6 +34,7 @@ task("addLinkToken", "Transfer link token to the contract")
         const linkTokenContract = await hre.ethers.getContractAt(erc20Abi, linkToken);
 
         //Transfer link to the contract
+        console.log(`Transferring ${amount} LINK (${linkToken}) to ${toContract}, from wallet: ${hre.config.networks.hardhat.accounts[0]}`);
         await linkTokenContract.transfer(toContract, amount);
 
     });
