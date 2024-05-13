@@ -10,7 +10,7 @@ import {ASSET_TYPE} from "../../constants/constants"
 async function main(){
     //only works for main chain
     const network = Networks.baseTestnet;
-    const selectedPrize = ASSET_TYPE.ERC721;
+    const selectedPrize = ASSET_TYPE.ERC20;
 
     const prize = {
        [ASSET_TYPE.ERC20]: {
@@ -28,10 +28,10 @@ async function main(){
     const gasLimitTx = {
         "baseTestnet": {
             [ASSET_TYPE.ERC20] : {
-                gasLimit: 350_000
+                gasLimit: 450_000
             },
             [ASSET_TYPE.ERC721] : {
-                gasLimit: 650_000
+                gasLimit: 750_000
             }
         },
         "bnbChainTestnet": {
@@ -70,7 +70,7 @@ async function main(){
             price: ethers.parseUnits("3", 6), // Slight discount for buying more
           },
         ],
-        gasLimit: 400_000, //gas needed for the transaction to execute on the mainchain
+        gasLimit: 450_000, //gas needed for the transaction to execute on the mainchain
         approveAmount: {
             "baseTestnet": ethers.parseUnits("0.5", 6) //ccip message fee
         },

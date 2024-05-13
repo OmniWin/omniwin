@@ -75,7 +75,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         ASSET_TYPE assetType,
         address seller,
         uint128 minimumFundsInWei,
-        uint256 deadline,
+        uint256 blockTimestamp,
         uint256 deadlineDuration
     );
 
@@ -83,7 +83,8 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         bytes32 indexed raffleId,
         address indexed receiver,
         uint64 indexed chainSelector,
-        uint256 gasLimit
+        uint256 gasLimit,
+        bytes32 messageId
     );
 
     event RaffleEnded(
@@ -96,16 +97,23 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
     event EntrySold(
         bytes32 indexed raffleId,
         address indexed buyer,
-        uint256 currentSize,
+        uint256 price,
+        uint256 numEntries,
+        uint256 amountRaised,
+        uint256 totalNumEntries,
         uint256 priceStructureId,
-        bytes32 messageId
+        uint256 blockTimestamp
     );
 
     event EntrySoldCCIP(
         bytes32 indexed raffleId,
         address indexed buyer,
-        uint256 currentSize,
+        uint256 price,
+        uint256 numEntries,
+        uint256 amountRaised,
+        uint256 totalNumEntries,
         uint256 priceStructureId,
+        uint256 blockTimestamp,
         bytes32 messageId
     );
 
@@ -289,6 +297,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
     error AlreadyClaimed();
     error NotTheWinner();
     error FailedToSendCashForSeller();
+    error InvalidPriceStructureId();
 
     mapping(bytes32 => RandomResult) public requests;
     // map the requestId created by chainlink with the raffle info passed as param when calling getRandomNumber()
@@ -641,7 +650,9 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             );
 
             // Generate a unique key
-            raffleId = keccak256(abi.encodePacked(msg.sender, block.timestamp));
+            raffleId = keccak256(
+                abi.encodePacked(msg.sender, block.timestamp, gasleft())
+            );
         }
 
         if (raffles[raffleId].deadline != 0) {
@@ -686,7 +697,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             _assetType,
             _seller,
             _minimumFundsInWei,
-            block.timestamp + _deadlineDuration,
+            block.timestamp,
             _deadlineDuration
         );
 
@@ -746,7 +757,6 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             revert FailedToSendPlatformFee();
         }
 
-        SChains memory currentChain = _chainSelector;
         MESSAGE_TYPE messageType = MESSAGE_TYPE.CREATE_RAFFLE_FROM_MAINCHAIN;
 
         bytes memory data = abi.encode(
@@ -755,18 +765,19 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             raffle.deadline,
             _raffleId
         );
-        sendMessage(
-            currentChain.chainSelector,
-            currentChain.ccnsReceiverAddress,
+        bytes32 messageId = sendMessage(
+            _chainSelector.chainSelector,
+            _chainSelector.ccnsReceiverAddress,
             data,
-            currentChain.gasLimit
+            _chainSelector.gasLimit
         );
 
         emit CreateRaffleToSidechain(
             _raffleId,
-            currentChain.ccnsReceiverAddress,
-            currentChain.chainSelector,
-            currentChain.gasLimit
+            _chainSelector.ccnsReceiverAddress,
+            _chainSelector.chainSelector,
+            _chainSelector.gasLimit,
+            messageId
         );
     }
 
@@ -1007,6 +1018,11 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         if (entryInfo.status != STATUS.ACCEPTED) revert NotInAcceptedStatus();
 
         PriceStructure memory priceStruct = pricesList[_raffleId][_id];
+
+        if (priceStruct.numEntries == 0) {
+            revert InvalidPriceStructureId();
+        }
+
         IERC20 usdc = IERC20(usdcContractAddress);
 
         uint256 price = priceStruct.price;
@@ -1035,7 +1051,16 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
         raffleChainActions[_raffleId][address(this)].amount += price;
 
         //add block timestamp to the raffle
-        emit EntrySold(_raffleId, msg.sender, entryInfo.entriesLength, _id, "");
+        emit EntrySold(
+            _raffleId,
+            msg.sender,
+            price,
+            numEntries,
+            entryInfo.amountRaised,
+            entryInfo.entriesLength,
+            _id,
+            block.timestamp
+        );
     }
 
     /// @param _raffleId Id of the raffle
@@ -1373,11 +1398,9 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
 
         EntryInfoStruct storage entryInfo = rafflesEntryInfo[_raffleId];
 
-        uint48 entriesLength = entryInfo.entriesLength;
-
         EntriesBought memory entryBought = EntriesBought({
             player: _buyer,
-            currentEntriesLength: uint48(entriesLength + numEntries),
+            currentEntriesLength: uint48(entryInfo.entriesLength + numEntries),
             priceStructureId: uint48(_priceStructureId),
             sender: _sender,
             messageId: _messageIdSourceChain
@@ -1393,12 +1416,15 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
 
         ticketsBoughtCCIP[_raffleId][_messageIdSourceChain] = true;
 
-        //TODO: say that its coming from sidechain and what sidechain
         emit EntrySoldCCIP(
             _raffleId,
             _buyer,
-            entriesLength,
+            usdcAmount,
+            numEntries,
+            entryInfo.amountRaised,
+            entryInfo.entriesLength,
             _priceStructureId,
+            block.timestamp,
             _messageIdSourceChain
         );
     }

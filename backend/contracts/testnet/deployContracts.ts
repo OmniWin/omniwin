@@ -33,65 +33,68 @@ async function main() {
     const SIDE_CHAIN_SELECTOR = routerConfig[SIDE_CHAIN].chainSelector;
     const NFT_BASE_URI = "https://api.omniwin.io/v1/nft/"
 
-    // const { MAIN_CONTRACT, USDC_MAIN_CONTRACT } = await deployMain(MAIN_CHAIN,NFT_BASE_URI) as { MAIN_CONTRACT: string, USDC_MAIN_CONTRACT: string };
+    // const { MAIN_CONTRACT, USDC_MAIN_CONTRACT, NFT_MAIN_CONTRACT } = await deployMain(MAIN_CHAIN,NFT_BASE_URI) as { MAIN_CONTRACT: string, USDC_MAIN_CONTRACT: string, NFT_MAIN_CONTRACT: string};
   
-    // const { MAIN_CONTRACT, USDC_MAIN_CONTRACT } = { 
-    //   MAIN_CONTRACT: "0xEb0Af68e467B2F2E68Aa9995DDAA2ef300c85D94",
-    //   USDC_MAIN_CONTRACT: "0x6df41902C6aD6C9ebBd655eB55C19A777ae69c37"
+    const { MAIN_CONTRACT, USDC_MAIN_CONTRACT, NFT_MAIN_CONTRACT } = { 
+      MAIN_CONTRACT: "0xFFbeaA7343647aC6F78fdCaf452e1c03b1dC4c07",
+      USDC_MAIN_CONTRACT: "0x772aC8C51662f731FEeAdF2e98E3c9F79B5Cf2fb",
+      NFT_MAIN_CONTRACT: "0x22f0F262B5641Cd88BEEd528eA78beF050D04f19"
+    }
+
+    const { SIDE_CONTRACT, USDC_CONTRACT_SIDE, NFT_SIDE_CONTRACT } =
+      await deploySide(SIDE_CHAIN,NFT_BASE_URI) as { SIDE_CONTRACT: string, USDC_CONTRACT_SIDE: string, NFT_SIDE_CONTRACT: string};
+    
+    // const { SIDE_CONTRACT, USDC_CONTRACT_SIDE, NFT_SIDE_CONTRACT } = {
+    //   SIDE_CONTRACT: "0xC4159b429fb82EE1a2C2d3590a6269F3937274B6",
+    //   USDC_CONTRACT_SIDE: "0xF024ecC6f75E93860f0462D0f64219312557Bc64",
+    //   NFT_SIDE_CONTRACT: "0xF234C207f5c728cf0e3B5DDc48e9bA09BB547fD3"
     // }
 
-    // const { SIDE_CONTRACT, USDC_CONTRACT_SIDE } =
-    //   await deploySide(SIDE_CHAIN,NFT_BASE_URI) as { SIDE_CONTRACT: string, USDC_CONTRACT_SIDE: string };
-    
-    // const { SIDE_CONTRACT, USDC_CONTRACT_SIDE } = {
-    //   SIDE_CONTRACT: "0x1304a1Aa1BCf40A560A2422391062451f2fE5bBC",
-    //   USDC_CONTRACT_SIDE: "0x32E33b084f2AB60FC77Fc75bdEA21c21F2143737"
-    // }
+    //deployNft are commented out because they are already deployed via deployMain and deploySide
+    // await deployNft(MAIN_CHAIN, NFT_BASE_URI);
+    // await deployNft(SIDE_CHAIN, NFT_BASE_URI);
 
-    
-    await deployNft(MAIN_CHAIN, NFT_BASE_URI);
-    await deployNft(SIDE_CHAIN, NFT_BASE_URI);
     // const tokenId = await mintNft(MAIN_CHAIN, config[MAIN_CHAIN + "NftContract"], secrets[MAIN_CHAIN + "Address" as keyof typeof secrets]);
 
-    // addContractToConfig(
-    //   {
-    //     [MAIN_CHAIN]: {
-    //       "Contract": MAIN_CONTRACT,
-    //       "UsdcContract": USDC_MAIN_CONTRACT,
-    //       "NftContract": NFT_MAIN_CONTRACT
-    //     },
-    //     [SIDE_CHAIN]: {
-    //       "Contract": SIDE_CONTRACT,
-    //       "UsdcContract": USDC_CONTRACT_SIDE,
-    //       "NftContract": NFT_SIDE_CONTRACT
-    //     }
-    //   }
-    // );
+    addContractToConfig(
+      {
+        [MAIN_CHAIN]: {
+          "Contract": MAIN_CONTRACT,
+          "UsdcContract": USDC_MAIN_CONTRACT,
+          "NftContract": NFT_MAIN_CONTRACT
+        },
+        [SIDE_CHAIN]: {
+          "Contract": SIDE_CONTRACT,
+          "UsdcContract": USDC_CONTRACT_SIDE,
+          "NftContract": NFT_SIDE_CONTRACT
+        }
+      }
+    );
 
 
-    // await setupSecurity(
-    //   MAIN_CONTRACT,
-    //   SIDE_CONTRACT,
-    //   MAIN_CHAIN,
-    //   SIDE_CHAIN,
-    //   MAIN_CHAIN_SELECTOR,
-    //   SIDE_CHAIN_SELECTOR
-    // );
+    await setupSecurity(
+      MAIN_CONTRACT,
+      SIDE_CONTRACT,
+      MAIN_CHAIN,
+      SIDE_CHAIN,
+      MAIN_CHAIN_SELECTOR,
+      SIDE_CHAIN_SELECTOR
+    );
 
     // await mintUSDC(MAIN_CHAIN, USDC_MAIN_CONTRACT, 1000, secrets[MAIN_CHAIN + "Address"  as keyof typeof secrets]);
     // await mintUSDC(SIDE_CHAIN, USDC_CONTRACT_SIDE, 1000, secrets[SIDE_CHAIN + "Address"   as keyof typeof secrets]);
 
 
-    // await addLinkToken(MAIN_CHAIN, config[MAIN_CHAIN + "Contract"], 1);
-    // await addLinkToken(SIDE_CHAIN, config[SIDE_CHAIN + "Contract"], 1);
+    await addLinkToken(MAIN_CHAIN, config[MAIN_CHAIN + "Contract"], 1);
+    await addLinkToken(SIDE_CHAIN, config[SIDE_CHAIN + "Contract"], 1);
 
-    // console.log("MAIN_CONTRACT", MAIN_CONTRACT);
-    // console.log("USDC_CONTRACT", USDC_MAIN_CONTRACT);
+    console.log("MAIN_CONTRACT", MAIN_CONTRACT);
+    console.log("USDC_CONTRACT", USDC_MAIN_CONTRACT);
 
-    // console.log("SIDE_CONTRACT", SIDE_CONTRACT);
-    // console.log("USDC_CONTRACT", USDC_CONTRACT_SIDE);
+    console.log("SIDE_CONTRACT", SIDE_CONTRACT);
+    console.log("USDC_CONTRACT", USDC_CONTRACT_SIDE);
 
-    // console.log("Contracts deployed successfully!");
+    console.log("Contracts deployed successfully!");
   } catch (error) {
     console.error("Deployment script failed:", error);
   }
@@ -102,9 +105,14 @@ async function deployNft(network: string, NFT_BASE_URI: string = "https://api.om
     `npx hardhat deployNft --network ${network}`
   ) as string;
 
-  await runCommand(
-    `npx hardhat verify ${nftContract} --network ${network}`
-  );
+  await sleep(10000);
+  try{
+    await runCommand(
+      `npx hardhat verify ${nftContract} --network ${network}`
+    );
+  }catch(e){
+    console.log("Error verifying contract");
+  }
 
   //Set base uri
   await runCommand(
@@ -116,7 +124,7 @@ async function deployNft(network: string, NFT_BASE_URI: string = "https://api.om
   return nftContract;
 }
 
-function addContractToConfig(data: {[network: string]: {Contract: string, UsdcContract: string}}) {
+function addContractToConfig(data: {[network: string]: {Contract: string, UsdcContract: string, NftContract: string}}) {
   console.log("Adding contract to config...");
   for(const [network, contractObj] of Object.entries(data)) {
     for(const [type, contract] of Object.entries(contractObj)) {
@@ -173,15 +181,24 @@ async function deployMain(mainNetwork: string, NFT_BASE_URI: string = "https://a
   );
   console.log(`Deployed Contract Address: ${MAIN_CONTRACT}`);
 
+  await sleep(10000);
+
   console.log(`Verifying contract on ${MAIN_NETWORK}...`);
-  await runCommand(
-    `npx hardhat verify --constructor-args argsMain.js ${MAIN_CONTRACT} --network ${MAIN_NETWORK}`
-  );
+  try{
+    await runCommand(
+      `npx hardhat verify --constructor-args argsMain.js ${MAIN_CONTRACT} --network ${MAIN_NETWORK}`
+    );
+  }catch(e){
+    console.log("Error verifying contract");
+  }
 
   console.log(`Deploying USDC contract on ${MAIN_NETWORK}...`);
   const USDC_MAIN_CONTRACT = await runCommand(
     `cd /home/spike/omniwin/backend/contracts/scripts/Deploy; npx hardhat deployUSDC --network ${MAIN_NETWORK}`
   ) as string;
+  console.log(`Deployed USDC Contract Address: ${USDC_MAIN_CONTRACT}`);
+
+  await sleep(10000);
 
   console.log(`Setting USDC contract on main contract...`);
   await runCommand(
@@ -212,15 +229,24 @@ async function deploySide(sideNetwork: string, NFT_BASE_URI: string = "https://a
   );
   console.log(`Deployed Contract Address: ${SIDE_CONTRACT}`);
 
+  await sleep(10000);
+
   console.log(`Verifying contract on ${SIDE_NETWORK}...`);
-  await runCommand(
-    `npx hardhat verify --constructor-args argsSide.js ${SIDE_CONTRACT} --network ${SIDE_NETWORK}`
-  );
+  try{
+    await runCommand(
+      `npx hardhat verify --constructor-args argsSide.js ${SIDE_CONTRACT} --network ${SIDE_NETWORK}`
+    );
+  }catch(e){  
+    console.log("Error verifying contract");
+  }
 
   console.log(`Deploying USDC contract on ${SIDE_NETWORK}...`);
   const USDC_CONTRACT_SIDE = await runCommand(
     `cd /home/spike/omniwin/backend/contracts/scripts/Deploy; npx hardhat deployUSDC --network ${SIDE_NETWORK}`
   );
+  console.log(`Deployed USDC Contract Address: ${USDC_CONTRACT_SIDE}`);
+
+  await sleep(10000);
 
   console.log(`Setting USDC contract on side contract...`);
   await runCommand(
@@ -281,6 +307,13 @@ async function setupSecurity(
   await runCommand(
     `npx hardhat allowlistSender --network ${MAIN_CHAIN} --contract ${MAIN_CONTRACT} --externalcontract ${SIDE_CONTRACT} --allow true`
   );
+}
+
+//sleep
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 main();

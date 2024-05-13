@@ -8,8 +8,8 @@ import {providers, Networks} from "../../providers/providers"
 
 
 async function main(){
-    const network = Networks.bnbChainTestnet;
-    const raffleId = "0x2ac398cd71e68307f8be8537533aeed4ece42f95ee9cf2087067acf048f227ee";
+    const network = Networks.baseTestnet;
+    const raffleId = "0xe1804c999f12a0e4113d7189fe5da104b59a372549f20d5afb902eef911a47b4";
 
     console.log("Buying ticket for raffleId: ", raffleId, " on network: ", network);
 
