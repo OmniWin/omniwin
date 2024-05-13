@@ -9,7 +9,7 @@ import {providers, Networks} from "../../providers/providers"
 
 async function main(){
     const network = Networks.baseTestnet;
-    const raffleId = "0xe1804c999f12a0e4113d7189fe5da104b59a372549f20d5afb902eef911a47b4";
+    const raffleId = "0x7d658609697353d5c836a667b58a23b797e199e6c0fd284d5940ad860e9a3f56"; //base
 
     console.log("Buying ticket for raffleId: ", raffleId, " on network: ", network);
 

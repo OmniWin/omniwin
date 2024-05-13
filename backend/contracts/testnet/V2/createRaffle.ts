@@ -8,6 +8,7 @@ import {providers, Networks} from "../../providers/providers"
 import {ASSET_TYPE} from "../../constants/constants"
   
 async function main(){
+  console.log("Creating raffle on BNB Chain Testnet");
     //only works for main chain
     const network = Networks.bnbChainTestnet;
 

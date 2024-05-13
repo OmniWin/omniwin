@@ -41,14 +41,14 @@ async function main() {
       NFT_MAIN_CONTRACT: "0x22f0F262B5641Cd88BEEd528eA78beF050D04f19"
     }
 
-    const { SIDE_CONTRACT, USDC_CONTRACT_SIDE, NFT_SIDE_CONTRACT } =
-      await deploySide(SIDE_CHAIN,NFT_BASE_URI) as { SIDE_CONTRACT: string, USDC_CONTRACT_SIDE: string, NFT_SIDE_CONTRACT: string};
+    // const { SIDE_CONTRACT, USDC_CONTRACT_SIDE, NFT_SIDE_CONTRACT } =
+    //   await deploySide(SIDE_CHAIN,NFT_BASE_URI) as { SIDE_CONTRACT: string, USDC_CONTRACT_SIDE: string, NFT_SIDE_CONTRACT: string};
     
-    // const { SIDE_CONTRACT, USDC_CONTRACT_SIDE, NFT_SIDE_CONTRACT } = {
-    //   SIDE_CONTRACT: "0xC4159b429fb82EE1a2C2d3590a6269F3937274B6",
-    //   USDC_CONTRACT_SIDE: "0xF024ecC6f75E93860f0462D0f64219312557Bc64",
-    //   NFT_SIDE_CONTRACT: "0xF234C207f5c728cf0e3B5DDc48e9bA09BB547fD3"
-    // }
+    const { SIDE_CONTRACT, USDC_CONTRACT_SIDE, NFT_SIDE_CONTRACT } = {
+      SIDE_CONTRACT: "0x83E658A2273e302589d7c162D647327B9455bBAA",
+      USDC_CONTRACT_SIDE: "0x2E62454acb3938B4115AC51AF89349d1f45f5d59",
+      NFT_SIDE_CONTRACT: "0x71246409Fb557aC26bfCeCE8511FBD5219572D6B"
+    }
 
     //deployNft are commented out because they are already deployed via deployMain and deploySide
     // await deployNft(MAIN_CHAIN, NFT_BASE_URI);
@@ -56,37 +56,37 @@ async function main() {
 
     // const tokenId = await mintNft(MAIN_CHAIN, config[MAIN_CHAIN + "NftContract"], secrets[MAIN_CHAIN + "Address" as keyof typeof secrets]);
 
-    addContractToConfig(
-      {
-        [MAIN_CHAIN]: {
-          "Contract": MAIN_CONTRACT,
-          "UsdcContract": USDC_MAIN_CONTRACT,
-          "NftContract": NFT_MAIN_CONTRACT
-        },
-        [SIDE_CHAIN]: {
-          "Contract": SIDE_CONTRACT,
-          "UsdcContract": USDC_CONTRACT_SIDE,
-          "NftContract": NFT_SIDE_CONTRACT
-        }
-      }
-    );
+    // addContractToConfig(
+    //   {
+    //     [MAIN_CHAIN]: {
+    //       "Contract": MAIN_CONTRACT,
+    //       "UsdcContract": USDC_MAIN_CONTRACT,
+    //       "NftContract": NFT_MAIN_CONTRACT
+    //     },
+    //     [SIDE_CHAIN]: {
+    //       "Contract": SIDE_CONTRACT,
+    //       "UsdcContract": USDC_CONTRACT_SIDE,
+    //       "NftContract": NFT_SIDE_CONTRACT
+    //     }
+    //   }
+    // );
 
 
-    await setupSecurity(
-      MAIN_CONTRACT,
-      SIDE_CONTRACT,
-      MAIN_CHAIN,
-      SIDE_CHAIN,
-      MAIN_CHAIN_SELECTOR,
-      SIDE_CHAIN_SELECTOR
-    );
+    // await setupSecurity(
+    //   MAIN_CONTRACT,
+    //   SIDE_CONTRACT,
+    //   MAIN_CHAIN,
+    //   SIDE_CHAIN,
+    //   MAIN_CHAIN_SELECTOR,
+    //   SIDE_CHAIN_SELECTOR
+    // );
 
     // await mintUSDC(MAIN_CHAIN, USDC_MAIN_CONTRACT, 1000, secrets[MAIN_CHAIN + "Address"  as keyof typeof secrets]);
-    // await mintUSDC(SIDE_CHAIN, USDC_CONTRACT_SIDE, 1000, secrets[SIDE_CHAIN + "Address"   as keyof typeof secrets]);
+    await mintUSDC(SIDE_CHAIN, USDC_CONTRACT_SIDE, 1000, secrets[SIDE_CHAIN + "Address"   as keyof typeof secrets]);
 
 
-    await addLinkToken(MAIN_CHAIN, config[MAIN_CHAIN + "Contract"], 1);
-    await addLinkToken(SIDE_CHAIN, config[SIDE_CHAIN + "Contract"], 1);
+    // await addLinkToken(MAIN_CHAIN, config[MAIN_CHAIN + "Contract"], 1);
+    // await addLinkToken(SIDE_CHAIN, config[SIDE_CHAIN + "Contract"], 1);
 
     console.log("MAIN_CONTRACT", MAIN_CONTRACT);
     console.log("USDC_CONTRACT", USDC_MAIN_CONTRACT);

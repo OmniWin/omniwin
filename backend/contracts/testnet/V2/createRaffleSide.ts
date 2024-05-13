@@ -28,7 +28,7 @@ async function main(){
     const gasLimitTx = {
         "baseTestnet": {
             [ASSET_TYPE.ERC20] : {
-                gasLimit: 450_000
+                gasLimit: 750_000
             },
             [ASSET_TYPE.ERC721] : {
                 gasLimit: 750_000
@@ -109,7 +109,7 @@ async function createRaffle(network: string, provider: ethers.JsonRpcProvider, r
         const tx = await nftContract.mintCollectionNFT(wallet.address, {
             gasLimit: 300_000,
             gasPrice: ((await providers[network].getFeeData()).gasPrice * BigInt(130)) / BigInt(100),
-            nonce: nonce
+            // nonce: nonce
             }
         );
       
@@ -123,7 +123,7 @@ async function createRaffle(network: string, provider: ethers.JsonRpcProvider, r
       await nftContract.approve(contractAddress, raffleConfig.prizeAmount,{
         gasLimit: 300_000,
         gasPrice: ((await providers[network].getFeeData()).gasPrice * BigInt(130)) / BigInt(100),
-        nonce: nonce + 1
+        // nonce: nonce + 1
       });
     }
 
@@ -136,7 +136,7 @@ async function createRaffle(network: string, provider: ethers.JsonRpcProvider, r
         await usdcContract.approve(contractAddress, raffleConfig.approveAmount[network],{
             gasLimit: 300_000,
             gasPrice: ((await providers[network].getFeeData()).gasPrice * BigInt(130)) / BigInt(100),
-            nonce: nonce + 2
+            // nonce: nonce + 2
         });
     }
 
@@ -152,7 +152,7 @@ async function createRaffle(network: string, provider: ethers.JsonRpcProvider, r
         raffleConfig.gasLimit,
       {
         ...raffleConfig.transactionOptions,
-        nonce: nonce + 3
+        // nonce: nonce + 3
       }
     );
     const receipt = await tx.wait();
