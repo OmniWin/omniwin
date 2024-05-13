@@ -361,7 +361,7 @@ contract OmniwinSide is CCIPReceiver, ReentrancyGuard {
 
         // Generate a unique key
         bytes32 raffleId = keccak256(
-            abi.encodePacked(msg.sender, block.timestamp)
+            abi.encodePacked(msg.sender, block.timestamp, gasleft())
         );
 
         if (raffles[raffleId].deadline != 0) {

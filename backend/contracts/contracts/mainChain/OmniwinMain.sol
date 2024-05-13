@@ -650,7 +650,9 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
             );
 
             // Generate a unique key
-            raffleId = keccak256(abi.encodePacked(msg.sender, block.timestamp));
+            raffleId = keccak256(
+                abi.encodePacked(msg.sender, block.timestamp, gasleft())
+            );
         }
 
         if (raffles[raffleId].deadline != 0) {
