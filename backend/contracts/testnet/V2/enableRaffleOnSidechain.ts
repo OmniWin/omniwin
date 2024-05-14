@@ -9,7 +9,7 @@ async function main(){
     //enable raffle fromNework to toNetwork
     const fromNetwork = Networks.bnbChainTestnet;
     const toNetwork = Networks.baseTestnet;
-    const raffleId = "0xe1804c999f12a0e4113d7189fe5da104b59a372549f20d5afb902eef911a47b4";
+    const raffleId = "0x7d658609697353d5c836a667b58a23b797e199e6c0fd284d5940ad860e9a3f56";
 
     const txConfig = {
       "baseTestnet": {
@@ -60,8 +60,8 @@ async function enableRaffleOnSidechain(fromNetwork: string, provider: ethers.Jso
       wallet
     );
   
-    await usdcContract.approve(contractAddress, raffleConfig.ccipMessageFee);
-
+    const approveTx = await usdcContract.approve(contractAddress, raffleConfig.ccipMessageFee);
+    await approveTx.wait();
     // Simulate the transaction to estimate gas
     // const estimatedGas = await contract.enableCreateRaffleOnSidechain.estimateGas(
     //   raffleConfig.raffleId,

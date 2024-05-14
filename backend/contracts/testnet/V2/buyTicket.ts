@@ -8,7 +8,7 @@ import {providers, Networks} from "../../providers/providers"
 
 
 async function main(){
-    const network = Networks.baseTestnet;
+    const network = Networks.bnbChainTestnet;
     const raffleId = "0x7d658609697353d5c836a667b58a23b797e199e6c0fd284d5940ad860e9a3f56"; //base
 
     console.log("Buying ticket for raffleId: ", raffleId, " on network: ", network);
@@ -23,7 +23,7 @@ async function main(){
             gasLimit: 350_000
         },
         "baseTestnet": {
-            gasLimit: 350_000,
+            gasLimit: 500_000,
             gasPrice: ((await providers[network].getFeeData()).gasPrice * BigInt(130)) / BigInt(100)
         }
     }
@@ -83,7 +83,19 @@ async function buyEntry(network: string, provider: ethers.JsonRpcProvider, metho
       wallet
     );
   
-    await usdcContract.approve(contractAddress, methodConfig.approveAmount[network]);
+    console.log(`Approving contract (${contractAddress}) to spend USDC with amount: ${methodConfig.approveAmount[network]}, from address: ${wallet.address}, with balance: ${await usdcContract.balanceOf(wallet.address)}`)
+    const approveTx = await usdcContract.approve(contractAddress, methodConfig.approveAmount[network]);
+    await approveTx.wait(); // Wait for the approval transaction to be mined
+
+    // await sleep(10000);
+
+    const allowance = await usdcContract.allowance(wallet.address, contractAddress);
+    if (allowance < methodConfig.approveAmount[network]) {
+        console.error(`Allowance is too low: ${allowance}. Waiting for approval to be processed...`);
+        
+        
+        return;
+    }
   
      // Prepare dynamic parameters based on the network
      const params = methodConfig.params[network];
@@ -122,5 +134,8 @@ async function buyEntry(network: string, provider: ethers.JsonRpcProvider, metho
 
 }
 
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 main().catch(console.error);

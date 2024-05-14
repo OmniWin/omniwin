@@ -120,24 +120,29 @@ async function createRaffle(network: string, provider: ethers.JsonRpcProvider, r
 
 
       //approve contract to spend NFT
-      await nftContract.approve(contractAddress, raffleConfig.prizeAmount,{
+      const approveTx = await nftContract.approve(contractAddress, raffleConfig.prizeAmount,{
         gasLimit: 300_000,
         gasPrice: ((await providers[network].getFeeData()).gasPrice * BigInt(130)) / BigInt(100),
         // nonce: nonce + 1
       });
+
+      await approveTx.wait();
     }
 
 
     if(raffleConfig.assetType === 0){
         const totalAmount = raffleConfig.prizeAmount + raffleConfig.approveAmount[network];
-        await usdcContract.approve(contractAddress, totalAmount);
+        const approveTx = await usdcContract.approve(contractAddress, totalAmount);
+        await approveTx.wait();
     }else{
         //only fee
-        await usdcContract.approve(contractAddress, raffleConfig.approveAmount[network],{
+        const approveTx = await usdcContract.approve(contractAddress, raffleConfig.approveAmount[network],{
             gasLimit: 300_000,
             gasPrice: ((await providers[network].getFeeData()).gasPrice * BigInt(130)) / BigInt(100),
             // nonce: nonce + 2
         });
+
+        await approveTx.wait();
     }
 
   
