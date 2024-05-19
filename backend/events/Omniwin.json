@@ -169,6 +169,11 @@
   },
   {
     "inputs": [],
+    "name": "InvalidPriceStructureId",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InvalidRaffle",
     "type": "error"
   },
@@ -405,7 +410,13 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "deadline",
+        "name": "blockTimestamp",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "deadlineDuration",
         "type": "uint256"
       }
     ],
@@ -438,6 +449,12 @@
         "internalType": "uint256",
         "name": "gasLimit",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "messageId",
+        "type": "bytes32"
       }
     ],
     "name": "CreateRaffleToSidechain",
@@ -461,7 +478,25 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "currentSize",
+        "name": "price",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "numEntries",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountRaised",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalNumEntries",
         "type": "uint256"
       },
       {
@@ -472,9 +507,9 @@
       },
       {
         "indexed": false,
-        "internalType": "bytes32",
-        "name": "messageId",
-        "type": "bytes32"
+        "internalType": "uint256",
+        "name": "blockTimestamp",
+        "type": "uint256"
       }
     ],
     "name": "EntrySold",
@@ -498,13 +533,37 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "currentSize",
+        "name": "price",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "numEntries",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountRaised",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalNumEntries",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
         "name": "priceStructureId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "blockTimestamp",
         "type": "uint256"
       },
       {

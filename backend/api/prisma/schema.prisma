@@ -32,11 +32,15 @@ model Raffles {
 }
 
 model SidechainEnabledRaffles {
-  id       Int                   @id @default(autoincrement())
-  raffleId String                @map("raffle_id")
-  chainId  Int                   @map("chain_id")
-  status   SidechainRaffleStatus
-  raffle   Raffles               @relation(fields: [raffleId], references: [id])
+  id            Int                   @id @default(autoincrement())
+  raffleId      String                @map("raffle_id")
+  chainId       Int                   @map("chain_id")
+  receiver      String                @map("receiver")
+  chainSelector String                @map("chain_selector")
+  gasLimit      Int                   @map("gas_limit")
+  messageId     String?               @map("message_id")
+  status        SidechainRaffleStatus
+  raffle        Raffles               @relation(fields: [raffleId], references: [id])
 
   @@unique([raffleId, chainId])
   @@map("sidechain_enabled_raffles")
@@ -87,6 +91,7 @@ model Tickets {
   chainId            Int      @map("chain_id")
   raffleId           String   @map("raffle_id")
   buyerAddress       String   @map("buyer_address")
+  priceStructureId   Int      @map("price_structure_id")
   numberOfEntries    Int      @map("number_of_entries")
   valueOfTickets     Int      @map("value_of_tickets")
   totalEntriesBought Int      @map("total_entries_bought")

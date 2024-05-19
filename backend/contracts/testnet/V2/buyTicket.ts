@@ -9,7 +9,8 @@ import {providers, Networks} from "../../providers/providers"
 
 async function main(){
     const network = Networks.bnbChainTestnet;
-    const raffleId = "0x7d658609697353d5c836a667b58a23b797e199e6c0fd284d5940ad860e9a3f56"; //base
+    // const raffleId = "0x7d658609697353d5c836a667b58a23b797e199e6c0fd284d5940ad860e9a3f56"; //base
+    const raffleId = "0x2930c10a6fe1ec482d1c5087f93cb5a6152f8360e0001411bbaaebd54088093d"; //bnb
 
     console.log("Buying ticket for raffleId: ", raffleId, " on network: ", network);
 

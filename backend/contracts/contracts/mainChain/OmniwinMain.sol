@@ -290,6 +290,7 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
     error FailSendEthToOW();
     error EntryDoesNotBelongToPlayer();
     error NumEntriesIsZero();
+    error InvalidPriceStructure();
     error DestinationChainNotAllowlisted();
     error SourceChainNotAllowlisted(); // Used when the source chain has not been allowlisted by the contract owner.
     error SenderNotAllowlisted(); // Used when the sender has not been allowlisted by the contract owner.
@@ -661,6 +662,16 @@ contract Omniwin is ReentrancyGuard, VRFConsumerBaseV2, CCIPReceiver {
 
         for (uint256 i = 0; i < _prices.length; ++i) {
             if (_prices[i].numEntries == 0) revert NumEntriesIsZero();
+
+            if (i > 0) {
+                // Ensure the effective price per entry decreases as the number of entries increases
+                if (
+                    _prices[i].price * _prices[i - 1].numEntries >
+                    _prices[i - 1].price * _prices[i].numEntries
+                ) {
+                    revert InvalidPriceStructure();
+                }
+            }
 
             pricesList[raffleId].push(_prices[i]);
         }
